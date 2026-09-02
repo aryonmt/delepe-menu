@@ -45,3 +45,5 @@ prisma/*.db-journal
 
 # generated AI context dump (regenerate with scripts/dump_project_for_ai.py)
 ai-context.txt
+scripts/dump_project_for_ai.py
+scripts/dumb_project_for_ai.py
