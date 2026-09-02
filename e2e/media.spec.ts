@@ -1,33 +1,13 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 test.describe("media route", () => {
   test("serves 320/640/960 WebP with immutable headers", async ({ page, request }) => {
     await page.goto("/");
-    const firstImg = page.locator('img[alt]').first();
-    await expect(firstImg).toBeVisible();
-    const src = await firstImg.getAttribute("src");
-    expect(src).toBeTruthy();
-    if (!src) return;
-    // Next Image with custom loader may encode via /_next/image?url=%2Fmedia%2F...%3Fw%3D640
-    let mediaId: string | null = null;
-    if (src.includes("/media/")) {
-      if (src.includes("_next/image")) {
-        const u = new URL(src, "http://localhost");
-        const encoded = u.searchParams.get("url");
-        if (encoded) {
-          const inner = new URL(encoded, "http://localhost");
-          mediaId = inner.pathname.split("/").pop() ?? null;
-        }
-      } else {
-        const u = new URL(src, "http://localhost");
-        mediaId = u.pathname.split("/").pop() ?? null;
-      }
-    }
+    const mediaId = await mediaIdFromPage(page);
     expect(mediaId).toBeTruthy();
-    if (!mediaId) return;
     for (const w of [320, 640, 960]) {
       const res = await request.get(`/media/${mediaId}?w=${String(w)}`);
-      expect(res.status()).toBe(200);
+      expect(res.status(), `GET /media/${mediaId}?w=${String(w)}`).toBe(200);
       expect(res.headers()["content-type"]).toBe("image/webp");
       expect(res.headers()["cache-control"]).toBe("public, max-age=31536000, immutable");
       const body = await res.body();
@@ -35,13 +15,39 @@ test.describe("media route", () => {
     }
   });
 
-  test("404 on unknown id or invalid w", async ({ request }) => {
+  test("404 on unknown id or invalid w", async ({ page, request }) => {
     const resBadId = await request.get("/media/does-not-exist?w=640");
     expect(resBadId.status()).toBe(404);
-    // Use a real id but invalid w
-    // Fetch a real mediaId first via the page
-    // Instead use a dummy valid uuid with invalid w
-    const resBadW = await request.get("/media/does-not-exist?w=999");
+
+    await page.goto("/");
+    const mediaId = await mediaIdFromPage(page);
+    const resBadW = await request.get(`/media/${mediaId}?w=999`);
     expect(resBadW.status()).toBe(404);
   });
 });
+
+async function mediaIdFromPage(page: Page): Promise<string> {
+  const firstImg = page.locator('img[alt]').first();
+  await expect(firstImg).toBeVisible();
+  const src =
+    (await firstImg.evaluate((el: HTMLImageElement) => el.currentSrc || el.src)) ||
+    (await firstImg.getAttribute("src"));
+  expect(src).toBeTruthy();
+  if (!src) {
+    throw new Error("product image has no src");
+  }
+  const mediaId = extractMediaId(src);
+  if (!mediaId) {
+    throw new Error(`could not extract mediaId from src: ${src}`);
+  }
+  return mediaId;
+}
+
+function extractMediaId(src: string): string | null {
+  const decoded = decodeURIComponent(src);
+  const uuid =
+    /([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i.exec(
+      decoded,
+    );
+  return uuid?.[1] ?? null;
+}

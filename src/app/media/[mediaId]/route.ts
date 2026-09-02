@@ -1,10 +1,16 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { prisma } from "@/infrastructure/prisma/client";
+import { getMediaSchema } from "@/application/schemas";
+import { NotFoundError } from "@/domain/errors";
+import { container } from "@/infrastructure/di/container";
 import { MEDIA_WIDTHS } from "@/lib/constants";
 import { env } from "@/lib/env";
 
 const VALID_WIDTHS = new Set<number>(MEDIA_WIDTHS as readonly number[]);
+
+function notFound(): Response {
+  return new Response("Not Found", { status: 404 });
+}
 
 // Next 15: params is a Promise
 export async function GET(
@@ -12,6 +18,11 @@ export async function GET(
   context: { params: Promise<{ mediaId: string }> },
 ) {
   const { mediaId } = await context.params;
+  const parsedId = getMediaSchema.safeParse({ id: mediaId });
+  if (!parsedId.success) {
+    return notFound();
+  }
+
   const url = new URL(request.url);
   const wParam = url.searchParams.get("w");
 
@@ -21,14 +32,18 @@ export async function GET(
   } else {
     const parsed = Number.parseInt(wParam, 10);
     if (Number.isNaN(parsed) || !VALID_WIDTHS.has(parsed)) {
-      return new Response("Not Found", { status: 404 });
+      return notFound();
     }
     width = parsed;
   }
 
-  const media = await prisma.media.findUnique({ where: { id: mediaId } });
-  if (!media) {
-    return new Response("Not Found", { status: 404 });
+  try {
+    await container.getMedia().execute(parsedId.data);
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      return notFound();
+    }
+    throw error;
   }
 
   const filePath = path.join(
@@ -47,6 +62,6 @@ export async function GET(
       },
     });
   } catch {
-    return new Response("Not Found", { status: 404 });
+    return notFound();
   }
 }

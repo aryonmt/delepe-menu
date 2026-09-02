@@ -8,6 +8,7 @@ import { ListCategoriesUseCase } from "@/application/use-cases/categories/list-c
 import { ReorderCategoriesUseCase } from "@/application/use-cases/categories/reorder-categories";
 import { UpdateCategoryUseCase } from "@/application/use-cases/categories/update-category";
 import { DeleteMediaUseCase } from "@/application/use-cases/media/delete-media";
+import { GetMediaUseCase } from "@/application/use-cases/media/get-media";
 import { UploadMediaUseCase } from "@/application/use-cases/media/upload-media";
 import { GetAdminMenuUseCase } from "@/application/use-cases/menu/get-admin-menu";
 import { GetPublicMenuUseCase } from "@/application/use-cases/menu/get-public-menu";
@@ -82,6 +83,7 @@ export const container = {
   getSettings: () => new GetSettingsUseCase(settingsRepo),
   updateSettings: () => new UpdateSettingsUseCase(settingsRepo),
   uploadMedia: () => new UploadMediaUseCase(optimizer, mediaRepo),
+  getMedia: () => new GetMediaUseCase(mediaRepo),
   deleteMedia: () => new DeleteMediaUseCase(mediaRepo, storage),
   login: () =>
     new LoginUseCase(adminUsers, hasher, sessions, loginLimiter, {

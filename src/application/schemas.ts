@@ -97,6 +97,8 @@ export const uploadMediaSchema = z.object({
 
 export const deleteMediaSchema = z.object({ mediaId: idSchema });
 
+export const getMediaSchema = z.object({ id: z.string().uuid() });
+
 export const loginSchema = z.object({
   username: z.string().min(1).max(40),
   password: z.string().min(1).max(128),

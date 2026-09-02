@@ -24,8 +24,10 @@ function loaderFor(width: number): number {
 
 function imageLoader({ src, width }: { src: string; width: number }): string {
   const w = loaderFor(width);
-  // src is the mediaId
-  return mediaUrl(src, w);
+  const id = src.includes("/media/")
+    ? (src.split("/media/")[1]?.split("?")[0] ?? src)
+    : src;
+  return mediaUrl(id, w);
 }
 
 export function MenuImage({ media, alt, priority = false, isMuted = false }: Props) {
@@ -57,12 +59,13 @@ export function MenuImage({ media, alt, priority = false, isMuted = false }: Pro
       )}
       <Image
         loader={imageLoader}
-        src={media.id}
+        src={mediaUrl(media.id, 640)}
         alt={alt}
         width={640}
         height={480}
         sizes="(max-width: 768px) 104px, 140px"
         priority={priority}
+        unoptimized
         className={`h-full w-full object-cover transition-opacity duration-300 ${
           isLoaded ? "opacity-100" : "opacity-0"
         } ${isMuted ? "grayscale opacity-[0.55]" : ""}`}
