@@ -14,6 +14,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "echo E2E suite configured in M2",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
     "admin:reset": "tsx scripts/admin-reset.ts",

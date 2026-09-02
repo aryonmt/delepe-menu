@@ -2,7 +2,11 @@
  * Recovery CLI stub. Argon2 hashing and AdminUser upsert land in M2 (docs/10).
  * Loads `.env` so the script is a valid entrypoint from a fresh clone.
  */
-process.loadEnvFile?.(".env");
+try {
+  process.loadEnvFile?.(".env");
+} catch {
+  // .env file is optional or missing
+}
 
 function flag(name: string): string | undefined {
   const index = process.argv.indexOf(name);

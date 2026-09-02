@@ -37,8 +37,9 @@ pnpm install
 cp .env.example .env          # fill DATABASE_URL, SESSION_SECRET, ADMIN_*
 docker compose up -d db       # PostgreSQL 16
 pnpm db:migrate               # prisma migrate dev
-pnpm db:seed                  # real Delepe menu, offline SVG placeholders
+pnpm db:seed                  # settings singleton (M0); full menu + placeholders in M3
 pnpm dev                      # http://localhost:3000
+# pnpm test:e2e               # Playwright (available from M2)
 ```
 
 Admin panel: `http://localhost:3000/admin` (credentials from `.env`).
@@ -54,9 +55,9 @@ Admin panel: `http://localhost:3000/admin` (credentials from `.env`).
 | `pnpm typecheck`   | `tsc --noEmit`                                 |
 | `pnpm test`        | Vitest unit tests (single run)                 |
 | `pnpm test:watch`  | Vitest watch mode (TDD loop)                   |
-| `pnpm test:e2e`    | Playwright end-to-end tests                    |
+| `pnpm test:e2e`    | Playwright E2E tests (available from M2)       |
 | `pnpm db:migrate`  | Prisma migrate dev                             |
-| `pnpm db:seed`     | Seed real Delepe menu (offline placeholders)   |
+| `pnpm db:seed`     | Seed database (settings singleton in M0; full Delepe menu & placeholders in M3) |
 | `pnpm admin:reset` | CLI: create/reset an admin user (recovery)     |
 | `pnpm check`       | lint + typecheck + test + build (pre-commit)   |
 

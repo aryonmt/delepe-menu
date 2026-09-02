@@ -1,4 +1,4 @@
-import { prisma } from "../src/infrastructure/prisma/client";
+import { prisma } from "@/infrastructure/prisma/client";
 
 /**
  * Idempotent M0 stub. Full real-menu seed lands in M3 (docs/04, ADR-10).
