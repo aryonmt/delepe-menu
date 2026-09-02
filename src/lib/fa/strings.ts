@@ -16,6 +16,21 @@ export const strings = {
     genericTitle: "مشکلی پیش آمد",
     genericBody: "لطفاً دوباره تلاش کنید.",
     retry: "تلاش دوباره",
+    domain: {
+      NOT_FOUND: "مورد نظر پیدا نشد",
+      VALIDATION: "اطلاعات واردشده نامعتبر است",
+      CATEGORY_NOT_EMPTY: "ابتدا محصولات این دسته را منتقل کنید",
+      CATEGORY_HAS_PRODUCTS: "ابتدا محصولات این دسته را منتقل کنید",
+      DEPTH_EXCEEDED: "عمق دسته‌بندی نمی‌تواند بیش از دو سطح باشد",
+      DUPLICATE_NAME: "این نام از قبل استفاده شده است",
+      INVALID_DISCOUNT: "قیمت با تخفیف باید کمتر از قیمت اصلی باشد",
+      DISCOUNT_WITH_VARIANTS: "برای محصول دارای تنوع نمی‌توان تخفیف گذاشت",
+      NOT_LEAF_CATEGORY: "محصول فقط در دستهٔ بدون زیرشاخه ثبت می‌شود",
+      INVALID_REORDER: "ترتیب ارسال‌شده نامعتبر است",
+      INVALID_UPLOAD: "فایل تصویر نامعتبر است",
+      UNAUTHORIZED: "نشست شما معتبر نیست",
+      RATE_LIMITED: "تعداد تلاش‌ها بیش از حد مجاز است؛ ۱۵ دقیقه دیگر تلاش کنید",
+    },
   },
 } as const;
 

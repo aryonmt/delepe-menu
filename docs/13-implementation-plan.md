@@ -44,11 +44,11 @@ Format: `ID · description · [docs] · deps · output · tests`.
 
 | ID | Task | Docs | Deps | Output | Tests |
 | --- | --- | --- | --- | --- | --- |
-| T-010 | `domain/entities.ts`, `errors.ts`, `ports.ts` | 03, 04 | T-004 | domain compiles standalone | typecheck |
-| T-011 | Prisma repositories (all ports) + in-memory fakes in `domain/testing/` | 04 | T-010 | repos + fakes | unit smoke |
-| T-012 | `di/container.ts` constructing every use-case | 03 | T-011 | container | construct-all test |
-| T-013 | `toPublicMenu` mapper | 04 | T-010 | pure mapper | unit: HIDE/MUTED/pruning |
-| T-014 ∥ | menu/category/product/settings use-cases (no auth/media yet) | 04 | T-011 | use-case classes | unit per BR (01,02,04..09,12..16) |
+| ~~T-010~~ | `domain/entities.ts`, `errors.ts`, `ports.ts` | 03, 04 | T-004 | domain compiles standalone | typecheck |
+| ~~T-011~~ | Prisma repositories (all ports) + in-memory fakes in `domain/testing/` | 04 | T-010 | repos + fakes | unit smoke |
+| ~~T-012~~ | `di/container.ts` constructing every use-case | 03 | T-011 | container | construct-all test |
+| ~~T-013~~ | `toPublicMenu` mapper | 04 | T-010 | pure mapper | unit: HIDE/MUTED/pruning |
+| ~~T-014~~ ∥ | menu/category/product/settings use-cases (no auth/media yet) | 04 | T-011 | use-case classes | unit per BR (01,02,04..09,12..16) |
 
 ### M2 · Auth & Recovery
 

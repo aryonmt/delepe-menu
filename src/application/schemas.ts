@@ -1,0 +1,95 @@
+import { z } from "zod";
+import {
+  BADGE_KINDS,
+  THEME_NAMES,
+  UNAVAILABLE_MODES,
+} from "@/domain/entities";
+import { PRICE_MAX_TOMAN, PRICE_MIN_TOMAN } from "@/lib/constants";
+
+const idSchema = z.string().min(1);
+
+export const createCategorySchema = z.object({
+  name: z.string().min(1).max(60),
+  parentId: z.string().min(1).nullable().optional(),
+});
+
+export const updateCategorySchema = createCategorySchema.extend({
+  id: idSchema,
+});
+
+export const deleteCategorySchema = z.object({ id: idSchema });
+
+export const reorderCategoriesSchema = z.object({
+  orderedIds: z.array(idSchema).min(1),
+  parentId: z.string().min(1).nullable(),
+});
+
+const variantSchema = z.object({
+  name: z.string().min(1).max(40),
+  price: z.number().int().min(PRICE_MIN_TOMAN).max(PRICE_MAX_TOMAN),
+});
+
+export const createProductSchema = z
+  .object({
+    name: z.string().min(1).max(120),
+    description: z.string().max(500).nullable().optional(),
+    price: z.number().int().min(PRICE_MIN_TOMAN).max(PRICE_MAX_TOMAN).optional(),
+    discountedPrice: z
+      .number()
+      .int()
+      .min(PRICE_MIN_TOMAN)
+      .max(PRICE_MAX_TOMAN)
+      .nullable()
+      .optional(),
+    discountActive: z.boolean().optional().default(false),
+    isAvailable: z.boolean().optional().default(true),
+    badges: z.array(z.enum(BADGE_KINDS)).optional().default([]),
+    categoryId: idSchema,
+    mediaId: z.string().min(1).nullable().optional(),
+    variants: z.array(variantSchema).optional().default([]),
+  })
+  .superRefine((value, ctx) => {
+    if (value.variants.length === 0 && value.price === undefined) {
+      ctx.addIssue({
+        code: "custom",
+        message: "price is required when the product has no variants",
+        path: ["price"],
+      });
+    }
+  });
+
+export const updateProductSchema = z.intersection(
+  z.object({ id: idSchema }),
+  createProductSchema,
+);
+
+export const deleteProductSchema = z.object({ id: idSchema });
+
+export const reorderProductsSchema = z.object({
+  orderedIds: z.array(idSchema).min(1),
+  categoryId: idSchema,
+});
+
+export const updateSettingsSchema = z.object({
+  restaurantName: z.string().min(1).max(80),
+  theme: z.enum(THEME_NAMES),
+  unavailableMode: z.enum(UNAVAILABLE_MODES),
+});
+
+export const uploadMediaSchema = z.object({
+  bytes: z.instanceof(Uint8Array).refine((bytes) => bytes.byteLength > 0),
+  width: z.number().int().positive(),
+  height: z.number().int().positive(),
+  fileName: z.string().min(1).max(200),
+});
+
+export const deleteMediaSchema = z.object({ mediaId: idSchema });
+
+export type CreateCategoryInput = z.infer<typeof createCategorySchema>;
+export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>;
+export type ReorderCategoriesInput = z.infer<typeof reorderCategoriesSchema>;
+export type CreateProductInput = z.infer<typeof createProductSchema>;
+export type UpdateProductInput = z.infer<typeof updateProductSchema>;
+export type ReorderProductsInput = z.infer<typeof reorderProductsSchema>;
+export type UpdateSettingsInput = z.infer<typeof updateSettingsSchema>;
+export type UploadMediaInput = z.infer<typeof uploadMediaSchema>;
