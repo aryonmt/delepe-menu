@@ -1,3 +1,4 @@
+import { InMemoryAdminUserRepository } from "./in-memory-admin-user-repository";
 import { InMemoryCategoryRepository } from "./in-memory-category-repository";
 import { InMemoryDatabase } from "./in-memory-database";
 import { InMemoryProductRepository } from "./in-memory-product-repository";
@@ -19,6 +20,7 @@ export function createInMemoryRepos() {
     media: new InMemoryMediaRepository(db),
     storage: new InMemoryMediaStorage(db),
     optimizer: new InMemoryImageOptimizer(db),
+    adminUsers: new InMemoryAdminUserRepository(),
   };
 }
 

@@ -97,6 +97,22 @@ export const uploadMediaSchema = z.object({
 
 export const deleteMediaSchema = z.object({ mediaId: idSchema });
 
+export const loginSchema = z.object({
+  username: z.string().min(1).max(40),
+  password: z.string().min(1).max(128),
+  ip: z.string().min(1),
+});
+
+export const changePasswordSchema = z.object({
+  adminId: z.string().min(1),
+  current: z.string().min(1).max(128),
+  next: z.string().min(8).max(128),
+});
+
+export const verifySessionSchema = z.object({
+  token: z.string().min(1).optional(),
+});
+
 export type CreateCategoryInput = z.infer<typeof createCategorySchema>;
 export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>;
 export type ReorderCategoriesInput = z.infer<typeof reorderCategoriesSchema>;
@@ -105,3 +121,5 @@ export type UpdateProductInput = z.infer<typeof updateProductSchema>;
 export type ReorderProductsInput = z.infer<typeof reorderProductsSchema>;
 export type UpdateSettingsInput = z.infer<typeof updateSettingsSchema>;
 export type UploadMediaInput = z.infer<typeof uploadMediaSchema>;
+export type LoginInput = z.infer<typeof loginSchema>;
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;

@@ -9,13 +9,14 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node scripts/start-standalone.mjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "echo E2E suite configured in M2",
+    "test:e2e": "playwright test",
     "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "admin:reset": "tsx scripts/admin-reset.ts",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
@@ -25,6 +26,7 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
+      "@node-rs/argon2",
       "@prisma/client",
       "@prisma/engines",
       "prisma",
@@ -34,10 +36,12 @@
     ]
   },
   "dependencies": {
+    "@node-rs/argon2": "^2.2.0",
     "@prisma/client": "6.15.0",
     "@radix-ui/react-slot": "^1.2.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "jose": "^6.2.10",
     "lucide-react": "^0.544.0",
     "next": "15.5.4",
     "react": "19.1.0",
@@ -47,6 +51,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
+    "@playwright/test": "1.55.0",
     "@types/node": "^22.18.1",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",

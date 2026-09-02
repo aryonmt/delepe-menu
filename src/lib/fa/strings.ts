@@ -28,9 +28,25 @@ export const strings = {
       NOT_LEAF_CATEGORY: "محصول فقط در دستهٔ بدون زیرشاخه ثبت می‌شود",
       INVALID_REORDER: "ترتیب ارسال‌شده نامعتبر است",
       INVALID_UPLOAD: "فایل تصویر نامعتبر است",
+      INVALID_CREDENTIALS: "نام کاربری یا رمز عبور نادرست است",
       UNAUTHORIZED: "نشست شما معتبر نیست",
       RATE_LIMITED: "تعداد تلاش‌ها بیش از حد مجاز است؛ ۱۵ دقیقه دیگر تلاش کنید",
     },
+  },
+  auth: {
+    title: "ورود به پنل",
+    username: "نام کاربری",
+    password: "رمز عبور",
+    submit: "ورود",
+    logout: "خروج",
+    changePassword: "تغییر رمز عبور",
+    currentPassword: "رمز فعلی",
+    nextPassword: "رمز جدید",
+    savePassword: "ذخیره رمز",
+    passwordChanged: "رمز عبور به‌روزرسانی شد",
+  },
+  admin: {
+    productsHeading: "محصولات",
   },
 } as const;
 

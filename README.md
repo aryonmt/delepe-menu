@@ -35,11 +35,13 @@ Prerequisites: Node 22 LTS, pnpm 10, Docker.
 ```bash
 pnpm install
 cp .env.example .env          # fill DATABASE_URL, SESSION_SECRET, ADMIN_*
-docker compose up -d db       # PostgreSQL 16
+docker compose up -d db       # PostgreSQL 16 (dev, port 5432)
+docker compose --profile test up -d db-test  # E2E Postgres (port 5433)
 pnpm db:migrate               # prisma migrate dev
 pnpm db:seed                  # settings singleton (M0); full menu + placeholders in M3
 pnpm dev                      # http://localhost:3000
-# pnpm test:e2e               # Playwright (available from M2)
+pnpm build                    # once, before Playwright (`pnpm start` serves standalone)
+pnpm test:e2e                 # Playwright against the test DB (doc 09)
 ```
 
 Admin panel: `http://localhost:3000/admin` (credentials from `.env`).
@@ -55,8 +57,9 @@ Admin panel: `http://localhost:3000/admin` (credentials from `.env`).
 | `pnpm typecheck`   | `tsc --noEmit`                                 |
 | `pnpm test`        | Vitest unit tests (single run)                 |
 | `pnpm test:watch`  | Vitest watch mode (TDD loop)                   |
-| `pnpm test:e2e`    | Playwright E2E tests (available from M2)       |
+| `pnpm test:e2e`    | Playwright E2E (test DB on 5433; requires `pnpm build` + `db-test`) |
 | `pnpm db:migrate`  | Prisma migrate dev                             |
+| `pnpm db:deploy`   | Prisma migrate deploy (used by E2E global-setup) |
 | `pnpm db:seed`     | Seed database (settings singleton in M0; full Delepe menu & placeholders in M3) |
 | `pnpm admin:reset` | CLI: create/reset an admin user (recovery)     |
 | `pnpm check`       | lint + typecheck + test + build (pre-commit)   |

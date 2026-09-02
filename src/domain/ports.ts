@@ -1,4 +1,5 @@
 import type {
+  AdminUser,
   Category,
   CategoryNode,
   CategoryWrite,
@@ -101,4 +102,30 @@ export interface ImageOptimizer {
     width: number;
     height: number;
   }): Promise<StoredImage>;
+}
+
+export interface AdminUserRepository {
+  findById(id: string): Promise<AdminUser | null>;
+  findByUsername(username: string): Promise<AdminUser | null>;
+  updatePasswordHash(id: string, passwordHash: string): Promise<void>;
+  upsertByUsername(username: string, passwordHash: string): Promise<AdminUser>;
+}
+
+/** argon2id in production; fakes in unit tests. */
+export interface PasswordHasher {
+  hash(plain: string): Promise<string>;
+  verify(passwordHash: string, plain: string): Promise<boolean>;
+}
+
+/** HS256 JWT in production (`jose`); opaque tokens in unit tests. */
+export interface SessionSigner {
+  sign(adminId: string): Promise<string>;
+  verify(token: string): Promise<{ adminId: string }>;
+}
+
+/** Failed-attempt window keyed by ip+username (docs/10). */
+export interface LoginRateLimiter {
+  assertAllowed(key: string): Promise<void>;
+  recordFailure(key: string): Promise<void>;
+  reset(key: string): Promise<void>;
 }

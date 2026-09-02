@@ -103,3 +103,9 @@ export type StoredImage = {
   dominantColor: string;
   path: string;
 };
+
+export type AdminUser = {
+  id: string;
+  username: string;
+  passwordHash: string;
+};

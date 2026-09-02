@@ -39,4 +39,13 @@ describe("in-memory repository fakes", () => {
     await repos.storage.deleteAll("m1");
     expect(repos.db.deletedMediaFiles).toEqual(["m1"]);
   });
+
+  it("upserts an admin user by username", async () => {
+    const repos = createInMemoryRepos();
+    const first = await repos.adminUsers.upsertByUsername("admin", "hash:a");
+    const second = await repos.adminUsers.upsertByUsername("admin", "hash:b");
+    expect(second.id).toBe(first.id);
+    expect(second.passwordHash).toBe("hash:b");
+    expect(await repos.adminUsers.findByUsername("admin")).toEqual(second);
+  });
 });

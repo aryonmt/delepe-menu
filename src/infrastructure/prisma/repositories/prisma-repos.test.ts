@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { prisma } from "../client";
+import { PrismaAdminUserRepository } from "./admin-user-repository";
 import { PrismaCategoryRepository } from "./category-repository";
 import { PrismaProductRepository } from "./product-repository";
 import {
@@ -13,5 +14,6 @@ describe("Prisma repositories", () => {
     expect(new PrismaProductRepository(prisma)).toBeDefined();
     expect(new PrismaSettingsRepository(prisma)).toBeDefined();
     expect(new PrismaMediaRepository(prisma)).toBeDefined();
+    expect(new PrismaAdminUserRepository(prisma)).toBeDefined();
   });
 });

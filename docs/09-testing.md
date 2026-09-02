@@ -33,9 +33,23 @@ Run: `pnpm test` (single run) · `pnpm test:watch` (dev loop).
 
 ## E2E (Playwright, `/e2e`)
 
-Config: `webServer: pnpm start` against a **seeded test DB** (compose profile
-`test`, doc 12), Persian locale, mobile viewport 390×844 + desktop pass.
-Seed runs with default SVG placeholders (offline-deterministic, ADR-10).
+Local prerequisite: `docker compose --profile test up -d db-test` (Postgres 16 on
+host port **5433**, database `delepe_test`, doc 12).
+
+`e2e/global-setup.ts` then:
+1. runs `prisma migrate deploy` against `E2E_DATABASE_URL` (default
+   `postgresql://delepe:delepe@localhost:5433/delepe_test`);
+2. runs `scripts/admin-reset.ts` against that same URL so the admin exists in
+   the **test** database, not the dev database on 5432.
+
+Playwright `webServer` (`pnpm start`) receives `DATABASE_URL` set to that test
+URL, Persian locale, mobile viewport 390×844 + desktop pass. `pnpm build` must
+have been run once so the standalone server exists.
+
+CI must set `E2E_DATABASE_URL` to the job's service Postgres. global-setup
+migrates that database — no extra CI migrate step is required.
+
+Seeded SVG placeholders for public-menu specs land in M3 (ADR-10).
 
 Critical specs:
 
@@ -53,6 +67,7 @@ Critical specs:
 Job `quality`: install → `pnpm lint` → `pnpm typecheck` → `pnpm test` →
 `pnpm build` → bundle check (`@next/bundle-analyzer`: `@dnd-kit`,
 `react-easy-crop` absent from the public bundle) → `pnpm audit --audit-level=high`
-(advisory) → `pnpm test:e2e` (with `services: postgres`, compose `test` profile).
+(advisory) → `pnpm test:e2e` (set `E2E_DATABASE_URL` to the job's Postgres
+service; global-setup migrates it — no extra migrate step).
 Playwright report + trace uploaded as artifacts.
 Branch protection: `quality` must pass on PRs to `main`.

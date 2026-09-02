@@ -54,11 +54,11 @@ Format: `ID · description · [docs] · deps · output · tests`.
 
 | ID | Task | Docs | Deps | Output | Tests |
 | --- | --- | --- | --- | --- | --- |
-| T-020 | auth use-cases (login/logout/change-password/verify-session) + Zod | 04, 10 | T-014 | use-cases | unit incl. rate-limit |
-| T-021 | argon2 adapter, jose session adapter, in-memory rate limiter | 10 | T-011 | adapters | unit |
-| T-022 | `/login` page + `_actions.ts`, `middleware.ts`, `/admin` redirect | 03, 07, 10 | T-020 | working login | E2E `auth.spec` (excl. lockout) |
-| T-023 | `scripts/admin-reset.ts` + MASTER env path | 10 | T-020 | CLI | manual + log assertion |
-| T-024 | lockout E2E (5 fails → RATE_LIMITED string) | 09, 10 | T-022 | green spec | E2E `auth.spec` full |
+| ~~T-020~~ | auth use-cases (login/logout/change-password/verify-session) + Zod | 04, 10 | T-014 | use-cases | unit incl. rate-limit |
+| ~~T-021~~ | argon2 adapter, jose session adapter, in-memory rate limiter | 10 | T-011 | adapters | unit |
+| ~~T-022~~ | `/login` page + `_actions.ts`, `middleware.ts`, `/admin` redirect | 03, 07, 10 | T-020 | working login | E2E `auth.spec` (excl. lockout) |
+| ~~T-023~~ | `scripts/admin-reset.ts` + MASTER env path | 10 | T-020 | CLI | manual + log assertion |
+| ~~T-024~~ | lockout E2E (5 fails → RATE_LIMITED string) | 09, 10 | T-022 | green spec | E2E `auth.spec` full |
 
 ### M3 · Seed + Public Menu v1
 

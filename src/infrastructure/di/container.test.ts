@@ -21,8 +21,12 @@ describe("DI container", () => {
       container.updateSettings(),
       container.uploadMedia(),
       container.deleteMedia(),
+      container.login(),
+      container.logout(),
+      container.changePassword(),
+      container.verifySession(),
     ];
-    expect(constructed).toHaveLength(17);
+    expect(constructed).toHaveLength(21);
     for (const useCase of constructed) {
       expect(useCase).toBeDefined();
       expect(typeof useCase.execute).toBe("function");

@@ -17,6 +17,10 @@ export const SESSION_COOKIE_NAME = "delepe_session";
 export const SESSION_TTL_DAYS = 7;
 export const SESSION_SECRET_MIN_BYTES = 32;
 
+export const ARGON2_MEMORY_KIB = 19_456;
+export const ARGON2_TIME_COST = 2;
+export const ARGON2_PARALLELISM = 1;
+
 export const LOGIN_RATE_LIMIT_MAX = 5;
 export const LOGIN_RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
 export const LOGIN_FAILURE_DELAY_MS = 300;
