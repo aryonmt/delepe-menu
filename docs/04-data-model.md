@@ -397,10 +397,11 @@ authored here — the seed copies them verbatim (no agent invention at seed time
 2. **Admin bootstrap**: an admin is created from `ADMIN_USERNAME`/`ADMIN_PASSWORD`
    **only when `AdminUser` count = 0** (idempotent; re-seeding never resets the
    owner's password).
-3. **Images (deterministic, ADR-10)**: by default the seed generates a branded SVG
-   placeholder per product (theme-colored gradient + category glyph + product
-   initial) into `storage/uploads/seed/`. With `SEED_DOWNLOAD_IMAGES=true` it
-   additionally attempts to download a curated photo per `imageKeyword`
-   (concurrency 8, cached on disk); any failure falls back to the SVG for that
-   product. E2E never depends on downloaded photos.
+3. **Images (deterministic, ADR-10)**: by default the seed rasterizes a branded
+   SVG placeholder per product (theme-colored gradient + category glyph + product
+   initial) into `uploads/` (not `uploads/seed/`). With `SEED_DOWNLOAD_IMAGES=true`
+   it uses keyword-seeded picsum photos as stand-ins, sequential, until real
+   photos exist; any failure falls back to the SVG for that product. E2E never
+   depends on downloaded photos. If a product's original file is missing, the
+   old Media row and its files (`deleteAll`) are removed before a new one is created.
 4. Seed is idempotent (`upsert` by category/name; skip existing files).

@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
+import { strings } from "@/lib/fa/strings";
 
 type CategoryTab = {
   id: string;
@@ -16,11 +17,15 @@ export function MenuTabs({ categories }: Props) {
   const [activeId, setActiveId] = useState<string>(categories[0]?.id ?? "");
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const ignoreObserverRef = useRef(false);
+  const scrollTargetRef = useRef<string | null>(null);
+  const settleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (categories.length === 0) return;
     const observer = new IntersectionObserver(
       (entries) => {
+        if (ignoreObserverRef.current) return;
         for (const entry of entries) {
           if (entry.isIntersecting) {
             const id = entry.target.id.replace(/^section-/, "");
@@ -46,13 +51,44 @@ export function MenuTabs({ categories }: Props) {
     }
   }, [activeId]);
 
+  useEffect(() => {
+    return () => {
+      if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
+    };
+  }, []);
+
+  const settleProgrammaticScroll = () => {
+    ignoreObserverRef.current = false;
+    const targetId = scrollTargetRef.current;
+    if (targetId) {
+      setActiveId(targetId);
+    }
+  };
+
   const handleClick = (id: string) => {
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const target = document.getElementById(`section-${id}`);
-    if (target) {
-      target.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth", block: "start" });
-      setActiveId(id);
-    }
+    if (!target) return;
+
+    ignoreObserverRef.current = true;
+    scrollTargetRef.current = id;
+    setActiveId(id);
+    target.scrollIntoView({
+      behavior: prefersReduced ? "auto" : "smooth",
+      block: "start",
+    });
+
+    const onSettle = () => {
+      window.removeEventListener("scrollend", onSettle);
+      if (settleTimerRef.current) {
+        clearTimeout(settleTimerRef.current);
+        settleTimerRef.current = null;
+      }
+      settleProgrammaticScroll();
+    };
+    window.addEventListener("scrollend", onSettle);
+    if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
+    settleTimerRef.current = setTimeout(onSettle, 700);
   };
 
   if (categories.length === 0) return null;
@@ -61,7 +97,7 @@ export function MenuTabs({ categories }: Props) {
     <nav
       ref={containerRef}
       className="sticky top-0 z-40 -mx-4 flex gap-2 overflow-x-auto border-b border-border bg-background/80 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/60"
-      aria-label="دسته‌ها"
+      aria-label={strings.public.categoriesAria}
       data-testid="category-tabs"
       style={{ scrollbarWidth: "none" }}
     >

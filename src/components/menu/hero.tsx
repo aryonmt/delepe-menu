@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { strings } from "@/lib/fa/strings";
 
 type Props = {
   restaurantName: string;
@@ -26,8 +27,7 @@ export function Hero({ restaurantName }: Props) {
 
   return (
     <header
-      className="relative flex w-full items-center justify-center overflow-hidden border-b border-border bg-background transition-all duration-300 ease-brand"
-      style={{ height: isShrunk ? 120 : 200 }}
+      className="relative flex h-[200px] w-full items-center justify-center overflow-hidden border-b border-border bg-background"
       data-testid="hero"
     >
       {/* drifting radial glows - transform only, 12s loop */}
@@ -47,8 +47,9 @@ export function Hero({ restaurantName }: Props) {
         }}
         aria-hidden="true"
       />
+      {/* TODO(M7): layout height 200→120 cannot be transform-only; A-07 shrink is scale/opacity on the inner frame. */}
       <div
-        className={`brand-frame relative flex flex-col items-center justify-center rounded-card bg-card px-8 py-6 shadow-warm transition-transform duration-300 ${isShrunk ? "scale-90 opacity-90" : "scale-100 opacity-100"}`}
+        className={`brand-frame relative flex flex-col items-center justify-center rounded-card bg-card px-8 py-6 shadow-warm transition-[transform,opacity] duration-300 ${isShrunk ? "scale-90 opacity-90" : "scale-100 opacity-100"}`}
       >
         <p className="ornament-divider font-display text-sm text-ornament" aria-hidden="true">
           ✦
@@ -56,7 +57,7 @@ export function Hero({ restaurantName }: Props) {
         <h1 className="font-display mt-2 text-center text-hero font-bold text-foreground md:text-[40px]">
           {restaurantName}
         </h1>
-        <p className="mt-1 text-secondary text-muted-foreground">منوی دیجیتال</p>
+        <p className="mt-1 text-secondary text-muted-foreground">{strings.public.subtitle}</p>
       </div>
       <style>{`@keyframes hero-drift { from { transform: translate3d(0,0,0); } to { transform: translate3d(20px, 12px, 0); } } @media (prefers-reduced-motion: reduce) { [style*="hero-drift"] { animation: none !important; } }`}</style>
     </header>

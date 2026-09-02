@@ -2,10 +2,11 @@ import { existsSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { hash } from "@node-rs/argon2";
-import { prisma } from "@/infrastructure/prisma/client";
 import { SharpImageOptimizer } from "@/infrastructure/image/optimizer";
+import { prisma } from "@/infrastructure/prisma/client";
+import { LocalDiskStorage } from "@/infrastructure/storage/local-disk-storage";
 import { env } from "@/lib/env";
-import { childCategories, groups, topLevelCategories } from "./seed-data";
+import { childCategories, groups, topLevelCategories, type SeedProduct } from "./seed-data";
 
 function categoryGlyph(name: string): string {
   const map: Record<string, string> = {
@@ -51,6 +52,7 @@ async function main() {
   });
 
   const adminCount = await prisma.adminUser.count();
+  // Skip when ADMIN_* are unset — E2E creates the admin via admin-reset after seed.
   if (adminCount === 0 && env.ADMIN_USERNAME && env.ADMIN_PASSWORD) {
     const passwordHash = await hash(env.ADMIN_PASSWORD);
     await prisma.adminUser.create({ data: { username: env.ADMIN_USERNAME, passwordHash } });
@@ -77,6 +79,7 @@ async function main() {
   }
 
   const optimizer = new SharpImageOptimizer();
+  const storage = new LocalDiskStorage();
   const shouldTryDownload = env.SEED_DOWNLOAD_IMAGES === "true";
 
   let sortCounter = 0;
@@ -85,15 +88,8 @@ async function main() {
     if (!categoryId) throw new Error(`Missing category ${group.category}`);
     for (const product of group.products) {
       sortCounter += 10;
-      const hasVariants = product.small !== undefined && product.large !== undefined;
-      const variants = hasVariants
-        ? [
-            { name: "سایز کوچک", price: product.small as number, sortOrder: 10 },
-            { name: "سایز بزرگ", price: product.large as number, sortOrder: 20 },
-          ]
-        : [];
-      const price = hasVariants ? Math.min(product.small as number, product.large as number) : (product.price as number);
-      const badges = (product.badges ?? []) as ("POPULAR" | "NEW" | "SPICY" | "VEGETARIAN")[];
+      const { price, variants } = productPricing(product);
+      const badges = product.badges ?? [];
       const isAvailable = product.isAvailable ?? true;
 
       const existing = await prisma.product.findFirst({ where: { categoryId, name: product.name } });
@@ -138,9 +134,14 @@ async function main() {
 
       if (existingMediaId) {
         const mediaRow = await prisma.media.findUnique({ where: { id: existingMediaId } });
+        const originalPath = mediaRow
+          ? path.join(env.STORAGE_ROOT, mediaRow.path)
+          : null;
+        // Skip re-encoding when the original file is already on disk.
+        if (originalPath && existsSync(originalPath)) continue;
+        await storage.deleteAll(existingMediaId);
         if (mediaRow) {
-          const originalPath = path.join(env.STORAGE_ROOT, mediaRow.path);
-          if (existsSync(originalPath)) continue;
+          await prisma.media.delete({ where: { id: existingMediaId } });
         }
       }
 
@@ -179,6 +180,29 @@ async function main() {
   }
 
   console.log("Seed completed");
+}
+
+function productPricing(product: SeedProduct): {
+  price: number;
+  variants: { name: string; price: number; sortOrder: number }[];
+} {
+  const small = product.small;
+  const large = product.large;
+  const hasVariants = small != null && large != null;
+  if (hasVariants) {
+    return {
+      price: Math.min(small, large),
+      variants: [
+        { name: "سایز کوچک", price: small, sortOrder: 10 },
+        { name: "سایز بزرگ", price: large, sortOrder: 20 },
+      ],
+    };
+  }
+  const unitPrice = product.price;
+  if (unitPrice == null) {
+    throw new Error(`Seed product "${product.name}" needs price or small/large`);
+  }
+  return { price: unitPrice, variants: [] };
 }
 
 async function tryDownloadImage(
