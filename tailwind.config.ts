@@ -59,7 +59,7 @@ const config: Config = {
         drawer: "var(--radius-drawer)",
       },
       fontFamily: {
-        sans: ["var(--font-body)", "sans-serif"],
+        sans: ["IRANSans", "var(--font-vazir)", "sans-serif"],
         display: ["var(--font-display)", "serif"],
       },
       fontSize: {

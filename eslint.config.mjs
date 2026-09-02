@@ -20,6 +20,30 @@ const eslintConfig = [
       "next-env.d.ts",
     ],
   },
+  {
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "framer-motion",
+              message: "Always import from 'motion/react' per ADR-09",
+            },
+          ],
+        },
+      ],
+      "react/no-danger": "error",
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "JSXAttribute[name.name='dangerouslySetInnerHTML']",
+          message:
+            "dangerouslySetInnerHTML is forbidden (docs/10 XSS policy).",
+        },
+      ],
+    },
+  },
 ];
 
 export default eslintConfig;

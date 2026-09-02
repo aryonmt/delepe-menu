@@ -26,6 +26,15 @@ describe("formatPrice", () => {
     expect(formatPrice(125500)).toContain("\u066B");
     expect(formatPrice(125500)).not.toContain(".");
   });
+
+  it("carries a remainder that rounds to 1.00 into the next thousand", () => {
+    // 125995 → rem/1000 = 0.995 → toFixed(2) would be "1.00"
+    expect(formatPrice(125995)).toBe("۱۲۶ هزار تومان");
+  });
+
+  it("carries a 0.995 remainder at 999 thousand into one million", () => {
+    expect(formatPrice(999995)).toBe("۱ میلیون تومان");
+  });
 });
 
 describe("formatPriceFrom", () => {

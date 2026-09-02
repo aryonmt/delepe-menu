@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/infrastructure/prisma/client";
+import { checkDatabaseHealth } from "@/infrastructure/prisma/health";
 
 export async function GET() {
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-    return NextResponse.json({ ok: true, db: true });
-  } catch {
+  const db = await checkDatabaseHealth();
+  if (!db) {
     return NextResponse.json({ ok: false, db: false }, { status: 503 });
   }
+  return NextResponse.json({ ok: true, db: true });
 }

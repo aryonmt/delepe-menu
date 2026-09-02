@@ -42,3 +42,6 @@ prisma/*.db-journal
 *.tsbuildinfo
 .turbo/
 .vercel/
+
+# generated AI context dump (regenerate with scripts/dump_project_for_ai.py)
+ai-context.txt

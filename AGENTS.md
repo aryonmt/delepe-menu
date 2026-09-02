@@ -46,6 +46,11 @@ started your session — re-read it.
 - **Before marking a task done**: run `pnpm check` (lint + typecheck + unit +
   build) and the relevant Playwright spec; then strike through the task row in
   `docs/13-implementation-plan.md`.
+- **Next.js 15 APIs**: Always `await cookies()`, `await headers()`, and `await params`.
+- **Server Action Redirects**: Never call `redirect()` inside a try/catch block that intercepts all errors without rethrowing `NEXT_REDIRECT`.
+- **Prisma Client**: Always use the global singleton pattern for Prisma in `src/infrastructure/prisma/client.ts`.
+- **No Direct Mutation**: Never mutate Zustand state directly; use immutable updates.
+
 
 ## Never change without reconsideration (flag to the human first)
 

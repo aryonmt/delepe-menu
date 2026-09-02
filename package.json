@@ -19,6 +19,9 @@
     "admin:reset": "tsx scripts/admin-reset.ts",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
   },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "pnpm": {
     "onlyBuiltDependencies": [
       "@prisma/client",
