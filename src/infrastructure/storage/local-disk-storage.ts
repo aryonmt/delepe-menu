@@ -9,8 +9,6 @@ export class LocalDiskStorage implements MediaStorage {
   async deleteAll(mediaId: string): Promise<void> {
     const dir = path.join(env.STORAGE_ROOT, "uploads");
     await tryUnlink(path.join(dir, `${mediaId}.jpg`));
-    await tryUnlink(path.join(dir, `${mediaId}.png`));
-    await tryUnlink(path.join(dir, `${mediaId}.webp`));
     for (const width of MEDIA_WIDTHS) {
       await tryUnlink(path.join(dir, `${mediaId}_${width}.webp`));
     }
