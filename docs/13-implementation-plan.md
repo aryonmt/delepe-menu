@@ -67,6 +67,7 @@ Format: `ID · description · [docs] · deps · output · tests`.
 | T-030 | `prisma/seed.ts`: full real menu + deterministic SVG placeholder generator (+ optional download flag) | 04, 02 (ADR-10) | T-014 | seeded DB offline | seed idempotency test |
 | T-031 | `GetPublicMenuUseCase` + tagged cache + `revalidateTag` helper | 03, 04 | T-013, T-030 | cached DTO | unit |
 | T-032 | Public page: hero, sticky tabs + scrollspy, sections, product card, skeletons, empty/error states | 05, 06 | T-031 | rendered menu | E2E `public-menu.spec` (basic rows 1–2) |
+| T-033 | media pipeline: SharpImageOptimizer (original + 320/640/960 WebP + dominantColor), /media/[mediaId] route, MenuImage + lib/media-url.ts | 03, 05, 06 | T-030 | optimized images + route | unit + E2E image asserts |
 
 ### M4 · Public Menu Polish
 
@@ -74,7 +75,7 @@ Format: `ID · description · [docs] · deps · output · tests`.
 | --- | --- | --- | --- | --- | --- |
 | T-040 | Variants expand («از …»), discount UI, badges, MUTED/HIDE, chips filter | 04, 05, 06 | T-032 | full card behaviors | E2E rows 3–6 |
 | T-041 | Animation catalog A-01..A-08 + reduced motion | 05, 06 | T-032 | motion | reduced-motion check |
-| T-042 ∥ | Desktop 2-col grid, `MenuImage` + media route + loader | 03, 06 | T-032 | responsive images | E2E image asserts |
+| T-042 ∥ | Desktop 2-col grid only | 03, 06 | T-033 | responsive grid | E2E layout asserts |
 | T-043 | a11y pass + `a11y.spec` + Lighthouse ≥ 90 | 11 | T-040, T-041 | green scans | E2E `a11y.spec` |
 
 ### M5 · Admin: Products
@@ -84,7 +85,7 @@ Format: `ID · description · [docs] · deps · output · tests`.
 | T-050 | Admin layout (sidebar/bottom-nav), draft store + hydration (`GetAdminMenu`), unsaved-changes guard | 03, 07 | T-022, T-013 | shell + store | unit store mutators |
 | T-051 | Products list: search, category filter, client pagination, availability switch (optimistic + revert) | 07 | T-050 | list | E2E list cases |
 | T-052 | Product drawer form (RHF+Zod): digits normalization, variant auto-price, discount hiding, badges | 04, 07 | T-050 | form | unit schemas + E2E |
-| T-053 | Upload editor + `/api/admin/media/upload` (XHR progress) + Sharp variants + dominantColor + orphan cleanup | 03, 07 | T-052 | media pipeline | E2E upload w/ fixture |
+| T-053 | Upload editor + orphan cleanup, reusing SharpImageOptimizer | 03, 07 | T-052, T-033 | media editor | E2E upload w/ fixture |
 | T-054 | Delete confirm (BR-03) + dnd reorder (BR-07, leaf-only rule) | 04, 07 | T-051 | CRUD complete | E2E `admin-products.spec` full |
 
 ### M6 · Admin: Categories, Settings, Live Preview

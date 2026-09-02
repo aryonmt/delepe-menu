@@ -140,25 +140,35 @@ Read first: AGENTS.md → docs/04-data-model.md (seed tables — copy descriptio
 and imageKeywords VERBATIM) → docs/03-architecture.md (data flow, caching) →
 docs/05-design-system.md → docs/06-public-menu-spec.md → docs/13 (M3).
 
-Goal: tasks T-030..T-032 — idempotent seed with deterministic SVG placeholders,
-GetPublicMenuUseCase with tagged cache, public page v1 (hero, tabs + scrollspy,
-sections, product card, skeletons, empty/error).
+Goal: tasks T-030..T-033 — idempotent seed with deterministic SVG placeholders
++ media pipeline (SharpImageOptimizer, /media/[mediaId] route, MenuImage +
+lib/media-url.ts), GetPublicMenuUseCase with tagged cache, public page v1
+(hero, tabs + scrollspy, sections, product card, skeletons, empty/error).
 
 Constraints:
 - Seed works with the network DISABLED (SVG placeholders by default, ADR-10);
   SEED_DOWNLOAD_IMAGES=true is the only network path and always falls back to SVG.
+  Seed ingests every image through SharpImageOptimizer (original + 320/640/960 WebP
+  + dominantColor), creates Media rows, and is idempotent via upserts and skipping
+  existing files (raster inputs saved as JPEG q0.92; SVGs rasterized).
+- Media pipeline: SharpImageOptimizer implements the same ImageOptimizer port;
+  /media/[mediaId]?w= validates w ∈ {320,640,960} (default 640), streams
+  pre-generated WebP with Cache-Control immutable, 404 on bad id/w, originals
+  never served; lib/media-url.ts helper + MenuImage with custom loader
+  (≤320→320, ≤640→640, else 960), 4:3, dominantColor + shimmer.
 - Admin bootstrap: create the admin from ADMIN_USERNAME/ADMIN_PASSWORD only when
   AdminUser count = 0.
 - Scrollspy: IntersectionObserver rootMargin "-40% 0px -55%"; tabs indicator via
   layoutId spring (docs/05 motion tokens).
 - The page is RSC; client JS only in the doc-06 islands.
 
-Tests: seed idempotency unit test (run twice → identical counts); E2E
+Tests: unit (media-url, SharpImageOptimizer fixture, cache helper); E2E
 public-menu.spec rows 1–2 (write the spec file now; unimplemented rows may be
 test.fixme with a comment referencing the doc row).
 
 Validation checklist:
-- [ ] pnpm db:seed twice → no duplicates
+- [ ] pnpm db:seed twice → no duplicates and no duplicate storage files
+- [ ] /media serves 320/640/960 WebP with immutable headers; 404 on bad w/id
 - [ ] «آب کرفس» renders grayscale (seeded isAvailable=false, default mode MUTED)
 - [ ] pnpm check green
 
@@ -176,12 +186,13 @@ docs/03-architecture.md (media pipeline) → docs/11-performance-accessibility.m
 docs/13 (M4).
 
 Goal: tasks T-040..T-043 — variants, discount, badges, MUTED/HIDE, chips,
-full animation catalog, MenuImage + media route, desktop grid, a11y + Lighthouse.
+full animation catalog, desktop 2-col grid only, a11y + Lighthouse
+(media pipeline already landed in M3 T-033).
 
 Constraints:
-- Media serving exactly per the docs/03 pipeline: /media/[mediaId]?w= streams
-  pre-generated variants, Cache-Control immutable; MenuImage uses the custom
-  loader (≤320→320, ≤640→640, else 960); dominantColor placeholder + shimmer.
+- Desktop grid: content column max-w-2xl centered; at md+ cards become a
+  2-column grid within sections (same card component, 140×105 image) —
+  MenuImage + media route already exist from M3.
 - Every animation transform/opacity only, durations from docs/05 tokens;
   prefers-reduced-motion disables all of them.
 - Enable the previously fixme'd public-menu.spec rows 3–6 and make them pass
@@ -219,7 +230,8 @@ Constraints:
 - Variant products: price input disabled + auto = min(variants); discount section
   hidden (BR-13/14).
 - Upload: react-easy-crop 4:3 → JPEG q0.92 → XHR to /api/admin/media/upload with
-  real upload progress; orphan media deleted on cancel (DeleteMedia).
+  real upload progress reusing SharpImageOptimizer from M3; orphan media deleted
+  on cancel (DeleteMedia).
 - Reorder enabled only for a single selected leaf category with empty search.
 
 Tests: unit (store mutators, schemas) first; then e2e/admin-products.spec
