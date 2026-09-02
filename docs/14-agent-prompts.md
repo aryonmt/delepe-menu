@@ -77,16 +77,22 @@ Constraints:
 - BR-13: use-cases recompute product.price = min(variant prices) on every
   variant mutation. BR-09 uniqueness is enforced in use-cases, NOT trusted to
   the DB (see the NULL note in docs/04).
+- Media use-cases (UploadMedia/DeleteMedia) and stub storage/optimizer adapters
+  (PassthroughImageOptimizer, LocalDiskStorage) are included in M1 to satisfy
+  the docs/04 contract-completeness checklist. Auth use-cases
+  (Login/Logout/ChangePassword/VerifySession) remain deferred to M2 by design.
 
 Expected files: src/domain/**, src/application/**, src/infrastructure/prisma/**,
-src/infrastructure/di/container.ts, src/domain/testing/*.
+src/infrastructure/di/container.ts, src/domain/testing/*,
+src/infrastructure/image/optimizer.ts, src/infrastructure/storage/*.
 
 Tests: pnpm test green (mapper + all BR cases); a container test constructs
-every use-case.
+every M1 use-case (menu/category/product/settings/media — not auth).
 
 Validation checklist:
 - [ ] no `import .*prisma` outside infrastructure (grep)
-- [ ] every use-case in the docs/04 contract table exists with that exact I/O
+- [ ] every non-auth use-case in the docs/04 contract table exists with that
+      exact I/O (media included; Login/Logout/ChangePassword/VerifySession are M2)
 - [ ] pnpm check green
 
 Standard trailer applies.

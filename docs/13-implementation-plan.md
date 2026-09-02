@@ -48,7 +48,7 @@ Format: `ID · description · [docs] · deps · output · tests`.
 | ~~T-011~~ | Prisma repositories (all ports) + in-memory fakes in `domain/testing/` | 04 | T-010 | repos + fakes | unit smoke |
 | ~~T-012~~ | `di/container.ts` constructing every use-case | 03 | T-011 | container | construct-all test |
 | ~~T-013~~ | `toPublicMenu` mapper | 04 | T-010 | pure mapper | unit: HIDE/MUTED/pruning |
-| ~~T-014~~ ∥ | menu/category/product/settings use-cases (no auth/media yet) | 04 | T-011 | use-case classes | unit per BR (01,02,04..09,12..16) |
+| ~~T-014~~ ∥ | menu/category/product/settings use-cases plus media use-cases and stub storage/optimizer adapters (included to satisfy the docs/04 contract-completeness checklist); auth use-cases (Login/Logout/ChangePassword/VerifySession) remain deferred to M2 by design | 04 | T-011 | use-case classes | unit per BR (01..16; BR-03/11 via media) |
 
 ### M2 · Auth & Recovery
 
@@ -135,6 +135,9 @@ in `docs/14-agent-prompts.md`.
 - **Gate**: `pnpm test` green (mapper + every BR); container constructs all
   use-cases.
 - **DoD**: no Prisma import outside infrastructure; layer boundaries verified.
+  Media use-cases and stub storage/optimizer adapters were included in M1 to
+  satisfy the docs/04 contract-completeness checklist; auth use-cases
+  (Login/Logout/ChangePassword/VerifySession) remain deferred to M2 by design.
 
 ### M2 · Auth & Recovery
 - **Goal**: secure login, middleware, recovery CLI.
