@@ -22,7 +22,7 @@ import { UpdateSettingsUseCase } from "@/application/use-cases/settings/update-s
 import { Argon2PasswordHasher } from "@/infrastructure/auth/password";
 import { InMemoryLoginRateLimiter } from "@/infrastructure/auth/rate-limiter";
 import { JoseSessionSigner } from "@/infrastructure/auth/session";
-import { PassthroughImageOptimizer } from "@/infrastructure/image/optimizer";
+import { SharpImageOptimizer } from "@/infrastructure/image/optimizer";
 import { prisma } from "@/infrastructure/prisma/client";
 import { PrismaAdminUserRepository } from "@/infrastructure/prisma/repositories/admin-user-repository";
 import { PrismaCategoryRepository } from "@/infrastructure/prisma/repositories/category-repository";
@@ -40,7 +40,7 @@ const settingsRepo = new PrismaSettingsRepository(prisma);
 const mediaRepo = new PrismaMediaRepository(prisma);
 const adminUsers = new PrismaAdminUserRepository(prisma);
 const storage = new LocalDiskStorage();
-const optimizer = new PassthroughImageOptimizer();
+const optimizer = new SharpImageOptimizer();
 const hasher = new Argon2PasswordHasher();
 const sessions = new JoseSessionSigner(env.SESSION_SECRET);
 
