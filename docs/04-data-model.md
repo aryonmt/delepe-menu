@@ -158,6 +158,7 @@ MUTED passthrough, empty-category pruning). Used by `GetPublicMenuUseCase`
 | UpdateCategory | id, name, parentId? | CategoryDto | NotFoundError, ValidationError (BR-01, BR-09, BR-16) |
 | DeleteCategory | id | void | NotFoundError, CategoryNotEmptyError (BR-02) |
 | ReorderCategories | orderedIds[], parentId \| null | void | ValidationError (BR-07) |
+| GetProduct | id | ProductDto | NotFoundError |
 | CreateProduct | per CreateProduct schema | ProductDto | ValidationError (BR-04, 09, 12, 13, 14, 15) |
 | UpdateProduct | id + same | ProductDto | NotFoundError + same rules; replacing image deletes old media after success |
 | DeleteProduct | id | void | NotFoundError; BR-03 media cleanup |
