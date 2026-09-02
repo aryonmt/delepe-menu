@@ -12,8 +12,9 @@ Works with a domain (auto-TLS) or bare IP (HTTP) until a domain is bought.
 | --- | --- | --- |
 | DATABASE_URL | yes | postgres connection |
 | SESSION_SECRET | yes | ≥32B random |
-| ADMIN_USERNAME / ADMIN_PASSWORD | first boot | seeds initial admin (ignored after user exists) |
+| ADMIN_USERNAME / ADMIN_PASSWORD | first seed | initial admin — used only when `AdminUser` count = 0 (doc 04) |
 | MASTER_USERNAME / MASTER_PASSWORD | no | recovery backdoor (doc 10) |
+| SEED_DOWNLOAD_IMAGES | no | `true` = seed tries curated photo download, SVG fallback (ADR-10) |
 | STORAGE_ROOT | no | default `/data/storage` |
 | PORT | no | 3000 |
 
@@ -27,7 +28,12 @@ Services:
 - `caddy`: caddy:2-alpine, ports 80/443, volume `Caddyfile` + `caddy_data`,
   reverse_proxy `:443 → app:3000` (with domain) or `:80` passthrough.
 
-Dockerfile (multi-stage, node:20-bookworm-slim, corepack pnpm):
+Compose also defines a **`test` profile** for E2E (doc 09):
+- `db-test`: postgres:16-alpine, host port **5433**, db `delepe_test`,
+  throwaway volume. E2E runs migrations + seed against it
+  (`DATABASE_URL=postgres://…:5433/delepe_test`).
+
+Dockerfile (multi-stage, node:22-bookworm-slim, corepack pnpm):
 `deps → build (output: standalone) → runner` (non-root user, copies
 `.next/standalone`, `public`, `prisma`, storage entrypoint).
 
@@ -35,17 +41,21 @@ Dockerfile (multi-stage, node:20-bookworm-slim, corepack pnpm):
 
 1. Ubuntu 24.04, `ufw` allow 22/80/443, create deploy user, SSH keys.
 2. Install Docker + compose plugin.
-3. `git clone` → `cp .env.example .env` → fill secrets.
+3. `git clone` → `cp .env.example .env` → fill secrets (DATABASE_URL,
+   SESSION_SECRET, ADMIN_USERNAME, ADMIN_PASSWORD).
 4. `docker compose up -d --build`.
-5. Point domain → Caddy obtains TLS automatically.
-6. Verify `/api/health` = `{ ok: true, db: true }`.
+5. **Seed once**: `docker compose exec app pnpm db:seed`
+   (creates settings, category tree, full menu, and the initial admin when none
+   exists; safe to re-run — idempotent, never resets an existing admin).
+6. Point domain → Caddy obtains TLS automatically.
+7. Verify `/api/health` = `{ ok: true, db: true }` and `/` shows the seeded menu.
 
 ## Backups & restore
 
 - Daily cron on host: `docker exec db pg_dump -Fc delepe > /backups/db-$(date).dump`
   + `tar czf /backups/storage-*.tgz storage volume`; retention 14 days;
   optional off-site copy (any S3 the owner trusts).
-- Restore: `pg_restore` into fresh volume + extract storage; documented commands.
+- Restore: `pg_restore` into a fresh volume + extract storage; documented commands.
 
 ## Updates
 

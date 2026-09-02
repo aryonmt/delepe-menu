@@ -8,12 +8,29 @@ Visual quality must match the public menu (same design system, doc 05).
 
 | Route | Purpose |
 | --- | --- |
-| `/login` | Username + password (rate-limited) |
+| `/login` | Username + password (rate-limited, doc 10). Already-authed → redirect `/admin/products` |
+| `/admin` | Redirects to `/admin/products` |
 | `/admin/products` | Product list + drawer form + dnd reorder + preview button |
 | `/admin/categories` | Two-level tree CRUD + dnd reorder |
 | `/admin/settings` | Restaurant name, theme picker, unavailable mode |
 
-Middleware protects `/admin/**` and `/api/admin/**` (doc 10).
+Middleware protects `/admin/**` and `/api/admin/**` (docs 03, 10).
+Successful login redirects to `/admin/products`.
+
+## Feature Specification
+
+- **Goal**: a non-technical owner manages the whole menu, fearlessly, in Persian.
+- **User value**: every change visible instantly in a phone-frame preview before
+  saving; no training needed.
+- **Technical requirements**: draft store (below) + shared `toPublicMenu` mapper;
+  RHF+Zod forms; dnd-kit; XHR upload with progress (doc 03 media pipeline).
+- **Dependencies**: docs 03 (architecture/media), 04 (contracts, BRs),
+  05 (design), 10 (auth).
+- **Implementation notes**: build the draft store + admin layout first; every
+  admin page reads/writes draft only.
+- **Acceptance criteria**: E2E table at the end.
+- **Required tests**: unit (use-cases per doc 04) + E2E `admin-products.spec`,
+  `admin-categories.spec`, `settings-preview.spec` (doc 09).
 
 ## Layout
 
@@ -21,40 +38,69 @@ Middleware protects `/admin/**` and `/api/admin/**` (doc 10).
 - Mobile: top bar + bottom navigation (3 items) — thumb-reachable.
 - Top bar: «پیش‌نمایش» button (opens preview drawer), user menu
   (تغییر رمز عبور dialog, خروج).
-- Unsaved-changes context: dirty flag → `beforeunload` + confirm dialog
+- Unsaved-changes: `isDirty` → `beforeunload` + confirm dialog
   («تغییرات ذخیره‌نشده دارید») on internal navigation.
 
 ## Draft store (live preview backbone)
 
-`useMenuDraftStore` (zustand) holds a normalized snapshot:
-`{ settings, categories[], products[] }` = **draft**, plus `savedVersion`.
+`useMenuDraftStore` (zustand) holds:
 
-- All admin lists render from **draft** (single source for UI).
-- Forms mutate draft on every field change (controlled) → preview is always live.
-- Server action success → `savedVersion++`, draft kept (now clean).
-- «بازگشت به منوی ذخیره‌شده» button in preview → `resetToSaved()` (refetch).
-- Draft persists only in memory (tab reload = saved state).
+```ts
+{
+  draft: AdminMenuDto;        // FULL menu incl. unavailable products
+  savedVersion: number;       // increments on every successful server mutation
+  isDirty: boolean;           // true after any draft mutation since last save
+  hydrate(data: AdminMenuDto): void;
+  resetToSaved(): Promise<void>;  // re-fetch via GetAdminMenu, replace draft
+  // …typed mutators: upsertProduct, removeProduct, updateSettings, …
+}
+```
+
+Rules (deterministic):
+
+1. **Hydration**: the admin layout (RSC) fetches `GetAdminMenuUseCase` and passes
+   it to the store once. All admin lists and the preview render from **draft** —
+   the single source of truth for admin UI.
+2. **Pagination & search are client-side** over draft (20/page). There is no
+   server-side pagination (menu size is small; simplicity wins).
+3. **Edit sessions**: the product/category drawer edits a **local copy** of the
+   entity. «ذخیره» → server action → on success the draft is updated and
+   `savedVersion++`, `isDirty=false`. «انصراف» / dismiss → the copy is discarded;
+   draft and preview stay untouched.
+4. **Instant actions** (availability switch): optimistic draft update + server
+   action; on error → revert draft + Persian error toast.
+5. **Preview**: renders the pure `components/menu/*` components with
+   `toPublicMenu(draft)` — the same mapper the server uses — so preview ==
+   production, including HIDE/MUTED and empty-category pruning.
+6. **Persistence**: draft lives in memory only (tab reload = saved state).
+   «بازگشت به منوی ذخیره‌شده» → `resetToSaved()`.
 
 ## Products page
 
 - Toolbar: search input (name, client-side over draft), category select
   (parent → child), «محصول جدید» primary button.
-- List: responsive table/cards; row = thumb 48px, name, category, effective
-  price, availability Switch (instant server action + toast), edit, delete.
-- Pagination 20/page (server-side when not searching).
-- **Reorder**: when a single category is selected → rows become dnd-kit sortable
-  (handle icon); drop → `ReorderProducts` action; other categories disabled with hint.
-- **Delete**: confirm dialog showing product name in bold; on success also
-  removes image files (BR-03); toast with undo? — no undo (out of scope).
+- List: responsive table/cards; row = thumb 48px (`mediaUrl(id, 320)`), name,
+  category, effective price, availability Switch (instant action), edit, delete.
+- Client-side pagination 20/page over the (filtered) draft list.
+- **Reorder**: enabled only when the filter selects exactly one **leaf** category
+  (a child, or a top-level category without children) and search is empty; rows
+  become dnd-kit sortable (handle icon); drop → `ReorderProducts` action.
+  Otherwise handles are disabled with a hint («برای مرتب‌سازی، یک دسته انتخاب کنید»).
+- **Delete**: confirm dialog showing the product name in bold; on success also
+  removes image files (BR-03); success toast. No undo (out of scope).
 
 ### Product form (drawer, RHF + Zod)
 
 Fields (Persian labels, English code):
-name · category (two selects) · description (≤500, counter) · price (integer toman,
-live Persian-formatted hint below input) · discount (Switch + discountedPrice,
-inline error if ≥ price, BR-04) · badges (multi chip toggle, doc 05) ·
-available Switch · image (upload editor) · variants (dynamic rows: name + price,
-add/remove, min 0 rows).
+name · category (two selects: parent → child; the child select is shown only when
+the chosen parent has children — BR-15 means the effective category is always a
+leaf) · description (≤500, counter) · price (integer toman, accepts FA/EN digits —
+normalized in the form layer; live Persian-formatted hint below input; **disabled
+and auto-filled with min(variant prices) when variants exist**, BR-13) ·
+discount (Switch + discountedPrice, inline error if ≥ price, BR-04; **the whole
+section is hidden when variants exist**, BR-14) · badges (multi chip toggle,
+doc 05) · available Switch · image (upload editor) · variants (dynamic rows:
+name + price, add/remove, min 0 rows).
 
 Submit → server action → success toast + close drawer; errors → inline Persian
 messages + error toast.
@@ -65,15 +111,21 @@ messages + error toast.
 2. `react-easy-crop`: fixed 4:3 aspect, rotate slider, zoom.
 3. Crop → canvas → JPEG blob (q .92) → **XHR** POST `/api/admin/media/upload`
    (real progress bar via `xhr.upload.onprogress`).
-4. Server: auth check → magic-bytes → size → ratio ±2% (BR-11) → save original →
-   Sharp variants (320/640/960 webp) → return `{ mediaId, url }`.
-5. Form shows thumb with «جایگزینی» / «حذف».
+4. Server: auth → magic-bytes → size → ratio ±2% (BR-11) → save original →
+   Sharp variants (320/640/960 WebP) + `dominantColor` → return
+   `{ mediaId, dominantColor, width, height }` (doc 03 pipeline).
+5. Form shows a thumb (`mediaUrl(mediaId, 320)`) with «جایگزینی» / «حذف».
+6. If the form is cancelled or product creation fails after a successful upload,
+   the client calls `DeleteMedia` for the orphan (no orphan files).
 
 ## Categories page
 
 - Tree list: parents with nested children (indented), dnd within level
   (`ReorderCategories` per parentId).
-- Add/edit dialog: name + parent select (parents only; depth BR-01).
+- Add/edit dialog: name + parent select (top-level categories only; depth BR-01).
+  Guards: adding a child to a category that owns products → error toast (BR-16);
+  re-parenting that would create depth 3 or strand products → `ValidationError`
+  toast (BR-01/BR-15/BR-16).
 - Delete: if BR-02 violated → error toast «ابتدا محصولات این دسته را منتقل کنید»;
   else confirm dialog.
 
@@ -81,25 +133,31 @@ messages + error toast.
 
 - Restaurant name input (1..80).
 - Theme picker: 4 cards rendering a mini live preview (hero + 2 cards) using the
-  actual tokens; selected = ring; applies to preview immediately, to public after save.
+  actual tokens; selected = ring; applies to the preview immediately, to the
+  public site after save.
 - Unavailable mode: two radio cards with tiny visual examples
-  (HIDE: hidden card icon · MUTED: grayscale thumb + «ناموجود»).
+  (HIDE: hidden-card icon · MUTED: grayscale thumb + «ناموجود»).
 - Single «ذخیره» button → `UpdateSettings` → toast.
 
 ## Live preview (phone frame)
 
 - Drawer (desktop: side panel 380px; mobile: full-screen sheet).
-- `PhoneFrame`: rounded device bezel, notch, status bar (fa digits clock),
-  scrollable viewport rendering the **pure public components** (`components/menu/*`)
-  fed with **draft** data and draft theme.
-- Buttons: «بازگشت به منوی ذخیره‌شده» (resetToSaved), «بستن».
-- Because menu components are pure (doc 06), preview == production rendering.
+- `PhoneFrame`: rounded device bezel, notch, status bar (Persian-digits clock),
+  scrollable viewport rendering the **pure public components** fed with
+  `toPublicMenu(draft)` and the draft theme.
+- Buttons: «بازگشت به منوی ذخیره‌شده» (`resetToSaved`), «بستن».
 
-## Acceptance criteria (highlights)
+## Acceptance criteria (highlights — automatable unless noted)
 
-1. Owner adds a product with image in < 2 minutes (measured in usability pass).
-2. Editing price in the form updates the phone preview instantly (no save).
-3. Upload shows real progress; wrong ratio file rejected with Persian message.
-4. Reorder persists after reload; public menu reflects new order after revalidate.
-5. Deleting a category with products shows guard toast, nothing deleted.
+1. Owner adds a product with image in < 2 minutes (manual usability pass).
+2. Editing a price in the form updates the phone preview instantly (no save).
+3. Upload shows real progress; a wrong-ratio file is rejected with a Persian message.
+4. Reorder persists after reload; the public menu reflects the new order after
+   revalidation.
+5. Deleting a category with products shows the guard toast; nothing is deleted.
 6. Dirty form + sidebar navigation → confirm dialog appears.
+7. Cancelling the product drawer after edits leaves list and preview unchanged.
+8. Typing Persian digits («۱۲۵۰۰۰») in the price field validates and saves as
+   125000.
+9. A product with variants shows no discount section and an auto-filled,
+   disabled price equal to the cheapest variant.

@@ -6,7 +6,7 @@
 | --- | --- |
 | SRP | One use-case class per operation (`CreateProductUseCase` does orchestration only). Components render only. Repositories persist only. |
 | OCP | Badges, themes, unavailable modes are data (maps/enums) — new badge = new entry, no logic change. |
-| LSP | Any `PrismaXRepository` is substitutable for port `XRepository` (unit tests use in-memory fakes). |
+| LSP | Any `PrismaXRepository` is substitutable for port `XRepository` (unit tests use in-memory fakes from `src/domain/testing/`). |
 | ISP | Ports are small: `ProductReader`, `ProductWriter` split where consumers differ. |
 | DIP | Use-cases depend on domain ports; wiring only in `infrastructure/di/container.ts`. |
 
@@ -28,15 +28,18 @@
   schemas `createNounSchema`; domain errors `NounError extends DomainError`.
 - **Error handling**: use-cases throw typed `DomainError`s with stable `code`;
   server actions catch → `ActionResult { ok:false, error:{code, fa} }`;
-  unexpected errors logged (infra logger) and mapped to generic Persian message.
+  unexpected errors logged (infra logger) and mapped to a generic Persian message.
   Never throw raw strings; never leak stack traces to UI.
 - **Imports order**: react → next → libs (alias `@/`) → relative; alias `@/*`.
+  Motion imports come from `motion/react` (never `framer-motion`).
 - **UI state**: local `useState` first; shared admin state only via the draft store.
 - **IDs**: `cuid()`; times UTC in DB, rendered via fa formatter.
+- **Pure mappers** (e.g. `toPublicMenu`) live in `application/mappers/` and are
+  the only allowed bridge between admin draft data and public rendering.
 
 ## PR / self-review checklist
 
-- [ ] Layers respected; new code in correct folder
+- [ ] Layers respected; new code in the correct folder (doc 03 tree)
 - [ ] Zod at boundary; domain rules inside use-case; Persian messages mapped
 - [ ] Loading/empty/error states + toasts where relevant
 - [ ] Animations transform/opacity + reduced-motion respected
