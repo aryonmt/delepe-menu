@@ -29,39 +29,51 @@ const variantSchema = z.object({
   price: z.number().int().min(PRICE_MIN_TOMAN).max(PRICE_MAX_TOMAN),
 });
 
-export const createProductSchema = z
-  .object({
-    name: z.string().min(1).max(120),
-    description: z.string().max(500).nullable().optional(),
-    price: z.number().int().min(PRICE_MIN_TOMAN).max(PRICE_MAX_TOMAN).optional(),
-    discountedPrice: z
-      .number()
-      .int()
-      .min(PRICE_MIN_TOMAN)
-      .max(PRICE_MAX_TOMAN)
-      .nullable()
-      .optional(),
-    discountActive: z.boolean().optional().default(false),
-    isAvailable: z.boolean().optional().default(true),
-    badges: z.array(z.enum(BADGE_KINDS)).optional().default([]),
-    categoryId: idSchema,
-    mediaId: z.string().min(1).nullable().optional(),
-    variants: z.array(variantSchema).optional().default([]),
-  })
-  .superRefine((value, ctx) => {
-    if (value.variants.length === 0 && value.price === undefined) {
-      ctx.addIssue({
-        code: "custom",
-        message: "price is required when the product has no variants",
-        path: ["price"],
-      });
-    }
-  });
+/** Shared product body — spread into create/update objects (Zod 4 recommends shape reuse over intersection). */
+const productFields = {
+  name: z.string().min(1).max(120),
+  description: z.string().max(500).nullable().optional(),
+  price: z.number().int().min(PRICE_MIN_TOMAN).max(PRICE_MAX_TOMAN).optional(),
+  discountedPrice: z
+    .number()
+    .int()
+    .min(PRICE_MIN_TOMAN)
+    .max(PRICE_MAX_TOMAN)
+    .nullable()
+    .optional(),
+  discountActive: z.boolean().optional().default(false),
+  isAvailable: z.boolean().optional().default(true),
+  badges: z.array(z.enum(BADGE_KINDS)).optional().default([]),
+  categoryId: idSchema,
+  mediaId: z.string().min(1).nullable().optional(),
+  variants: z.array(variantSchema).optional().default([]),
+};
 
-export const updateProductSchema = z.intersection(
-  z.object({ id: idSchema }),
-  createProductSchema,
-);
+function requirePriceWhenNoVariants(
+  value: { variants: unknown[]; price?: number },
+  ctx: z.RefinementCtx,
+): void {
+  if (value.variants.length === 0 && value.price === undefined) {
+    ctx.addIssue({
+      code: "custom",
+      message: "price is required when the product has no variants",
+      path: ["price"],
+    });
+  }
+}
+
+export const createProductSchema = z
+  .object(productFields)
+  .superRefine(requirePriceWhenNoVariants);
+
+export const updateProductSchema = z
+  .object({
+    id: idSchema,
+    ...productFields,
+  })
+  .superRefine(requirePriceWhenNoVariants);
+
+export const getProductSchema = z.object({ id: idSchema });
 
 export const deleteProductSchema = z.object({ id: idSchema });
 

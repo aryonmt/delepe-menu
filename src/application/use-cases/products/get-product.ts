@@ -1,6 +1,6 @@
 import type { ProductDto } from "@/application/dtos";
 import { toProductDto } from "@/application/mappers/to-dto";
-import { deleteProductSchema } from "@/application/schemas";
+import { getProductSchema } from "@/application/schemas";
 import { NotFoundError } from "@/domain/errors";
 import type { ProductRepository } from "@/domain/ports";
 import { parseOrThrow } from "@/application/use-cases/shared/parse";
@@ -10,7 +10,7 @@ export class GetProductUseCase {
   constructor(private readonly products: ProductRepository) {}
 
   async execute(input: unknown): Promise<ProductDto> {
-    const { id } = parseOrThrow(deleteProductSchema, input);
+    const { id } = parseOrThrow(getProductSchema, input);
     const product = await this.products.findById(id);
     if (!product) {
       throw new NotFoundError();

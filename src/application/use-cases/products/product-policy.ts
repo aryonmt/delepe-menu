@@ -1,7 +1,10 @@
 import type { ProductWrite } from "@/domain/entities";
 import { NotFoundError, ValidationError } from "@/domain/errors";
 import type { CategoryRepository, ProductRepository } from "@/domain/ports";
-import type { CreateProductInput } from "@/application/schemas";
+import type {
+  CreateProductInput,
+  UpdateProductInput,
+} from "@/application/schemas";
 import { PRICE_MIN_TOMAN } from "@/lib/constants";
 
 export async function requireLeafCategory(
@@ -32,7 +35,9 @@ export async function assertUniqueProductName(
 /**
  * BR-13 auto min-price, BR-14 no discount with variants, BR-04 discount bounds.
  */
-export function resolveProductWrite(input: CreateProductInput): ProductWrite {
+export function resolveProductWrite(
+  input: CreateProductInput | UpdateProductInput,
+): ProductWrite {
   const variants = input.variants;
   if (variants.length > 0) {
     const hasDiscount =
@@ -62,7 +67,7 @@ export function resolveProductWrite(input: CreateProductInput): ProductWrite {
 }
 
 function toWrite(
-  input: CreateProductInput,
+  input: CreateProductInput | UpdateProductInput,
   price: number,
   discountedPrice: number | null,
   discountActive: boolean,
@@ -81,7 +86,9 @@ function toWrite(
   };
 }
 
-function variantsOf(input: CreateProductInput): ProductWrite["variants"] {
+function variantsOf(
+  input: CreateProductInput | UpdateProductInput,
+): ProductWrite["variants"] {
   return input.variants.map((variant) => ({
     name: variant.name,
     price: variant.price,
