@@ -7,7 +7,7 @@ try {
   // optional — CI injects env
 }
 
-const port = process.env.PORT ?? "3000";
+const port = process.env.E2E_PORT ?? "3100";
 const baseURL = `http://127.0.0.1:${port}`;
 
 export default defineConfig({
@@ -35,6 +35,7 @@ export default defineConfig({
     env: {
       ...process.env,
       DATABASE_URL: e2eDatabaseUrl(),
+      PORT: port,
     },
   },
 });

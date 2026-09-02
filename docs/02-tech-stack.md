@@ -33,6 +33,7 @@ Exact patch versions are locked in `package.json` / lockfile; this table pins th
 | A11y tests | @axe-core/playwright | 4.x | axe scans in E2E |
 | Bundle analysis | @next/bundle-analyzer | 15.x | CI guard: admin libs out of public bundle |
 | Lint/Format | ESLint flat + Prettier | 9.x / 3.x | Strict ruleset |
+| CLI runner (TS scripts) | tsx | 4.x | runs seed and admin-reset as TypeScript without a build step |
 | Runtime | Node 22 LTS, pnpm 10 | | Node 20 is EOL; 22 is the active LTS |
 | Deploy | Docker Compose + Caddy 2 | | Auto-TLS, single VPS, Iran-accessible |
 

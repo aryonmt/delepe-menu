@@ -35,8 +35,9 @@ Two mechanisms, both audited:
 ## Upload & media
 
 - Magic-byte sniff (jpeg/png/webp), size ≤ 5MB, ratio 4:3 ±2% (BR-11).
-- Files stored under `STORAGE_ROOT` **outside** the web root, names `cuid().ext`
-  (unique per upload; variants `{id}_{320|640|960}.webp`, doc 03).
+- Files stored under `STORAGE_ROOT` **outside** the web root, names
+  `{randomUUID-v4}.{ext}` (unique, unguessable; variants `{id}_{320|640|960}.webp`,
+  doc 03).
 - Served only via `/media/[mediaId]?w=` (public; unguessable ids; originals never
   served — only pre-generated WebP variants).
 - Sharp re-encodes (strips EXIF/metadata).

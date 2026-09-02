@@ -108,7 +108,8 @@ Switching cross-fades colors (300ms) using CSS `transition` on color properties 
 - Body: **IRANSans** (self-hosted woff2 **400/500/700**) → fallback **Vazirmatn**.
 - Display (hero title, category titles): **Markazi Text** 600/700 (OFL, next/font).
 - Scale (mobile-first): body 15px/1.9 · secondary 12.5px/1.8 · card title 15.5px/700 ·
-  section title 22px display · hero title **36px** (40px at `md+`) display ·
+  section title 22px display · hero title **36px** (40px at `md+`, usage
+  `text-hero md:text-[40px]`) display ·
   price 15px/**700** (heaviest available IRANSans weight).
 - Persian rules: ZWNJ (نیم‌فاصله) in all strings, including seed data
   («می‌شود», «هویج‌بستنی», «توت‌فرنگی»); **no letter-spacing** on Persian text;
@@ -197,5 +198,6 @@ Shimmer skeleton cards (3) while streaming; empty menu → ornament +
 ### Hero
 
 Height **200px**, shrinks to **120px** once `scrollY > 80` (scroll-linked
-scale/opacity). Restaurant name in display font, brand frame motif, two
+scale/opacity). Restaurant name in display font with class
+`text-hero md:text-[40px]` (36px mobile, 40px at `md+`), brand frame motif, two
 slow-drifting radial glows (transform only, 12s loop), ornament draw-in on load.

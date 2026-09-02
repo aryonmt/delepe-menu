@@ -153,9 +153,9 @@ to a generic Persian message; stack traces never reach the UI.
 
 ## Media pipeline (authoritative — docs 04/06/07/10/11 defer to this section)
 
-**Naming**: files are `cuid().ext` — unique per upload, therefore safe for immutable
-caching. They are *not* content-addressed; identical bytes uploaded twice produce
-two files (accepted; storage is cheap, duplicates are rare).
+**Naming**: files are named `{randomUUID-v4}.{ext}` — unique, unguessable, and
+safe for immutable caching. They are *not* content-addressed; identical bytes
+uploaded twice produce two files (accepted; storage is cheap, duplicates are rare).
 
 **Storage layout** under `STORAGE_ROOT` (default `/data/storage`):
 
@@ -186,7 +186,8 @@ Originals are never served.
 else 960). Next's own optimizer is bypassed for these images.
 
 **Deletion**: deleting a product (or replacing/removing its image) deletes the
-Media row and all 4 files after the DB transaction succeeds (BR-03). If product
+Media row + the original (whichever of jpg/png/webp exists) + the three
+pre-generated WebP variants after the DB transaction succeeds (BR-03). If product
 creation is cancelled after an upload, the form calls `DeleteMediaUseCase`
 (no orphan files).
 

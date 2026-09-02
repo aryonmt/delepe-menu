@@ -41,7 +41,7 @@ pnpm db:migrate               # prisma migrate dev
 pnpm db:seed                  # settings singleton (M0); full menu + placeholders in M3
 pnpm dev                      # http://localhost:3000
 pnpm build                    # once, before Playwright (`pnpm start` serves standalone)
-pnpm test:e2e                 # Playwright against the test DB (doc 09)
+pnpm test:e2e                 # Playwright on port 3100 against the test DB (doc 09)
 ```
 
 Admin panel: `http://localhost:3000/admin` (credentials from `.env`).
@@ -57,7 +57,7 @@ Admin panel: `http://localhost:3000/admin` (credentials from `.env`).
 | `pnpm typecheck`   | `tsc --noEmit`                                 |
 | `pnpm test`        | Vitest unit tests (single run)                 |
 | `pnpm test:watch`  | Vitest watch mode (TDD loop)                   |
-| `pnpm test:e2e`    | Playwright E2E (test DB on 5433; requires `pnpm build` + `db-test`) |
+| `pnpm test:e2e`    | Playwright E2E on `E2E_PORT` (default 3100) vs test DB 5433 |
 | `pnpm db:migrate`  | Prisma migrate dev                             |
 | `pnpm db:deploy`   | Prisma migrate deploy (used by E2E global-setup) |
 | `pnpm db:seed`     | Seed database (settings singleton in M0; full Delepe menu & placeholders in M3) |

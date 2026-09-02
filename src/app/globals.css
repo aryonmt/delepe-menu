@@ -139,10 +139,6 @@
     font-family: IRANSans, var(--font-vazir), sans-serif;
     letter-spacing: 0;
   }
-
-  .font-display {
-    font-family: var(--font-display), serif;
-  }
 }
 
 @layer utilities {

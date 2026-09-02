@@ -14,7 +14,7 @@ export class PassthroughImageOptimizer implements ImageOptimizer {
     height: number;
   }): Promise<StoredImage> {
     void input.bytes;
-    const mediaId = randomUUID();
+    const mediaId = randomUUID(); // docs/03 naming contract: {randomUUID-v4}.{ext}
     const ext = extensionFor(input.mimeType);
     return {
       mediaId,

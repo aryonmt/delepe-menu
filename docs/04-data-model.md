@@ -99,7 +99,7 @@ model AdminUser {
 | --- | --- |
 | BR-01 | Category depth ≤ 2. Creating a child under a category that already has a parent → `ValidationError` |
 | BR-02 | Deleting a category with products or children → `CategoryNotEmptyError` (UI: Persian toast, no confirm shown) |
-| BR-03 | Deleting a product is a hard delete after confirm dialog; its Media row + all 4 files are deleted after the DB transaction succeeds |
+| BR-03 | Deleting a product is a hard delete after confirm dialog; its Media row + the original (whichever of jpg/png/webp exists) + the three pre-generated WebP variants are deleted after the DB transaction succeeds |
 | BR-04 | `discountedPrice` must be ≥ 1000 and < `price` |
 | BR-05 | Effective price = `discountActive && discountedPrice ? discountedPrice : price` (variants never discounted, BR-14) |
 | BR-06 | When variants exist, the public card shows «از » + `formatPrice(price)` where `price` = min(variant prices) per BR-13, plus an expand chevron |
