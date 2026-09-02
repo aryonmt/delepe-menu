@@ -43,6 +43,9 @@ prisma/*.db-journal
 .turbo/
 .vercel/
 
+# storage (generated at seed)
+storage/
+
 # generated AI context dump (regenerate with scripts/dump_project_for_ai.py)
 ai-context.txt
 scripts/dump_project_for_ai.py
