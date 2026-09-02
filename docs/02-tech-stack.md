@@ -12,6 +12,10 @@ Exact patch versions are locked in `package.json` / lockfile; this table pins th
 | UI runtime | React | 19.1.x | Ships with Next 15.5 |
 | Styling | Tailwind CSS + CSS variables | 3.4.x | Theme system via variables, RTL-friendly, AI-friendly |
 | Components | shadcn/ui (Radix) | CLI latest at init | Accessible primitives, full visual control, copy-in ownership |
+| shadcn Slot | `@radix-ui/react-slot` | 1.2.x | `asChild` composition for shadcn Button |
+| Class variants | `class-variance-authority` | 0.7.x | shadcn `cva()` variant maps (Button) |
+| Classnames | `clsx` | 2.x | Conditional `className` lists (`lib/utils` `cn`) |
+| Tailwind merge | `tailwind-merge` | 2.x | Resolves conflicting Tailwind classes in `cn` |
 | Motion | **Motion** (formerly Framer Motion) | 12.x | Layout animations, springs, reduced-motion support. Package `motion`, imports from `motion/react` |
 | Client state | zustand | 5.x | Admin draft store (live preview backbone, doc 07) |
 | DnD | @dnd-kit/core + @dnd-kit/sortable | 6.x | Accessible drag-and-drop for ordering |
