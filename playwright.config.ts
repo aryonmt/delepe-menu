@@ -1,6 +1,5 @@
-import path from "node:path";
 import { defineConfig } from "@playwright/test";
-import { e2eDatabaseUrl } from "./e2e/env";
+import { e2eDatabaseUrl, e2eStorageRoot } from "./e2e/env";
 
 try {
   process.loadEnvFile?.(".env");
@@ -29,14 +28,19 @@ export default defineConfig({
     hasTouch: true,
   },
   webServer: {
-    command: "pnpm start",
+    // Clean `.next` so ISR HTML is generated against the test DATABASE_URL, not a
+    // leftover production build that used the dev database.
+    command:
+      process.platform === "win32"
+        ? "cmd /c \"if exist .next rmdir /s /q .next && pnpm build && pnpm start\""
+        : "rm -rf .next && pnpm build && pnpm start",
     url: `${baseURL}/api/health`,
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    timeout: 240_000,
     env: {
       ...process.env,
       DATABASE_URL: e2eDatabaseUrl(),
-      STORAGE_ROOT: path.resolve(process.env.STORAGE_ROOT ?? "./storage"),
+      STORAGE_ROOT: e2eStorageRoot(),
       PORT: port,
     },
   },

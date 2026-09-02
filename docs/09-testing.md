@@ -43,13 +43,16 @@ host port **5433**, database `delepe_test`, doc 12).
 `e2e/global-setup.ts` then:
 1. runs `prisma migrate deploy` against `E2E_DATABASE_URL` (default
    `postgresql://delepe:delepe@localhost:5433/delepe_test`);
-2. runs `scripts/admin-reset.ts` against that same URL so the admin exists in
+2. runs `tsx prisma/seed.ts` against that same URL (menu + media; skips admin
+   bootstrap when `ADMIN_*` are unset);
+3. runs `scripts/admin-reset.ts` against that same URL so the admin exists in
    the **test** database, not the dev database on 5432.
 
 E2E runs on `E2E_PORT` (default **3100**) so a dev server on 3000 is never reused.
-Playwright `webServer` (`pnpm start`) listens on that port and receives
-`DATABASE_URL` set to the test URL. Persian locale, mobile viewport 390×844 +
-desktop pass. `pnpm build` must have been run once so the standalone server exists.
+Playwright `webServer` deletes `.next`, then runs `pnpm build && pnpm start` with
+the test `DATABASE_URL` and repo `STORAGE_ROOT` so ISR HTML (`revalidate = 60`)
+matches the seeded test database. It listens on `E2E_PORT`. Persian locale, mobile
+viewport 390×844 + desktop pass.
 
 CI must set `E2E_DATABASE_URL` to the job's service Postgres. global-setup
 migrates that database — no extra CI migrate step is required.

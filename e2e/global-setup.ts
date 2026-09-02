@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 import path from "node:path";
-import { e2eDatabaseUrl } from "./env";
+import { e2eDatabaseUrl, e2eStorageRoot } from "./env";
 
 try {
   process.loadEnvFile?.(".env");
@@ -13,9 +13,7 @@ export default function globalSetup() {
   const testEnv = {
     ...process.env,
     DATABASE_URL: databaseUrl,
-    STORAGE_ROOT: process.env.STORAGE_ROOT
-      ? path.resolve(process.env.STORAGE_ROOT)
-      : path.resolve("./storage"),
+    STORAGE_ROOT: e2eStorageRoot(),
   };
   const root = process.cwd();
   const node = process.execPath;
