@@ -33,7 +33,8 @@
 - **Imports order**: react → next → libs (alias `@/`) → relative; alias `@/*`.
   Motion imports come from `motion/react` (never `framer-motion`).
 - **UI state**: local `useState` first; shared admin state only via the draft store.
-- **IDs**: `cuid()`; times UTC in DB, rendered via fa formatter.
+- **IDs**: entity ids are `cuid()`; media ids are `randomUUID-v4` per docs/03.
+  Times UTC in DB, rendered via fa formatter.
 - **Pure mappers** (e.g. `toPublicMenu`) live in `application/mappers/` and are
   the only allowed bridge between admin draft data and public rendering.
 

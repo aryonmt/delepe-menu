@@ -46,10 +46,10 @@ host port **5433**, database `delepe_test`, doc 12).
 2. runs `scripts/admin-reset.ts` against that same URL so the admin exists in
    the **test** database, not the dev database on 5432.
 
-Playwright `webServer` (`pnpm start`) listens on `E2E_PORT` (default **3100**) so
-a local `pnpm dev` on 3000 cannot be reused, and receives `DATABASE_URL` set to
-the test URL. Persian locale, mobile viewport 390×844 + desktop pass. `pnpm build`
-must have been run once so the standalone server exists.
+E2E runs on `E2E_PORT` (default **3100**) so a dev server on 3000 is never reused.
+Playwright `webServer` (`pnpm start`) listens on that port and receives
+`DATABASE_URL` set to the test URL. Persian locale, mobile viewport 390×844 +
+desktop pass. `pnpm build` must have been run once so the standalone server exists.
 
 CI must set `E2E_DATABASE_URL` to the job's service Postgres. global-setup
 migrates that database — no extra CI migrate step is required.
