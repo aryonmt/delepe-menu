@@ -10,11 +10,18 @@ try {
 
 export default function globalSetup() {
   const databaseUrl = e2eDatabaseUrl();
-  const testEnv = { ...process.env, DATABASE_URL: databaseUrl };
+  const testEnv = {
+    ...process.env,
+    DATABASE_URL: databaseUrl,
+    STORAGE_ROOT: process.env.STORAGE_ROOT
+      ? path.resolve(process.env.STORAGE_ROOT)
+      : path.resolve("./storage"),
+  };
   const root = process.cwd();
   const node = process.execPath;
 
   runOrThrow(node, [prismaCli(root), "migrate", "deploy"], testEnv);
+  runOrThrow(node, [tsxCli(root), "prisma/seed.ts"], testEnv);
   runOrThrow(
     node,
     [

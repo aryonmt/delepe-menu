@@ -1,3 +1,4 @@
+import path from "node:path";
 import { defineConfig } from "@playwright/test";
 import { e2eDatabaseUrl } from "./e2e/env";
 
@@ -35,6 +36,7 @@ export default defineConfig({
     env: {
       ...process.env,
       DATABASE_URL: e2eDatabaseUrl(),
+      STORAGE_ROOT: path.resolve(process.env.STORAGE_ROOT ?? "./storage"),
       PORT: port,
     },
   },

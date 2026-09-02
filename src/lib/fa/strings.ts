@@ -9,6 +9,14 @@ export const strings = {
     emptyHint: "به‌زودی فهرست غذاها و نوشیدنی‌ها اینجا می‌آید.",
     footer: "دلِپ · منوی دیجیتال",
     homeLink: "بازگشت به منو",
+    unavailable: "ناموجود",
+    fromPrice: "از",
+  },
+  badges: {
+    POPULAR: "پرفروش",
+    NEW: "جدید",
+    SPICY: "تند",
+    VEGETARIAN: "گیاهی",
   },
   errors: {
     notFoundTitle: "صفحه پیدا نشد",
