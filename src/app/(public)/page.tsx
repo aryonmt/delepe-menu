@@ -4,21 +4,24 @@ import { Hero } from "@/components/menu/hero";
 import { MenuTabs } from "@/components/menu/menu-tabs";
 import { CategorySection } from "@/components/menu/category-section";
 import { HeroSkeleton, MenuSkeleton } from "@/components/menu/menu-skeleton";
+import { NotFoundError } from "@/domain/errors";
 import { getPublicMenuCached } from "@/lib/public-menu-cache";
 import { strings } from "@/lib/fa/strings";
 
 export const revalidate = 60;
-export const dynamic = "force-dynamic";
 
 async function MenuContent() {
-  let menu: Awaited<ReturnType<typeof getPublicMenuCached>> | null = null;
+  let menu: Awaited<ReturnType<typeof getPublicMenuCached>>;
   try {
     menu = await getPublicMenuCached();
-  } catch {
-    return <EmptyState />;
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      return <EmptyState />;
+    }
+    throw error;
   }
 
-  if (!menu || menu.categories.length === 0) {
+  if (menu.categories.length === 0) {
     return <EmptyState />;
   }
 

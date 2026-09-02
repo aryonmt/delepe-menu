@@ -64,7 +64,10 @@ export function ProductCard({ product, priority = false }: Props) {
           {hasDiscount && (
             <>
               <span className="text-secondary text-muted-foreground line-through">{formatPrice(product.price)}</span>
-              <span className="rounded-full bg-destructive px-2 py-0.5 text-[11px] font-medium text-destructive-foreground">−{percent}٪</span>
+              <span className="rounded-full bg-destructive px-2 py-0.5 text-[11px] font-medium text-destructive-foreground">
+                −{percent}
+                {strings.public.percentSign}
+              </span>
             </>
           )}
         </div>

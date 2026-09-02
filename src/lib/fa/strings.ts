@@ -11,6 +11,10 @@ export const strings = {
     homeLink: "بازگشت به منو",
     unavailable: "ناموجود",
     fromPrice: "از",
+    subtitle: "منوی دیجیتال",
+    otherCategory: "سایر",
+    categoriesAria: "دسته‌ها",
+    percentSign: "٪",
   },
   badges: {
     POPULAR: "پرفروش",

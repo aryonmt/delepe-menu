@@ -188,7 +188,8 @@ Display font 22px + ornament: `─── ✦ ───` rendered with gradient l
 ### Sub-header (child group inside a section)
 
 Display font **18px** + single thin gradient line on the inline-end side only
-(no ✦ ornament) — visually subordinate to the section header.
+(no ✦ ornament) — visually subordinate to the section header. Leftover products
+on a parent that also has children are grouped under the sub-header «سایر».
 
 ### Skeletons & states
 

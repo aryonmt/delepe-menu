@@ -1,4 +1,5 @@
 import type { CategoryDto } from "@/application/dtos";
+import { strings } from "@/lib/fa/strings";
 import { ProductCard } from "./product-card";
 import { SectionHeader, SubHeader } from "./section-header";
 
@@ -43,7 +44,7 @@ export function CategorySection({ category, priorityStartIndex = 0 }: Props) {
           ))}
           {category.products.length > 0 && (
             <div>
-              <SubHeader title="سایر" />
+              <SubHeader title={strings.public.otherCategory} />
               <div className="grid gap-3 md:grid-cols-2 md:gap-4">
                 {category.products.map((product, index) => (
                   <ProductCard key={product.id} product={product} priority={priorityStartIndex + index < 4} />
