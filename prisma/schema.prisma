@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum BadgeKind {
+  POPULAR
+  NEW
+  SPICY
+  VEGETARIAN
+}
+
+enum ThemeName {
+  WARM_HONEY
+  MIDNIGHT_GOLD
+  IVORY_MINIMAL
+  DEEP_EMERALD
+}
+
+enum UnavailableMode {
+  HIDE
+  MUTED
+}
+
+model Category {
+  id        String     @id @default(cuid())
+  name      String
+  parentId  String?
+  sortOrder Int
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  parent    Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children  Category[] @relation("CategoryTree")
+  products  Product[]
+
+  @@unique([parentId, name])
+  @@index([parentId, sortOrder])
+}
+
+model Product {
+  id              String           @id @default(cuid())
+  name            String
+  description     String?
+  price           Int
+  discountedPrice Int?
+  discountActive  Boolean          @default(false)
+  isAvailable     Boolean          @default(true)
+  sortOrder       Int
+  badges          BadgeKind[]
+  categoryId      String
+  mediaId         String?          @unique
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  category        Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  media           Media?           @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+  variants        ProductVariant[]
+
+  @@unique([categoryId, name])
+  @@index([categoryId, sortOrder])
+}
+
+model ProductVariant {
+  id        String  @id @default(cuid())
+  productId String
+  name      String
+  price     Int
+  sortOrder Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, name])
+  @@index([productId, sortOrder])
+}
+
+model Media {
+  id            String   @id @default(cuid())
+  fileName      String
+  mimeType      String
+  width         Int
+  height        Int
+  dominantColor String
+  path          String   @unique
+  createdAt     DateTime @default(now())
+  product       Product?
+}
+
+model Settings {
+  id              Int             @id @default(1)
+  restaurantName  String
+  theme           ThemeName       @default(WARM_HONEY)
+  unavailableMode UnavailableMode @default(MUTED)
+  updatedAt       DateTime        @updatedAt
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

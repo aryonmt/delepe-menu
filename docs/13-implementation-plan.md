@@ -34,11 +34,11 @@ Format: `ID · description · [docs] · deps · output · tests`.
 
 | ID | Task | Docs | Deps | Output | Tests |
 | --- | --- | --- | --- | --- | --- |
-| T-001 | Next 15 + TS strict + Tailwind + shadcn + ESLint flat + Prettier + pinned deps (doc 02) | 02 | — | runnable app shell | `pnpm check` |
-| T-002 | `dir=rtl lang=fa`, fonts (IRANSans local w/ Vazirmatn fallback, Markazi Text), globals.css with **all** doc-05 tokens for 4 themes | 05 | T-001 | themed blank page | visual check |
-| T-003 | `lib/env.ts`, `lib/fa/strings.ts`, `lib/constants.ts`, `lib/utils.ts`, `lib/format/{price,digits}.ts` | 03, 04 | T-001 | utils + **golden price/digit unit tests** | `pnpm test` |
-| T-004 | docker compose (db + test profile), Prisma schema + initial migration | 04, 12 | T-001 | migrated DB | `prisma migrate dev` green |
-| T-005 | `/api/health`, custom 404/error shells | 03 | T-001 | health JSON, branded 404 | curl + manual |
+| ~~T-001~~ | Next 15 + TS strict + Tailwind + shadcn + ESLint flat + Prettier + pinned deps (doc 02) | 02 | — | runnable app shell | `pnpm check` |
+| ~~T-002~~ | `dir=rtl lang=fa`, fonts (IRANSans local w/ Vazirmatn fallback, Markazi Text), globals.css with **all** doc-05 tokens for 4 themes | 05 | T-001 | themed blank page | visual check |
+| ~~T-003~~ | `lib/env.ts`, `lib/fa/strings.ts`, `lib/constants.ts`, `lib/utils.ts`, `lib/format/{price,digits}.ts` | 03, 04 | T-001 | utils + **golden price/digit unit tests** | `pnpm test` |
+| ~~T-004~~ | docker compose (db + test profile), Prisma schema + initial migration | 04, 12 | T-001 | migrated DB | `prisma migrate dev` green |
+| ~~T-005~~ | `/api/health`, custom 404/error shells | 03 | T-001 | health JSON, branded 404 | curl + manual |
 
 ### M1 · Domain & Infrastructure Core
 
