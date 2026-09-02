@@ -52,8 +52,7 @@ describe("menu use-cases", () => {
       categoryId: leaf.id,
     });
     const pub = await new GetPublicMenuUseCase(
-      repos.categories,
-      repos.settings,
+      new GetAdminMenuUseCase(repos.categories, repos.settings),
     ).execute();
     const names = pub.categories
       .flatMap((c) => [...c.products, ...c.children.flatMap((ch) => ch.products)])

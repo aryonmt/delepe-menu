@@ -36,8 +36,8 @@ const optimizer = new PassthroughImageOptimizer();
  * Composition root. Server actions obtain use-cases only through these factories.
  */
 export const container = {
-  getPublicMenu: () => new GetPublicMenuUseCase(categoryRepo, settingsRepo),
   getAdminMenu: () => new GetAdminMenuUseCase(categoryRepo, settingsRepo),
+  getPublicMenu: () => new GetPublicMenuUseCase(container.getAdminMenu()),
   listCategories: () => new ListCategoriesUseCase(categoryRepo),
   createCategory: () => new CreateCategoryUseCase(categoryRepo),
   updateCategory: () => new UpdateCategoryUseCase(categoryRepo),
