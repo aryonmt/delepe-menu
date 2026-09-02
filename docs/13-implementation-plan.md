@@ -64,10 +64,10 @@ Format: `ID · description · [docs] · deps · output · tests`.
 
 | ID | Task | Docs | Deps | Output | Tests |
 | --- | --- | --- | --- | --- | --- |
-| T-030 | `prisma/seed.ts`: full real menu + deterministic SVG placeholder generator (+ optional download flag) | 04, 02 (ADR-10) | T-014 | seeded DB offline | seed idempotency test |
-| T-031 | `GetPublicMenuUseCase` + tagged cache + `revalidateTag` helper | 03, 04 | T-013, T-030 | cached DTO | unit |
-| T-032 | Public page: hero, sticky tabs + scrollspy, sections, product card, skeletons, empty/error states | 05, 06 | T-031 | rendered menu | E2E `public-menu.spec` (basic rows 1–2) |
-| T-033 | media pipeline: SharpImageOptimizer (original + 320/640/960 WebP + dominantColor), /media/[mediaId] route, MenuImage + lib/media-url.ts | 03, 05, 06 | T-030 | optimized images + route | unit + E2E image asserts |
+| ~~T-030~~ | `prisma/seed.ts`: full real menu + deterministic SVG placeholder generator (+ optional download flag) | 04, 02 (ADR-10) | T-014 | seeded DB offline | seed idempotency test |
+| ~~T-031~~ | `GetPublicMenuUseCase` + tagged cache + `revalidateTag` helper | 03, 04 | T-013, T-030 | cached DTO | unit |
+| ~~T-032~~ | Public page: hero, sticky tabs + scrollspy, sections, product card, skeletons, empty/error states | 05, 06 | T-031 | rendered menu | E2E `public-menu.spec` (basic rows 1–2) |
+| ~~T-033~~ | media pipeline: SharpImageOptimizer (original + 320/640/960 WebP + dominantColor), /media/[mediaId] route, MenuImage + lib/media-url.ts | 03, 05, 06 | T-030 | optimized images + route | unit + E2E image asserts |
 
 ### M4 · Public Menu Polish
 
