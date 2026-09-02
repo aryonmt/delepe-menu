@@ -1,11 +1,12 @@
 import { z } from "zod";
+import { SESSION_SECRET_MIN_BYTES } from "@/lib/constants";
 
 const envSchema = z.object({
   NODE_ENV: z
     .enum(["development", "test", "production"])
     .default("development"),
   DATABASE_URL: z.string().min(1),
-  SESSION_SECRET: z.string().min(32),
+  SESSION_SECRET: z.string().min(SESSION_SECRET_MIN_BYTES),
   ADMIN_USERNAME: z.string().optional(),
   ADMIN_PASSWORD: z.string().optional(),
   MASTER_USERNAME: z.string().optional(),
