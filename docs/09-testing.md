@@ -1,8 +1,10 @@
 # 09 · Testing Strategy
 
-Pyramid: **unit** (rules & formatting) → **E2E** (critical journeys).
-No integration layer: use-cases are unit-tested with in-memory repository fakes
-(`src/domain/testing/`).
+Pyramid: **unit** (rules & formatting) → optional **Prisma integration**
+(`pnpm test:integration`) → **E2E** (critical journeys).
+Use-cases are unit-tested with in-memory repository fakes
+(`src/domain/testing/`). Prisma repository behavior against Postgres lives in
+`*.integration.test.ts` and is **not** part of `pnpm test`.
 
 ## Workflow (local-first TDD — per task in doc 13)
 
@@ -29,7 +31,9 @@ development loop.
 - Zod schemas: boundary cases (discount ≥ price, name lengths, price limits).
 - Colocation: `src/**/*.test.ts` next to source. Fakes in `src/domain/testing/`.
 
-Run: `pnpm test` (single run) · `pnpm test:watch` (dev loop).
+Run: `pnpm test` (single run, no database) · `pnpm test:watch` (dev loop).
+`pnpm test:integration` runs Prisma repository specs against `E2E_DATABASE_URL`
+(default compose `db-test` on 5433) and skips when that database is unreachable.
 
 ## E2E (Playwright, `/e2e`)
 

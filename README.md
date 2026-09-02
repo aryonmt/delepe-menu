@@ -58,6 +58,7 @@ Admin panel: `http://localhost:3000/admin` (credentials from `.env`).
 | `pnpm test`        | Vitest unit tests (single run)                 |
 | `pnpm test:watch`  | Vitest watch mode (TDD loop)                   |
 | `pnpm test:e2e`    | Playwright E2E on `E2E_PORT` (default 3100) vs test DB 5433 |
+| `pnpm test:integration` | Prisma repository specs against `db-test` (skips if unreachable) |
 | `pnpm db:migrate`  | Prisma migrate dev                             |
 | `pnpm db:deploy`   | Prisma migrate deploy (used by E2E global-setup) |
 | `pnpm db:seed`     | Seed database (settings singleton in M0; full Delepe menu & placeholders in M3) |
