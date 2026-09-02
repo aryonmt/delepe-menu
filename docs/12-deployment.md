@@ -30,8 +30,13 @@ Services:
 
 Compose also defines a **`test` profile** for E2E (doc 09):
 - `db-test`: postgres:16-alpine, host port **5433**, db `delepe_test`,
-  throwaway volume. E2E runs migrations + seed against it
-  (`DATABASE_URL=postgres://…:5433/delepe_test`).
+  throwaway volume. Playwright global-setup runs `prisma migrate deploy` and
+  `admin-reset` against it (`E2E_DATABASE_URL`, default
+  `postgresql://delepe:delepe@localhost:5433/delepe_test`).
+
+Caddy must be the only trusted proxy and overwrites `X-Forwarded-For` by
+default; never expose the app behind a proxy that forwards client-supplied XFF
+unchecked (login rate limiting keys on it, doc 10).
 
 Dockerfile (multi-stage, node:22-bookworm-slim, corepack pnpm):
 `deps → build (output: standalone) → runner` (non-root user, copies

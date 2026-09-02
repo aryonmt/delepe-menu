@@ -166,6 +166,8 @@ uploads/{mediaId}_640.webp
 uploads/{mediaId}_960.webp
 ```
 
+Originals keep their received extension; `deleteAll` covers jpg/png/webp originals + 3 WebP variants.
+
 **Upload flow** (details in doc 07):
 client crop (4:3) → JPEG blob → XHR `POST /api/admin/media/upload` →
 auth → magic bytes (jpeg/png/webp) → ≤ 5MB → ratio 4:3 ±2% →

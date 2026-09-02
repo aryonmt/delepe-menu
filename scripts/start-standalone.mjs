@@ -1,6 +1,8 @@
 /**
  * Local/E2E production server for `output: "standalone"`.
- * `next start` cannot serve the standalone output (Next.js 15).
+ * `next start` cannot serve that output (Next.js 15). Bind address comes from
+ * STANDALONE_HOSTNAME (not ambient HOSTNAME, which Linux/CI often set to a
+ * non-loopback name). Default is 0.0.0.0.
  */
 import { cpSync, existsSync } from "node:fs";
 import { spawn } from "node:child_process";
@@ -29,7 +31,7 @@ const child = spawn(process.execPath, ["server.js"], {
   env: {
     ...process.env,
     PORT: process.env.PORT ?? "3000",
-    HOSTNAME: process.env.HOSTNAME ?? "0.0.0.0",
+    HOSTNAME: process.env.STANDALONE_HOSTNAME ?? "0.0.0.0",
   },
 });
 

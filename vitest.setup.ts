@@ -1,3 +1,6 @@
+import os from "node:os";
+import path from "node:path";
+
 /**
  * Dummy env so unit tests can import `@/lib/env` without a Zod boot failure.
  * `.env` is loaded when present; CI / fresh clones fall back to safe defaults.
@@ -13,3 +16,4 @@ Object.assign(process.env, { NODE_ENV: "test" });
 process.env.DATABASE_URL ??=
   "postgresql://delepe:delepe@localhost:5432/delepe_test";
 process.env.SESSION_SECRET ??= "vitest-session-secret-32-bytes-min!!";
+process.env.STORAGE_ROOT ??= path.join(os.tmpdir(), "delepe-menu-vitest-storage");

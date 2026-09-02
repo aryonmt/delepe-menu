@@ -9,6 +9,7 @@ export const UPLOAD_ASPECT_TOLERANCE = 0.02;
 export const MEDIA_WIDTHS = [320, 640, 960] as const;
 export type MediaWidth = (typeof MEDIA_WIDTHS)[number];
 export const MEDIA_DEFAULT_WIDTH: MediaWidth = 640;
+export const MEDIA_ORIGINAL_EXTENSIONS = ["jpg", "png", "webp"] as const;
 
 export const LIST_PAGE_SIZE = 20;
 export const SORT_ORDER_GAP = 10;
