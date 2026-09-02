@@ -92,6 +92,48 @@ describe("UpdateCategoryUseCase", () => {
         error instanceof ValidationError && error.code === "DEPTH_EXCEEDED",
     );
   });
+
+  it("does not throw DUPLICATE_NAME when the name is unchanged (BR-09)", async () => {
+    const repos = createRepos();
+    const { create, update } = categoryUseCases(repos);
+    const root = await create.execute({ name: "غذا" });
+    const updated = await update.execute({ id: root.id, name: "غذا" });
+    expect(updated.name).toBe("غذا");
+    expect(updated.id).toBe(root.id);
+  });
+
+  it("rejects re-parenting a category that has children under a new root (BR-01)", async () => {
+    const repos = createRepos();
+    const { create, update } = categoryUseCases(repos);
+    const food = await create.execute({ name: "غذا" });
+    await create.execute({ name: "برگر", parentId: food.id });
+    const drinks = await create.execute({ name: "نوشیدنی" });
+    await expect(
+      update.execute({ id: food.id, name: "غذا", parentId: drinks.id }),
+    ).rejects.toSatisfy(
+      (error: unknown) =>
+        error instanceof ValidationError && error.code === "DEPTH_EXCEEDED",
+    );
+  });
+
+  it("rejects re-parenting onto a category that owns products (BR-16)", async () => {
+    const repos = createRepos();
+    const { create, update } = categoryUseCases(repos);
+    const dessert = await create.execute({ name: "دسر" });
+    await new CreateProductUseCase(repos.products, repos.categories).execute({
+      name: "چیزکیک",
+      price: 180_000,
+      categoryId: dessert.id,
+    });
+    const other = await create.execute({ name: "دیگر" });
+    await expect(
+      update.execute({ id: other.id, name: "دیگر", parentId: dessert.id }),
+    ).rejects.toSatisfy(
+      (error: unknown) =>
+        error instanceof ValidationError &&
+        error.code === "CATEGORY_HAS_PRODUCTS",
+    );
+  });
 });
 
 describe("DeleteCategoryUseCase", () => {

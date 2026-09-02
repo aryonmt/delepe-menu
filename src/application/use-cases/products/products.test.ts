@@ -188,6 +188,32 @@ describe("UpdateProductUseCase", () => {
     expect(await repos.media.findById("old")).toBeNull();
     expect(repos.db.deletedMediaFiles).toContain("old");
   });
+
+  it("does not throw DUPLICATE_NAME when the name is unchanged (BR-09)", async () => {
+    const repos = createRepos();
+    const { leaf } = await seedLeafCategory(repos);
+    const created = await new CreateProductUseCase(
+      repos.products,
+      repos.categories,
+    ).execute({
+      name: "لاته",
+      price: 250_000,
+      categoryId: leaf.id,
+    });
+    const updated = await new UpdateProductUseCase(
+      repos.products,
+      repos.categories,
+      repos.media,
+      repos.storage,
+    ).execute({
+      id: created.id,
+      name: "لاته",
+      price: 250_000,
+      categoryId: leaf.id,
+    });
+    expect(updated.name).toBe("لاته");
+    expect(updated.id).toBe(created.id);
+  });
 });
 
 describe("DeleteProductUseCase", () => {
