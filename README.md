@@ -4,7 +4,7 @@ A visually rich, mobile-first **digital QR menu** for **Delepe Café Restaurant*
 simple but beautiful admin panel for the owner.
 
 - Customers scan a QR code and browse the menu on their phone. **No digital ordering** — ordering stays traditional.
-- The owner manages categories, products, prices, images, availability, discounts and themes from a simple Persian admin panel.
+- The owner manages categories, products, prices, images, availability, discounts and settings from a simple Persian admin panel.
 
 > This repository is the single source of truth. All planning documents live in `docs/`.
 > AI agents MUST read `AGENTS.md` and `docs/` before writing any code.
@@ -12,7 +12,7 @@ simple but beautiful admin panel for the owner.
 ## Highlights
 
 - 🇮🇷 Fully Persian & RTL, self-hosted assets (works inside Iran without VPN)
-- 🎨 4 curated visual themes, rich-but-smooth animations (Motion)
+- 🎨 Single art-directed «پاتوق» identity (dark cinematic hangout), rich-but-smooth animations (Motion)
 - 🧱 Strict Clean Architecture (domain / application / infrastructure) with DI
 - 🔐 Custom lightweight auth (argon2id + HTTP-only session cookie)
 - 🖼️ Client-side crop/rotate upload with server-side optimization (Sharp)
@@ -88,7 +88,7 @@ src/lib             env config, constants, price formatting, Persian strings, ut
 | [02-tech-stack](docs/02-tech-stack.md) | Pinned stack + rejected alternatives (ADRs) |
 | [03-architecture](docs/03-architecture.md) | Clean Architecture, folder tree, DI, data flow, **media pipeline** |
 | [04-data-model](docs/04-data-model.md) | Prisma schema, business rules (BR-01..16), DTOs, use-case contracts, seed data |
-| [05-design-system](docs/05-design-system.md) | Complete tokens ×4 themes, typography, RTL, motion tokens |
+| [05-design-system](docs/05-design-system.md) | «پاتوق» design system — single art-directed identity and its complete design tokens (color, typography, shape, motion) |
 | [06-public-menu-spec](docs/06-public-menu-spec.md) | Customer-facing menu behavior + animation catalog + acceptance criteria |
 | [07-admin-panel-spec](docs/07-admin-panel-spec.md) | Admin CRUD, draft store rules, upload editor, live phone preview |
 | [08-clean-code-standards](docs/08-clean-code-standards.md) | SOLID mapping, naming, error handling rules |
@@ -103,5 +103,4 @@ src/lib             env config, constants, price formatting, Persian strings, ut
 
 Body font **IRANSans** is a commercial font. The owner must place licensed
 `woff2` files (400/500/700) in `src/fonts/iransans/`. The build falls back to the
-open-source **Vazirmatn** if the files are missing. Heading font **Markazi Text**
-is OFL.
+open-source **Vazirmatn** if the files are missing. Display font **Lalezar** is OFL.

@@ -43,9 +43,11 @@ src/
 │   └── media/[mediaId]/route.ts  # public optimized image serving (?w=320|640|960)
 ├── components/
 │   ├── ui/                       # shadcn primitives
-│   ├── menu/                     # PURE presentational: hero, tabs, chips, product-card,
-│   │                             #   variant-list, badge, price-tag, section, empty-state,
-│   │                             #   menu-image (next/image + media loader)
+│   ├── menu/                     # PURE presentational: hero-wordmark, dish-ticker, dock,
+│   │                             #   context-strip, chapter-header, product-card (signature
+│   │                             #   + standard tiers), variant-tickets, dish-peek, badge,
+│   │                             #   section, empty-state, skeletons, menu-image
+│   │                             #   (next/image + media loader)
 │   ├── admin/                    # product-form, category-form, upload-editor,
 │   │                             #   dnd-list, confirm-dialog, preview-phone
 │   └── phone-frame.tsx

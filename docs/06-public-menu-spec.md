@@ -1,97 +1,141 @@
-# 06 · Public Menu Specification
+# 06 · Public Menu Specification — «پاتوق»
 
 Route: `/` (group `(public)`). Data: `GetPublicMenuUseCase` → `PublicMenuDto`
-(settings + category tree with products/variants/media, BR-08 already applied by
-the `toPublicMenu` mapper).
-All components in `components/menu/` are **pure/presentational** (reused by the
-admin live preview, doc 07).
+(BR-08 applied by the pure `toPublicMenu` mapper). All `components/menu/*`
+components remain **pure/presentational** (reused by the admin live preview).
 
 ## Feature Specification
 
-- **Goal**: a premium, fast, animated mobile-first menu that customers open via QR.
-- **User value**: read the full menu in seconds, see real prices/availability,
-  enjoy a native-app feel on a mid-range Android over 4G.
-- **Technical requirements**: RSC + tagged cache (doc 03); client JS limited to the
-  interactive islands listed below; all visuals per doc 05; media per doc 03
-  pipeline (`MenuImage` + custom loader).
-- **Dependencies**: docs 03 (architecture, media), 04 (DTOs, BR-05..08, 13),
-  05 (tokens, motion, component specs).
-- **Implementation notes**: build presentational components first (Storybook-free;
-  verify via the page itself), then wire scrollspy/chips islands.
-- **Acceptance criteria**: see the E2E table at the end — each row is automatable.
-- **Required tests**: unit (mapper, price formatting — doc 04) + E2E
-  `public-menu.spec` + `a11y.spec` (doc 09).
+- **Goal**: a cinematic, appetite-first, mobile-first menu for a young hangout —
+  browsing itself is the experience. No ordering of any kind.
+- **User value**: see real prices/availability instantly, feel hungry, explore
+  dishes tactilely (Dish Peek), reach any chapter in one thumb move.
+- **Technical requirements**: RSC + tagged cache (doc 03); client JS limited to
+  the islands below; visuals per doc 05; media per doc 03 pipeline.
+- **Dependencies**: docs 03 (architecture/media), 04 (DTOs, BRs), 05 (tokens).
+- **Acceptance criteria**: E2E table at the end.
+- **Required tests**: existing unit suite unchanged + `public-menu.spec`
+  (updated rows) + `a11y.spec`.
 
-## Page structure (top → bottom)
+## Data-driven rules (binding)
 
-1. **Hero header** — per doc 05 (200px → 120px at `scrollY > 80`, display font,
-   frame motif, two drifting radial glows 12s loop, ornament draw-in).
-2. **Sticky category tabs** (top-0, z-40, blur bg).
-3. **Sub-category chips** (only when the active category has children).
-4. **Sections**: one per top-level category, in sortOrder.
-   - Category **without** children: its products listed directly.
-   - Category **with** children and active chip = «همه»: child groups with
-     sub-headers (doc 05), each listing its products.
-   - A child chip active: only that child's products (animated relayout).
-5. **Footer mini** — «دلِپ · منوی دیجیتال» ornament only (no contact/social).
+1. Everything renders from `PublicMenuDto`: category names/count/order, product
+   names/descriptions/prices/discounts/availability/badges/images/variants.
+   **No product name, category name, count, or bestseller claim is hardcoded.**
+2. Robustness: 0 categories → global empty state · 1 category → dock renders
+   one tab · categories with 0 visible products pruned (BR-08) · 0..N POPULAR
+   per chapter → all flagged products render as signature cards, uncapped ·
+   variable child counts · `media: null` → placeholder art (doc 05).
+3. Long content: standard card title `line-clamp-1`, signature title/desc
+   clamp-2, dock tabs/ticker chips nowrap+ellipsis, peek/chapter titles wrap
+   with no clamp.
+4. The hero renders `settings.restaurantName`. The exact brand string
+   «دِ‌لِ‌پِ» (doc 05) is the seed/meta default only.
+5. Signature tier counts and ticker item counts are presentation concerns; the
+   menu itself always renders fully from the DTO.
+
+## Page structure
+
+1. **Hero** — wordmark ignition + eyebrow + optional tagline slot (currently
+   empty by design) + dish ticker; ambient glow/grain; no photography required;
+   a future full-bleed photo slots behind the wordmark with a scrim, zero
+   recomposition (documented migration path).
+2. **Chapters** — one section per top-level category in `sortOrder`, each with
+   chapter header (ghost number + title + hue tick) and products; child groups
+   render with sub-headers when the active chip is «همه»; leftover products on
+   a parent render under the «سایر» sub-header (existing rule).
+3. **Footer mini** — three-spark divider + `strings.public.footer`.
+
+Overlays (not in flow): **context strip** (sticky top), **dock/spine**
+(bottom on mobile / top on `md+`), **Dish Peek** dialog.
 
 ## Behaviors
 
 | ID | Behavior |
 | --- | --- |
-| B-01 Tabs & scrollspy | Click → smooth scroll to section (`behavior: "auto"` when reduced-motion). Scrollspy via IntersectionObserver (`rootMargin: "-40% 0px -55%"`); active tab indicator springs (`layoutId`); tab list auto-scrolls active tab into view. |
-| B-02 Chips | Filter within active top category; AnimatePresence `popLayout`, cards animate position/opacity; «همه» default. |
-| B-03 Product card | Per doc 05. Tap → press scale only (no navigation; no detail page). |
-| B-04 Variants | If variants exist: price line shows «از …» (BR-06) + chevron. Expand → animated height list of `name … price` rows; multiple cards may be open; state is local to the card. |
-| B-05 Discount | Only on products without variants (BR-14). Effective price primary + original struck + percent chip (`−{round((1-disc/price)*100)}٪`). |
-| B-06 Badges | Chips per doc 05 map, max 2 shown (+n overflow chip). |
-| B-07 Unavailable | Mode from settings: `HIDE` → excluded server-side by the mapper; `MUTED` → grayscale card + «ناموجود» chip; variants of a muted product are not expandable. |
-| B-08 Empty rules | Category with 0 visible products hidden entirely (mapper). No categories at all → global empty state (doc 05). |
-| B-09 Images | `MenuImage` (next/image + media loader, doc 03), 4:3, sizes `(max-width: 768px) 104px, 140px`; first 4 images `priority`; others lazy; placeholder = `media.dominantColor` bg + shimmer; on error → ornament fallback. |
-| B-10 Desktop | Content column `max-w-2xl` centered; at `md+` cards become a 2-column grid within sections (same card component, 140×105 image). |
+| B-01 Dock & scrollspy | Tap → **near-instant jump** (`scrollIntoView({behavior:"auto"})`) + 250ms settle choreography (opacity/y on the arriving chapter header). Observer-ignore window 600ms. Scrollspy IO `rootMargin:"-30% 0px -55%"`. Active tab indicator springs (`layoutId`); active tab scrolls into view within the dock. `role=tablist/tab` + arrow-key nav preserved (RTL-aware). |
+| B-02 Chips | Filter within active chapter; `popLayout` relayout; «همه» default; strip shows chapter name + chips when children exist. |
+| B-03 Signature tier | Per doc 05 «Signature tier — UI behavior vs content responsibility»: every POPULAR product becomes a signature card; no UI cap; the designation is Admin-owned content; the layout stays graceful for any POPULAR count (self-contained full-width blocks in normal flow). |
+| B-04 Cards | Standard card per doc 05; tap → press scale + open Dish Peek (no navigation, no route). |
+| B-05 Dish Peek | Radix dialog per doc 05; content = image (960), name, badges, full description, price/variants; Esc/backdrop/X close; focus trap + restore; strictly non-transactional. |
+| B-06 Variants | «از …» summary (BR-06) + chevron → spring-height ticket list; local state per card; multiple may be open; disabled when MUTED. |
+| B-07 Discount | BR-14 (no variants) + BR-04/05; ember price + struck original + −٪ stamp; formula `−{round((1−disc/price)·100)}٪`. |
+| B-08 Badges | doc 05 map; max 2 + `+n`. |
+| B-09 Unavailable | `HIDE` → excluded by the mapper. `MUTED` → grayscale + opacity .7 + «امروز تموم شد» stamp. Copy maps to the single `isAvailable` boolean; if richer availability semantics are ever added to the model, copy mapping must be extended in this doc first. |
+| B-10 Ticker | Items = flattened available products in chapter order, limited to `TICKER_MAX_ITEMS = 16` — **presentation-only** (doc 05): the ticker chooses up to 16 items for display; it never affects menu contents. Unavailable items excluded from the ticker. CSS marquee 40s; paused on hover for fine pointers only (a tap must never freeze it) and static under reduced motion. Tap → instant jump to the card + 600ms ember highlight flash. |
+| B-11 Hero | Wordmark ignition once (900ms); `h1` semantics; `data-testid="hero"`. **Binding:** doc 05 «Hero — high-priority visual experimentation area» applies — structural spec plus Phase 1 evaluation/iteration mandate. |
+| B-12 Images | `MenuImage` + media loader (doc 03); tiered `sizes`: standard `(max-width:768px) 160px, 200px` · signature `(max-width:768px) 100vw, 640px` · peek `960px` fixed. First 4 images `priority`, rest lazy. `dominantColor` placeholder + shimmer; error → placeholder art. **No `<img>` may precede menu product images in DOM order** (`media.spec` extracts the first `img[alt]`). |
+| B-13 Empty rules | Mapper prunes empties (BR-08); zero categories → global empty state. |
+| B-14 Desktop | Column `max-w-2xl` centered; `md+`: standard cards in 2-column grid (asserted by E2E), signature cards span both columns, dock becomes top spine. |
 
 ## Client islands (exhaustive — everything else is RSC)
 
-1. Hero scroll shrink (scroll listener, transform only)
-2. Tabs + scrollspy + chip filter (one island per section list is fine)
-3. Variant expander (per card)
-4. `MenuImage` (client boundary allowed for loader; may be server-rendered with
-   loader prop — pick the simpler correct option)
+1. Hero (wordmark ignition + ticker)
+2. Dock/spine + scrollspy + settle
+3. Context strip + chip filter
+4. Product cards (variant tickets + peek trigger) and `MenuImage`
+5. Dish Peek dialog (Radix; `next/dynamic` is the sanctioned lever if the
+   bundle budget needs it)
 
-## Animation catalog (rich but smooth)
+## Animation catalog
 
 | # | Moment | Animation |
 | --- | --- | --- |
-| A-01 | First paint | Hero frame lines draw (scaleX), name fade-up, tabs slide-up, first-viewport cards stagger reveal (y16→0, 40ms) |
-| A-02 | Scroll | Cards reveal once on enter viewport (whileInView, once) |
-| A-03 | Tab change | Indicator spring (layoutId); section scroll |
-| A-04 | Chip change | popLayout relayout + fade |
-| A-05 | Variants expand | height + opacity spring; chevron rotate |
-| A-06 | Press | scale .98 120ms |
-| A-07 | Hero scroll | scale/opacity shrink linked to scroll (threshold 80px) |
-| A-08 | Theme change (preview) | 300ms color cross-fade |
+| A-01 | Load | Wordmark ignition: clusters rise (spring), kasra ticks drop in staggered with glow pulse (total 900ms); eyebrow/ticker fade-up |
+| A-02 | Ticker | Continuous 40s loop; pause on hover/focus/reduced-motion |
+| A-03 | Chapter arrival | Ghost number + title settle (250ms); cards stagger reveal (y16→0, 35ms, once) |
+| A-04 | Tab change | Indicator spring; instant jump; chapter settle |
+| A-05 | Chip change | popLayout relayout + fade |
+| A-06 | Variants | height+opacity spring; chevron rotate |
+| A-07 | Press | stamps: translate+shadow collapse; cards: scale .97/.98 (120ms) |
+| A-08 | Peek | sheet slide-up / panel scale-fade (Radix data-state), transform/opacity |
+| A-09 | Deep-link flash | target card ember ring flash 600ms |
 
-Reduced motion: all disabled (Motion `useReducedMotion` + CSS media query).
+Reduced motion: all disabled (Motion hook + CSS media query); ticker static.
 
 ## States
 
-- **Loading**: RSC streams; Suspense fallback = hero skeleton + 3 card skeletons.
-- **Error**: `error.tsx` → Persian friendly + «تلاش دوباره».
-- **404**: branded not-found with ornament + link to `/`.
-- **Stale data**: admin mutations revalidate the `public-menu` tag; customers
-  always see a fresh menu.
+- **Loading**: Suspense skeletons per doc 05 (no splash gate).
+- **Error**: `error.tsx` identity restyle + «تلاش دوباره».
+- **404**: identity restyle + home link.
+- **No image**: placeholder art (doc 05).
+- **Stale data**: mutations revalidate the `public-menu` tag.
 
-## Acceptance criteria (E2E highlights — automatable)
+## Performance
 
-1. Load `/` → hero, tabs, ≥1 section visible; Lighthouse performance ≥ 90 on
-   mid-tier mobile profile.
-2. Tap tab «غذای اصلی» → page scrolls; scrollspy activates the tab while
-   scrolling toward the پیتزا group.
-3. The **پیتزا مارگاریتا** card shows «از ۵۵۰ هزار تومان»; expanding it lists
-   «سایز کوچک ۵۵۰ هزار تومان» and «سایز بزرگ ۷۵۰ هزار تومان».
-4. The discounted «کوکی متوسط» shows ۹۵ هزار تومان primary, ۱۱۵ هزار struck,
-   and a −۱۷٪ chip.
-5. With `MUTED`, «آب کرفس» is visible grayscale + «ناموجود»; switch settings to
-   `HIDE` → it disappears from `/`.
-6. A product assigned to a leaf category renders; the schema/UI make it
-   impossible to assign one to a non-leaf category (BR-15).
+`content-visibility:auto` on below-fold chapters — **verify scrollspy against
+CV-enabled sections in Phase 4** (fallback: CV on deep chapters only). All
+doc-11 budgets apply (≤220KB first-load JS, Lighthouse ≥90 mid-range Android).
+
+## Acceptance criteria (E2E — automatable)
+
+1. Load `/` → hero (wordmark as `h1`), dock, ≥1 section; آب کرفس visible,
+   grayscale, `data-available="false"`, stamp «امروز تموم شد», opacity `0.7`.
+2. Tap «غذای اصلی» (dock) → instant jump; tab `data-active`; scrollspy keeps it
+   active while scrolling toward the پیتزا group.
+3. پیتزا مارگاریتا: «از ۵۵۰ هزار تومان»; expand → tickets «سایز کوچک ۵۵۰…» /
+   «سایز بزرگ ۷۵۰…».
+4. کوکی متوسط: ۹۵ هزار تومان primary, ۱۱۵ هزار struck, −۱۷٪ stamp.
+5. MUTED → HIDE switch removes آب کرفس.
+6. Leaf-category product renders (اسپرسو).
+7. Chips (context strip) filter «غذای اصلی» to پیتزا.
+8. Ticker visible; tapping a ticker chip reveals its product card.
+9. Tapping a card opens `dish-peek` showing name + image; Esc closes; focus
+   returns to the trigger.
+10. Desktop (`md+`): sections use a 2-column product grid.
+
+## Testid contract (protected)
+
+`hero` · `category-tabs` · `tab-{name}` · `data-active` · `section-{name}` ·
+`product-{name}` · `data-available` · `unavailable-chip` · `price` ·
+`price-original` · `discount-chip` · `variant-toggle` · `variant-list` ·
+`subcategory-chips` · `product-grid` · new: `dish-peek`, `peek-close`,
+`hero-ticker`. Any rename requires updating the E2E specs in the same commit.
+
+## Required string changes (`lib/fa/strings.ts`)
+
+- `strings.brand.wordmark` = exact «دِ‌لِ‌پِ» constant (doc 05) — new key.
+- `strings.public.unavailable` value → «امروز تموم شد» (key preserved).
+- New keys: `public.closePeek`, `public.peekAria`, `public.tickerAria`,
+  `public.dockAria`, `meta.description` reworded around the new identity.
+- Remove: hardcoded hero tagline default (tagline slot, empty by default).

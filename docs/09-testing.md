@@ -49,9 +49,9 @@ host port **5433**, database `delepe_test`, doc 12).
    the **test** database, not the dev database on 5432.
 
 E2E runs on `E2E_PORT` (default **3100**) so a dev server on 3000 is never reused.
-Playwright `webServer` deletes `.next`, then runs `pnpm build && pnpm start` with
+Playwright `webServer` deletes `.next`, then runs `pnpm db:seed && pnpm build && pnpm start` with
 the test `DATABASE_URL` and repo `STORAGE_ROOT` so ISR HTML (`revalidate = 60`)
-matches the seeded test database. It listens on `E2E_PORT`. Persian locale, mobile
+matches the seeded test database (including `unavailableMode: MUTED`). It listens on `E2E_PORT`. Persian locale, mobile
 viewport 390×844 + desktop pass.
 
 CI must set `E2E_DATABASE_URL` to the job's service Postgres. global-setup
@@ -67,7 +67,7 @@ Critical specs:
 | `auth.spec` | Login success/failure (generic Persian error), logout, change password, redirect rules (`/admin` → products; authed `/login` → products), **rate limit: 5 fails → 6th attempt returns `RATE_LIMITED` + «تعداد تلاش‌ها بیش از حد مجاز است؛ ۱۵ دقیقه دیگر تلاش کنید»** |
 | `admin-products.spec` | Create with upload (fixture image), edit, discount validation, availability switch (optimistic + revert on failure), delete confirm, reorder persistence, Persian-digit price input, variant auto-price (BR-13), discount hidden with variants (BR-14) |
 | `admin-categories.spec` | Create child (depth guard BR-01), child-under-product-owner guard (BR-16), delete guard toast (BR-02), reorder |
-| `settings-preview.spec` | Theme switch reflects in phone preview + public after save; unavailable mode switch; draft reset button; drawer cancel leaves preview unchanged |
+| `settings-preview.spec` | Preview reflects the single «پاتوق» identity for both draft and saved state (no public theme switcher exists; the legacy 4-theme system is retired per ADR-12); settings mutations (restaurant name, unavailable mode) reflected in the phone preview and, after save, on the public menu; draft reset button; drawer cancel leaves preview unchanged |
 | `a11y.spec` | axe-core scan of `/`, `/login`, `/admin/products` — zero critical violations |
 
 ## CI (GitHub Actions)

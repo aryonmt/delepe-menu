@@ -1,204 +1,344 @@
-# 05 · Design System
+# 05 · Design System — «پاتوق» Identity
 
 ## Brand direction
 
-Warm, premium café feel that echoes the physical menu: **deep coffee browns,
-honey/gold accents, thin double-line frames and a small ✦ ornament** as the brand
-motif. Motion is rich but always smooth (transform/opacity only, 60fps).
+**«پاتوق — The Cinematic Hangout»**: a warm, dark, cinematic canvas where food
+radiates off the screen. Neon-sign glow × street-poster energy. Young, energetic,
+appetizing, warm, slightly rebellious, family-tolerant. Never fine-dining
+pretentious; never childish.
 
-## Tokens (CSS variables, consumed by Tailwind config)
+**One identity.** The former 4-theme system is retired (ADR-12). The
+`Settings.theme` field persists in the data model unchanged (default
+`WARM_HONEY`, zero migration) but is **visually inert**; the public UI renders
+only the «پاتوق» identity. The former `✦` star survives only as a minor
+decorative divider.
 
-Every theme defines **all** of these variables (shadcn-compatible set + brand set):
+## Design constants vs Admin-managed content (binding distinction)
 
-```text
---background --foreground
---card --card-foreground
---primary --primary-foreground
---accent --accent-foreground
---muted --muted-foreground
---border --ring
---destructive --destructive-foreground
---ornament
---badge-popular  --badge-popular-foreground
---badge-new      --badge-new-foreground
---badge-spicy    --badge-spicy-foreground
---badge-vegetarian --badge-vegetarian-foreground
---radius            # 12px  (buttons, inputs — shadcn base)
---radius-card       # 18px
---radius-image      # 14px
---radius-drawer     # 24px (top corners)
-```
+| Design constants — owned by this doc | Admin-managed data — never hardcoded in layout logic |
+| --- | --- |
+| Tokens, wordmark treatment, radii, shadows, motion, spacing, tier rules ("POPULAR flag ⇒ signature card"), hue palette order, clamp limits | Restaurant name, category names/count/order, product names/descriptions, prices, discounts, availability, badges (incl. POPULAR), images, variants, subcategory counts |
 
-All text/on-color pairs below were chosen for **WCAG contrast ≥ 4.5:1** (computed);
-the M7 design-QA pass re-verifies every pair with a contrast tool (doc 13).
+Rules:
 
-### Theme 1 · WARM_HONEY (default, light)
+1. Components must tolerate **0..N** categories, children, products, variants,
+   badges, and POPULAR items, and any reordering/renaming by the Admin.
+2. The only brand strings in code are `strings.brand.wordmark` (seed/meta/wordmark
+   default) and admin-provided `settings.restaurantName` rendered at runtime.
+3. If a visual decision depends on a data assumption, the assumption must be
+   written here or in doc 06 — never decided silently in code.
 
-| var | value | | var | value |
-| --- | --- | --- | --- | --- |
-| background | `#FAF5EC` | | muted | `#F1E8D8` |
-| foreground | `#2A211A` | | muted-foreground | `#6B5D4D` |
-| card | `#FFFCF6` | | border | `#E7DCC9` |
-| card-foreground | `#2A211A` | | ring | `#96601F` |
-| primary | `#96601F` (honey caramel) | | destructive | `#B3261E` |
-| primary-foreground | `#FFFFFF` | | destructive-foreground | `#FFFFFF` |
-| accent | `#6E4B26` | | ornament | `#C89B54` (decorative only) |
-| accent-foreground | `#FFFFFF` | | | |
+## Wordmark & brand marks
 
-Badges (bg / fg): POPULAR `#96601F`/`#FFFFFF` · NEW `#6E4B26`/`#FFFFFF` ·
-SPICY `#B03A22`/`#FFFFFF` · VEGETARIAN `#2F6B3E`/`#FFFFFF`
+- Exact Persian brand string: **`دِ‌لِ‌پِ`** — Unicode sequence
+  `U+062F U+0650 U+200C U+0644 U+0650 U+200C U+067E U+0650`.
+  Defined once in `strings.brand.wordmark`; used by seed `restaurantName`,
+  `strings.meta`, footer, and the hero wordmark default. **Never normalized or
+  altered**; any typographic improvement is done in CSS/layout only.
+- The hero renders `settings.restaurantName` (admin-managed). If the Admin
+  renames the restaurant, the wordmark follows — the exact string above is the
+  seed/default value only.
+- Rendered in Lalezar. The **three kasra ticks are the secondary brand motif**
+  ("three sparks"), colored `--primary`.
+- Latin lockup: **DELEPE** in Lalezar Latin, `letter-spacing: .3em`
+  (letter-spacing is permitted on Latin text only).
+- Favicon: dark rounded square + three-spark ticks (replaces the star).
 
-> Primary adjusted from the original `#A9702B` to `#96601F` so both white text on
-> primary (5.3:1) and primary text on card (5.1:1) pass AA.
+### Wordmark visual validation (binding)
 
-### Theme 2 · MIDNIGHT_GOLD (dark)
+- The source string is **locked**: `دِ‌لِ‌پِ`
+  (`U+062F U+0650 U+200C U+0644 U+0650 U+200C U+067E U+0650`).
+  **The rendering is NOT locked.** A locked string is not an assumed visual result.
+- During Phase 1 the rendered wordmark in Lalezar must be visually validated on:
+  desktop Chrome, mobile Chrome (Android), and iOS Safari — at both wordmark
+  sizes (64px mobile / 88px `md+`).
+- Validation checklist:
+  1. Every kasra renders fully — no clipping from line-height or overflow.
+  2. The ZWNJ separations render as clean gaps between the clusters دِ / لِ / پِ —
+     no unintended joining, no doubled spacing.
+  3. The three kasras read as the "three sparks" motif (visible, ember-tinted if
+     technically possible — see below).
+  4. Optical centering and baseline inside the hero composition.
+- Permitted presentation-layer treatments (the string constant is never modified):
+  - Per-cluster `<span>`s — safe, because the clusters are already ZWNJ-separated.
+  - Diacritic tinting via separate mark spans **only if** shaping and mark
+    positioning are verified unchanged on all target browsers; otherwise fall back
+    to a single-color wordmark with the ember glow.
+  - Line-height, padding, optical margin, and `text-rendering` tuning.
+- If rendering is poor on any target browser: fix it in CSS/markup. If it cannot
+  be fixed, escalate with screenshots. **Never normalize, re-type, or alter the
+  source string.**
 
-| var | value | | var | value |
-| --- | --- | --- | --- | --- |
-| background | `#14100C` | | muted | `#241C13` |
-| foreground | `#F4EADA` | | muted-foreground | `#A79883` |
-| card | `#1E1812` | | border | `#35291C` |
-| card-foreground | `#F4EADA` | | ring | `#D2A64C` |
-| primary | `#D2A64C` | | destructive | `#E57367` |
-| primary-foreground | `#241A08` | | destructive-foreground | `#2A0E0B` |
-| accent | `#8F6C2F` | | ornament | `#D2A64C` |
-| accent-foreground | `#FFFFFF` | | | |
+## Color tokens — «پاتوق» (single identity, dark)
 
-Badges (bg / fg): POPULAR `#D2A64C`/`#241A08` · NEW `#8F6C2F`/`#FFFFFF` ·
-SPICY `#E0664A`/`#2A0E0B` · VEGETARIAN `#63B088`/`#0F1F16`
+All text/on-color pairs ≥ 4.5:1 (computed; M7 re-verifies with a contrast tool).
+`--spark` is used as a *fill* (stamps/badges) — never as small body text.
 
-### Theme 3 · IVORY_MINIMAL (light)
+| Token | Value | Role |
+| --- | --- | --- |
+| `--background` | `#0D0A07` | charred-coffee canvas |
+| `--foreground` | `#F5EBDD` | warm cream ink |
+| `--card` | `#16110B` | card surface |
+| `--card-2` | `#1F1811` | raised surface |
+| `--card-foreground` | `#F5EBDD` | |
+| `--muted` | `#221A11` | |
+| `--muted-foreground` | `#A8947F` | secondary text |
+| `--muted-2` | `#756350` | tertiary text |
+| `--border` | `#2C2115` | |
+| `--line` | `rgba(232,163,61,.16)` | hairlines |
+| `--primary` | `#E8A33D` | **Ember** — the brand light source |
+| `--primary-foreground` | `#1A0F04` | |
+| `--accent` | `#B86E20` | |
+| `--accent-foreground` | `#FFFFFF` | |
+| `--ring` | `#E8A33D` | focus rings |
+| `--glow` | `rgba(232,163,61,.45)` | |
+| `--spark` | `#F0563A` | **the rebellious accent** (alias: destructive) |
+| `--spark-foreground` | `#240A04` | (alias: destructive-foreground) |
+| `--ornament` | `#E8A33D` | decorative ✦ only |
 
-| var | value | | var | value |
-| --- | --- | --- | --- | --- |
-| background | `#FBFAF7` | | muted | `#F2F0EB` |
-| foreground | `#201D19` | | muted-foreground | `#6E675C` |
-| card | `#FFFFFF` | | border | `#E8E4DC` |
-| card-foreground | `#201D19` | | ring | `#23201B` |
-| primary | `#23201B` | | destructive | `#B3261E` |
-| primary-foreground | `#FFFFFF` | | destructive-foreground | `#FFFFFF` |
-| accent | `#9C6B1F` | | ornament | `#B08A3E` |
-| accent-foreground | `#FFFFFF` | | | |
+Badges (bg / fg — poster style: bright fill, dark ink):
 
-Badges (bg / fg): POPULAR `#23201B`/`#FFFFFF` · NEW `#9C6B1F`/`#FFFFFF` ·
-SPICY `#B03A22`/`#FFFFFF` · VEGETARIAN `#2F6B3E`/`#FFFFFF`
+| badge | bg | fg |
+| --- | --- | --- |
+| POPULAR | `#E8A33D` | `#1A0F04` |
+| NEW | `#7FD1A8` | `#0E1F15` |
+| SPICY | `#F0563A` | `#240A04` |
+| VEGETARIAN | `#4EAB72` | `#0E1F15` |
 
-### Theme 4 · DEEP_EMERALD (dark)
+**Chapter hues** `--chapter-hue-1..6` — exactly **six** dark-adapted hues,
+used sparingly (per Q17):
 
-| var | value | | var | value |
-| --- | --- | --- | --- | --- |
-| background | `#0F1512` | | muted | `#1C2921` |
-| foreground | `#ECE7DB` | | muted-foreground | `#93A296` |
-| card | `#17211B` | | border | `#24352C` |
-| card-foreground | `#ECE7DB` | | ring | `#63B088` |
-| primary | `#63B088` | | destructive | `#E57367` |
-| primary-foreground | `#0F1F16` | | destructive-foreground | `#2A0E0B` |
-| accent | `#2E6B4F` | | ornament | `#C89B54` |
-| accent-foreground | `#FFFFFF` | | | |
+| # | name | value |
+| --- | --- | --- |
+| 1 | caramel | `#C89B54` |
+| 2 | ice | `#8FB8CC` |
+| 3 | berry | `#C77DBB` |
+| 4 | tomato | `#D96C4A` |
+| 5 | flame | `#E8763D` |
+| 6 | mint | `#7FC8A9` |
 
-Badges (bg / fg): POPULAR `#C89B54`/`#241A08` · NEW `#7FC8A9`/`#0F1F16` ·
-SPICY `#E0664A`/`#2A0E0B` · VEGETARIAN `#63B088`/`#0F1F16`
+Assignment rule (design constant): a top-level category's hue =
+`hues[(displayIndex) mod 6]`, evaluated in render/sort order.
 
-Theme is applied via `<html data-theme="warm-honey | midnight-gold | ivory-minimal |
-deep-emerald">` (kebab-case attribute value mapped from the `ThemeName` enum).
-Switching cross-fades colors (300ms) using CSS `transition` on color properties only.
+- Deterministic and data-driven — **never** mapped to category names.
+- More than six categories cycle through the six hues deterministically.
+- Reordering categories may change their assigned hue (accepted, documented).
+- Hues are used only for chapter ghost numbers (decorative), active-chip
+  accents, and placeholder fields — never as full surfaces and never as
+  separate themes. Where a hue carries information it must hold ≥ 3:1
+  against its backdrop.
+- Note: `honey` and `cocoa` from the earlier draft were dropped to honor the
+  approved six-hue decision. Tomato↔flame separation is checked in the M7
+  visual QA pass.
+
+Ambient layers: `--ambient-glow-1/-2` warm radial gradients on the canvas
+(top-start ember, bottom-end spark tint) + `.grain-overlay` utility.
 
 ## Typography
 
-- Body: **IRANSans** (self-hosted woff2 **400/500/700**) → fallback **Vazirmatn**.
-- Display (hero title, category titles): **Markazi Text** 600/700 (OFL, next/font).
-- Scale (mobile-first): body 15px/1.9 · secondary 12.5px/1.8 · card title 15.5px/700 ·
-  section title 22px display · hero title **36px** (40px at `md+`, usage
-  `text-hero md:text-[40px]`) display ·
-  price 15px/**700** (heaviest available IRANSans weight).
-- Persian rules: ZWNJ (نیم‌فاصله) in all strings, including seed data
-  («می‌شود», «هویج‌بستنی», «توت‌فرنگی»); **no letter-spacing** on Persian text;
-  Persian digits everywhere in UI; Persian punctuation (، ؟).
+- **Display: Lalezar** (OFL, `next/font/google`, subsets arabic+latin, weight
+  400, variable `--font-display`). Replaces Markazi Text (ADR-07). Two
+  families total (Lalezar + Vazirmatn-until-IRANSans) keeps the 300KB budget.
+- **Body:** IRANSans (owner-supplied woff2) → fallback Vazirmatn
+  (`--font-vazir`). Chain: `IRANSans, var(--font-vazir), sans-serif`.
 
-## Shape & elevation
+| Use | Size / weight | Face |
+| --- | --- | --- |
+| Wordmark | 72px mobile / 88px `md+`, lh 1.15 | Lalezar |
+| Ticker item | name 14px / price 12.5px | Lalezar / body |
+| Chapter title | 30px mobile / 36px `md+` | Lalezar |
+| Chapter ghost number | 88px, opacity .1 (decorative) | Lalezar |
+| Sub-header | 18px | Lalezar |
+| Peek title | 24px | Lalezar |
+| Prices | 17px (cards) / 19px (signature) / 15px (variant tickets) | Lalezar |
+| Card title | 16px / 800 | body |
+| Body | 15px / lh 1.8 | body |
+| Secondary | 12.5px / lh 1.7 | body |
+| Badge / stamp | 11px / 800 | body |
+| Dock label | 12.5px / 700 | body |
 
-- Radius: tokens above (`--radius*`).
-- Shadows: warm soft `0 8px 24px rgb(42 33 26 / .08)` on light themes;
-  dark themes use borders + inner glow instead (no drop shadows).
-- Brand frame motif: 1px double border with corner ticks (like the printed menu)
-  used on hero and section titles; ornament `✦` as divider glyph.
+Persian rules (unchanged): ZWNJ everywhere, no letter-spacing on Persian text,
+Persian digits, momayyez `U+066B`, Persian punctuation. The wordmark's kasras
+are a brand-spelling exception owned by the string constant, not prose.
+
+## Shape, shadow & texture
+
+- Radii: `--radius` 14px (controls) · `--radius-card` 20px · `--radius-image`
+  16px · `--radius-drawer` 24px (peek top corners on mobile) · `--radius-stamp`
+  10px. Philosophy: **food frames are soft; meta is tight.**
+- Shadows: `--shadow-card: 0 10px 28px -8px rgb(0 0 0 /.7)` ·
+  `--shadow-lift: 0 18px 44px -8px rgb(0 0 0 /.85)` ·
+  `--shadow-stamp: 3px 3px 0 0 rgb(0 0 0 /.55)` (hard offset — the
+  street-poster device) · active-pill glow `0 0 18px var(--glow)`.
+- **Press language:** stamp/pill controls translate 2px into their hard shadow
+  and the shadow collapses to 1px (`whileTap`); cards scale `.98` (120ms).
+- Stamp rotation: decorative stamps only, ±2° (discount chip −3°, unavailable
+  stamp −6°). Functional controls are never rotated.
+- **`.grain-overlay`:** inline-SVG `feTurbulence` data-URI, opacity .035,
+  `pointer-events:none` — no asset request. Hero adds a radial vignette fading
+  into `--background`.
 
 ## Motion tokens
 
 | token | value |
 | --- | --- |
-| duration-fast | 150ms |
-| duration-base | 260ms |
-| duration-slow | 450ms |
-| ease-out | cubic-bezier(.22,.61,.36,1) |
-| spring | stiffness 380 · damping 32 (indicators) |
-| stagger | 40ms |
+| duration-fast / base / slow | 150 / 260 / 450ms |
+| ease-brand | cubic-bezier(.22,.61,.36,1) |
+| spring | stiffness 380 · damping 32 |
+| stagger | 35ms |
 | reveal-y | 16px |
+| settle (chapter arrival) | 250ms |
+| press | 120ms · scale .97 |
+| ticker loop | 40s linear |
+| wordmark ignition | 900ms total |
 
-All animations: transform/opacity only. `prefers-reduced-motion` → durations 0.
-Motion library: `motion/react` (Motion v12, doc 02 ADR-09).
+Rules: transform/opacity only. **Sanctioned exceptions:** variant-ticket height
+expansion and the peek dialog open/close (small, scoped). `prefers-reduced-motion`
+disables everything: wordmark static, ticker paused as a static scrollable row,
+jumps instant. Motion library: `motion/react` (ADR-09).
 
-## Icons & badges
+## Icons
 
-lucide-react **main package only**. Badge map:
-
-| badge | Persian | lucide icon | colors |
-| --- | --- | --- | --- |
-| POPULAR | پرفروش | `Flame` | `--badge-popular` / fg |
-| NEW | جدید | `Sparkles` | `--badge-new` / fg |
-| SPICY | تند | `FlameKindling` | `--badge-spicy` / fg |
-| VEGETARIAN | گیاهی | `Leaf` | `--badge-vegetarian` / fg |
-
-(`Pepper` does not exist in lucide-react main; `FlameKindling` is the fixed choice —
-do not substitute, do not add @lucide/lab.)
+lucide-react main package only. Badge icons unchanged: POPULAR `Flame`,
+NEW `Sparkles`, SPICY `FlameKindling`, VEGETARIAN `Leaf`. Added: `X` (peek
+close), `ChevronDown` (variants, mirrored in RTL). **No emoji anywhere in the
+public UI** (seed SVG glyphs no longer use emoji — see ADR-10).
 
 ## RTL rules
 
-- `<html dir="rtl" lang="fa">`; Tailwind logical utilities (`ms-*, me-*, ps-*, pe-*,
-  start-*, end-*`) only — no physical left/right in components.
-- Horizontal scrollers: `scroll-padding-inline-start`, indicator math RTL-aware.
-- Icons that imply direction (chevrons) mirrored via `rtl:rotate-180`.
+`<html dir="rtl" lang="fa">`; logical utilities only (`ms/me/ps/pe/start/end`);
+no physical left/right in components; directional icons mirrored via
+`rtl:rotate-180`. Ticker: duplicated track loops seamlessly, drifting toward
+inline-end (rightward in RTL); verified visually in Phase 4.
 
 ## Component specs (visual)
 
-### Product card (horizontal)
+**Hero.** `min-height: min(72svh, 620px)`; wordmark centered; eyebrow chip
+(`strings.public.subtitle`) above it; **optional tagline slot renders only when
+a non-empty string exists (currently none — documented, not a bug)**; ticker
+anchored to the hero's bottom edge; ambient glows + grain + vignette. `h1` =
+the rendered restaurant name. `data-testid="hero"`.
 
-Card row: image block inline-start **104×78px** mobile / **140×105px** at `md+`
-(4:3, radius-image) · content: title (700), description 2-line clamp muted,
-footer row: price (primary, 700) + old price line-through muted (when discounted)
-+ percent chip · badges row above title · unavailable (MUTED): image
-`grayscale(1) opacity(.55)`, card opacity .7, «ناموجود» chip on image ·
-press feedback scale .98 · variants: chevron-down button inline-end rotates 180°
-when open.
+**Dish ticker.** Chip = min-height 44px pill, border `--line`, bg `card/.7` +
+blur; content: name (Lalezar 14) + «،» separator + price (12.5, ember).
+Track duplicated once, duplicate `aria-hidden`. Chips are buttons.
+`TICKER_MAX_ITEMS = 16` — a **design/UX presentation constant, not a content
+limitation**. The ticker selects up to 16 eligible (available) items, taken in
+chapter order, purely for the ticker presentation. The underlying menu may
+contain any number of products; this constant never filters, hides, or alters
+actual menu content and is never read by the menu rendering path.
 
-### Category tabs
+**Dock (mobile `<md`).** Fixed bottom; glass blur; height 60px +
+`env(safe-area-inset-bottom)`; horizontal scroll; tab min-width 64px, label
+12.5/700, nowrap + ellipsis; active = ember pill + primary-foreground + scale-pop spring + glow (no shared-layout morph; dock auto-scroll is instant).; content bottom padding 96px. **Spine (`md+`).**
+Sticky top: monogram «دِ» (Lalezar 24, ember) + horizontal tabs + Latin
+lockup at inline-end. Same tablist semantics in both forms.
+`data-testid="category-tabs"`, tabs `tab-{name}` + `data-active`.
 
-Sticky top, backdrop-blur, horizontal scroll, pill indicator animated with
-`layoutId` spring; active tab scrolls into view; tab = display font 15px.
+**Context strip.** Sticky top (mobile: top-0; `md+`: under the spine), 48px,
+glass. Contains: active chapter name (Lalezar 15 + hue tick) and the chip row
+**only when the active chapter has children**. Chips min-height 44px pill,
+`aria-pressed`, `layoutId` fill. `data-testid="subcategory-chips"`.
 
-### Sub-category chips
+**Chapter header.** pt 56 / pb 24 (mobile); ghost number (hue, opacity .1,
+inline-end, absolute); title Lalezar 30/36; hue tick rule. Section
+`scroll-mt` accounts for strip height only (dock is bottom).
 
-Row under tabs (only when active category has children): chip «همه» + children;
-active chip filled primary; content change animates with `popLayout`.
+**Signature card** (any product whose badges include POPULAR — 0..N per
+chapter, no cap, no copy claims). Full-width; image 4:3, height 176px mobile /
+224px `md+`, `object-fit:cover; object-position: 50% 40%`; badges row, title
+17/800 clamp-2, description clamp-2, price Lalezar 19. Tap → Dish Peek.
 
-### Section header (top-level category)
+### Signature tier — UI behavior vs content responsibility
 
-Display font 22px + ornament: `─── ✦ ───` rendered with gradient lines.
+- **UI behavior:** every product whose `badges` include `POPULAR` renders in
+  the signature tier. There is **no UI cap, no demotion logic, and no hidden
+  limit**. A chapter with zero POPULAR products renders entirely as standard
+  cards.
+- **Content responsibility:** the POPULAR designation is Admin-managed
+  content. The UI never assumes a specific count — not five, not any fixed
+  number. The five POPULAR items in the current seed data are sample data
+  only and carry no design significance.
+- **Gracefulness at scale:** signature cards are self-contained full-width
+  blocks in normal document flow, so an unusually large number of POPULAR
+  products degrades to a longer stack of signature cards — the layout remains
+  correct, and the image payload is covered by the standard lazy-loading and
+  variant-sizing rules (doc 06, B-12).
+- A presentation cap may only ever be introduced as a documented product
+  decision — never silently as a layout workaround.
 
-### Sub-header (child group inside a section)
+**Standard card.** Horizontal; image 42% width, 4:3, rounded-image; title 16/800
+clamp-1, description clamp-2, price row. `md+`: 2-column grid. Tap → Dish Peek.
+Press: scale .98. Both tiers: `data-testid="product-{name}"`,
+`data-available`, `price`, `price-original`, `discount-chip` preserved.
 
-Display font **18px** + single thin gradient line on the inline-end side only
-(no ✦ ornament) — visually subordinate to the section header. Leftover products
-on a parent that also has children are grouped under the sub-header «سایر».
+**Variant tickets.** Chevron expands a spring-height list of ticket rows:
+variant name + dotted leader + price (Lalezar). «از …» summary line per BR-06.
+Disabled for MUTED products.
 
-### Skeletons & states
+**Discount.** Ember effective price + struck muted original + rotated (−3°)
+spark stamp chip `−{percent}٪` with `--shadow-stamp`. Formula unchanged.
 
-Shimmer skeleton cards (3) while streaming; empty menu → ornament +
-«منو به‌زودی تکمیل می‌شود»; error → friendly Persian + retry button.
+**Unavailable (MUTED).** Image grayscale + opacity .55; **card opacity .7
+(fixed — asserted by E2E)**; diagonal −6° stamp on the image corner:
+«امروز تموم شد» (bg `--spark`, fg `--spark-foreground`, shadow-stamp).
+`data-testid="unavailable-chip"` on the stamp. Variants not expandable.
 
-### Hero
+**Badges.** Above the title, max 2 + `+n` overflow chip.
 
-Height **200px**, shrinks to **120px** once `scrollY > 80` (scroll-linked
-scale/opacity). Restaurant name in display font with class
-`text-hero md:text-[40px]` (36px mobile, 40px at `md+`), brand frame motif, two
-slow-drifting radial glows (transform only, 12s loop), ornament draw-in on load.
+**Dish Peek.** Radix Dialog. Mobile: bottom sheet (slide-up, rounded-t-drawer,
+max-height 86svh, inner scroll). `md+`: centered panel max-w-md, rounded-card.
+Content: image (4:3, full width, 960 variant; placeholder art when media is
+null), title (Lalezar 24, wraps, no clamp), badges, full description, price
+block or full variant-ticket list (read-only), unavailable stamp when muted.
+Close: X button, Esc, backdrop. Focus trap + `aria-modal` + focus restore
+(Radix). **Zero transactional affordances** — no cart/order/tray semantics,
+no buttons that imply purchase. `data-testid="dish-peek"`, close `peek-close`.
+MUTED products may still be peeked (read-only exploration).
+
+**Placeholder art** (product with `media: null`, deterministic, both card and
+peek): chapter-hue field (hue @ 12% over `card-2`) + oversized Lalezar initial
+(first character of the product name, 56px, hue @ .5) + small ✦.
+
+**Seed placeholder SVG** (ADR-10 default): same deterministic-generator
+contract, new art direction — hue gradient field + product initial + category
+name + brand line «دِ‌لِ‌پِ»; **no emoji glyphs**.
+
+**Skeletons.** Hero skeleton (wordmark block + ticker bar), card skeletons in
+both tier shapes, dock skeleton bar — streamed via the existing Suspense
+boundary. **No artificial loading gate** (the pizza splash is retired).
+
+**Empty / error / 404 / footer.** Existing copy via strings; restyled with
+identity tokens, three-spark dividers, stamp-styled primary button.
+
+### Hero — high-priority visual experimentation area (binding)
+
+The hero specification above is a **structural direction, not a
+paint-by-numbers checklist**. Mechanically implementing it does not complete it.
+
+During Phase 1, after first render, the hero must be evaluated against the
+identity target:
+
+> **young + energetic + appetizing + warm + cinematic + slightly rebellious +
+> restaurant hangout**
+
+- If the rendered hero reads as generic, empty, corporate, fine-dining, or
+  visually weak: iterate on the composition — type scale and spacing, glow
+  intensity, grain density, ticker prominence, motion timing, ambient layering —
+  strictly within the approved tokens of this document.
+- The Phase 1 phase report must contain an explicit **hero evaluation**:
+  screenshots, the identity checklist above scored honestly, and the
+  iterate/keep decision.
+- The hero is done when it establishes «پاتوق» at first glance — not when the
+  component mounts. Iteration rounds continue in later phases if needed; the
+  hero remains a first-class review item through Phase 4 polish.
+
+## Loading behavior
+
+RSC streaming + skeletons only. No timed splash, no fake delays.
+
+## Retired values
+
+`THEME_CROSSFADE_MS`, `HERO_*` constants, all per-theme token tables, and
+Markazi Text usage are removed from `lib/constants` / `fonts.ts` during
+implementation (this doc supersedes them).

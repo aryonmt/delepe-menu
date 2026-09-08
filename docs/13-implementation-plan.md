@@ -8,6 +8,12 @@ code or stop and update the docs in the same commit.
 **Tracking**: when a task is complete, strike through its ID cell
 (`~~T-001~~`) in the same commit that finishes it.
 
+**Phase-0 redesign note**: the public menu visual system is governed by the
+rewritten docs/05 + docs/06 («پاتوق» identity). Redesign implementation tasks
+are tracked as milestone **M4R** (inserted after M4, before M5; milestone order
+M0→M8 otherwise unchanged). M4R task rows are defined at Phase 1 kickoff, and
+its definition-of-done includes the doc-05 hero evaluation paragraph.
+
 ## Dependency graph (modules)
 
 ```mermaid
@@ -23,7 +29,8 @@ flowchart TD
   SEED[prisma/seed.ts] --> PUBLICUI
 ```
 
-Critical path: **M0 → M1 → M2 → M3 → M4 → M5 → M6 → M7 → M8** (strictly ordered).
+Critical path: **M0 → M1 → M2 → M3 → M4 → M4R → M5 → M6 → M7 → M8**
+(strictly ordered).
 Within a milestone, tasks marked ∥ can be done in any order / parallel.
 
 ## Task tree
@@ -69,14 +76,17 @@ Format: `ID · description · [docs] · deps · output · tests`.
 | ~~T-032~~ | Public page: hero, sticky tabs + scrollspy, sections, product card, skeletons, empty/error states | 05, 06 | T-031 | rendered menu | E2E `public-menu.spec` (basic rows 1–2) |
 | ~~T-033~~ | media pipeline: SharpImageOptimizer (original + 320/640/960 WebP + dominantColor), /media/[mediaId] route, MenuImage + lib/media-url.ts | 03, 05, 06 | T-030 | optimized images + route | unit + E2E image asserts |
 
-### M4 · Public Menu Polish
+### M4R · «پاتوق» Public Menu Redesign
 
 | ID | Task | Docs | Deps | Output | Tests |
 | --- | --- | --- | --- | --- | --- |
-| T-040 | Variants expand («از …»), discount UI, badges, MUTED/HIDE, chips filter | 04, 05, 06 | T-032 | full card behaviors | E2E rows 3–6 |
-| T-041 | Animation catalog A-01..A-08 + reduced motion | 05, 06 | T-032 | motion | reduced-motion check |
-| T-042 ∥ | Desktop 2-col grid only | 03, 06 | T-033 | responsive grid | E2E layout asserts |
-| T-043 | a11y pass + `a11y.spec` + Lighthouse ≥ 90 | 11 | T-040, T-041 | green scans | E2E `a11y.spec` |
+| ~~T-4R0~~ | Foundation: single-identity `globals.css` tokens, Lalezar display face (ADR-07), strings/brand updates, favicon, retire theme constants | 05 | T-043 | token foundation | `pnpm check` |
+| ~~T-4R1~~ | Hero foundation: wordmark ignition, three-spark motif, ambient layers, ticker foundation (no photography dependency) | 05, 06 | T-4R0 | hero renders | E2E row 1 |
+| ~~T-4R2~~ | Navigation: bottom dock (mobile) / top spine (desktop), scrollspy, sticky context strip; testid contract preserved | 06 | T-4R1 | navigation | E2E rows 1–2 + chips |
+| ~~T-4R3~~ | Chapters & cards: chapter headers (ghost numbers, six hues mod 6), signature + standard tiers, variant tickets, badges, MUTED stamp «امروز تموم شد» | 05, 06 | ~~T-4R2~~ | menu body | E2E rows 3–6 |
+| ~~T-4R4~~ | Dish Peek (`@radix-ui/react-dialog`), ticker deep-link + flash, `TICKER_MAX_ITEMS` presentation constant | 06 | T-4R3 | exploration layer | E2E rows 8–9 |
+| ~~T-4R5~~ | Seed placeholder art direction (no emoji) + seed brand name «دِ‌لِ‌پِ» | 04 (ADR-10) | T-4R0 | seed visuals | seed idempotency |
+| ~~T-4R6~~ | Responsive/a11y/reduced-motion/perf verification + honest hero evaluation report | 05, 06, 11 | T-4R4 | QA report | `pnpm check` + full E2E |
 
 ### M5 · Admin: Products
 
@@ -93,16 +103,16 @@ Format: `ID · description · [docs] · deps · output · tests`.
 | ID | Task | Docs | Deps | Output | Tests |
 | --- | --- | --- | --- | --- | --- |
 | T-060 | Categories tree CRUD + dnd + guards (BR-01/02/15/16) | 04, 07 | T-050 | categories page | E2E `admin-categories.spec` |
-| T-061 ∥ | Settings page: name, theme cards, unavailable-mode radios | 05, 07 | T-050 | settings page | E2E part |
+| T-061 ∥ | Settings page: name, unavailable-mode radios (theme picker deferred per ADR-12) | 05, 07 | T-050 | settings page | E2E part |
 | T-062 | Phone-frame preview (`toPublicMenu(draft)`) + «بازگشت به منوی ذخیره‌شده» | 07 | T-050, T-040 | live preview | E2E `settings-preview.spec` |
 | T-063 | Change-password dialog; mobile admin QA | 07, 10 | T-050 | dialog | E2E `auth.spec` extension |
 
-### M7 · Themes & Visual QA
+### M7 · Identity & Visual QA
 
 | ID | Task | Docs | Deps | Output | Tests |
 | --- | --- | --- | --- | --- | --- |
-| T-070 | 4 themes wired end-to-end + 300ms cross-fade (A-08) | 05 | T-061 | theme switch | visual |
-| T-071 | Contrast verification of every text/on-color pair in doc 05 × 4 themes; ornament/frame polish; dark-theme glow tuning | 05, 11 | T-070 | QA report | contrast tool ≥ 4.5 |
+| T-070 | «پاتوق» identity wiring verified end-to-end (`data-theme` attribute removed from the public layout; single token set) | 05 | T-061 | identity wiring | visual |
+| T-071 | Contrast verification of every text/on-color pair in doc 05 (single identity); three-spark/wordmark polish; glow and grain tuning | 05, 11 | T-070 | QA report | contrast tool ≥ 4.5 |
 
 ### M8 · Hardening & Ship
 
@@ -121,6 +131,7 @@ pass) · definition of done**. The ready-to-use agent prompt for each milestone 
 in `docs/14-agent-prompts.md`.
 
 ### M0 · Bootstrap
+
 - **Goal**: runnable, themed, checked app skeleton.
 - **Why**: everything else imports these foundations; fonts/tokens early prevent
   rework.
@@ -130,6 +141,7 @@ in `docs/14-agent-prompts.md`.
 - **DoD**: all T-00x rows struck through, commit `chore: bootstrap project skeleton`.
 
 ### M1 · Domain & Infrastructure Core
+
 - **Goal**: the whole domain + application layer, unit-tested without HTTP.
 - **Why**: business rules are the riskiest logic; fakes make them fast to test.
 - **Tasks**: T-010..T-014. **Requires**: M0.
@@ -141,6 +153,7 @@ in `docs/14-agent-prompts.md`.
   (Login/Logout/ChangePassword/VerifySession) remain deferred to M2 by design.
 
 ### M2 · Auth & Recovery
+
 - **Goal**: secure login, middleware, recovery CLI.
 - **Why**: admin pages (M5/M6) need the guard; recovery must exist before first
   real deploy.
@@ -149,6 +162,7 @@ in `docs/14-agent-prompts.md`.
 - **DoD**: `pnpm check` + spec green; task rows struck through.
 
 ### M3 · Seed + Public Menu v1
+
 - **Goal**: the real menu renders, offline-seeded.
 - **Why**: earliest end-to-end validation of the whole stack with real data.
 - **Tasks**: T-030..T-032. **Requires**: M2 (mutations revalidate; none yet —
@@ -156,14 +170,18 @@ in `docs/14-agent-prompts.md`.
 - **Gate**: seeded menu renders; scrollspy correct; `public-menu.spec` rows 1–2 green.
 - **DoD**: seed re-run is idempotent; works with network disabled.
 
-### M4 · Public Menu Polish
-- **Goal**: every documented public behavior + animation + a11y.
-- **Why**: the public menu is the product; polish is a feature, not an afterthought.
-- **Tasks**: T-040..T-043. **Requires**: M3.
-- **Gate**: all doc 06 acceptance criteria green; Lighthouse ≥ 90 mobile.
-- **DoD**: `a11y.spec` zero critical violations.
+### M4R · «پاتوق» Public Menu Redesign
+
+- **Goal**: rebuild the public menu on the approved «پاتوق» identity without
+  touching protected data/engineering contracts.
+- **Why**: Phase 0 redesign direction approved by the owner.
+- **Tasks**: T-4R0..T-4R6. **Requires**: M4.
+- **Gate**: full `public-menu.spec` + `a11y.spec` + `media.spec` green;
+  first-load JS ≤ 220KB; hero evaluation documented (docs/05 mandate).
+- **DoD**: honest Phase 1 report delivered; KEEP/ITERATE decision recorded.
 
 ### M5 · Admin: Products
+
 - **Goal**: full product management with upload + preview-ready draft store.
 - **Why**: the owner's core job; draft store here unlocks preview in M6.
 - **Tasks**: T-050..T-054. **Requires**: M4 (menu components reused by preview).
@@ -171,21 +189,23 @@ in `docs/14-agent-prompts.md`.
 - **DoD**: BR-03/07/13/14/15 visibly honored in UI.
 
 ### M6 · Admin: Categories, Settings, Live Preview
+
 - **Goal**: remaining admin sections + live phone preview.
 - **Why**: completes the owner workflow.
 - **Tasks**: T-060..T-063. **Requires**: M5.
 - **Gate**: `settings-preview.spec` green; editing price updates preview without save.
 - **DoD**: drawer-cancel leaves preview unchanged (AC-7).
 
-### M7 · Themes & Visual QA
-- **Goal**: all 4 themes production-quality and contrast-verified.
-- **Why**: themes are a headline feature; contrast is a hard a11y gate.
+### M7 · Identity & Visual QA
+
+- **Goal**: the single «پاتوق» identity production-quality and contrast-verified.
+- **Why**: the identity is a headline feature; contrast is a hard a11y gate.
 - **Tasks**: T-070, T-071. **Requires**: M6.
-- **Gate**: contrast tool ≥ 4.5 on every doc-05 pair × 4 themes; owner-look
-  simplicity pass.
+- **Gate**: contrast tool ≥ 4.5 on every doc-05 pair; owner-look simplicity pass.
 - **DoD**: side-by-side visual review against doc 05.
 
 ### M8 · Hardening & Ship
+
 - **Goal**: CI, deploy assets, backups, proven runbook.
 - **Why**: a portfolio piece must deploy from a fresh clone.
 - **Tasks**: T-080..T-084 (T-081/T-082 parallel-safe). **Requires**: M7.

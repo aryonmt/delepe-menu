@@ -1,17 +1,20 @@
 import { Suspense } from "react";
 import { EmptyState } from "@/components/menu/empty-state";
-import { Hero } from "@/components/menu/hero";
-import { MenuTabs } from "@/components/menu/menu-tabs";
-import { CategorySection } from "@/components/menu/category-section";
+import { MenuShell } from "@/components/menu/menu-shell";
 import { HeroSkeleton, MenuSkeleton } from "@/components/menu/menu-skeleton";
 import { NotFoundError } from "@/domain/errors";
 import { getPublicMenuCached } from "@/lib/public-menu-cache";
-import { strings } from "@/lib/fa/strings";
 
 export const revalidate = 60;
 
+/**
+ * Fetches the public menu (categories + settings) from cache.
+ * Shows empty state if no menu, throws if error.
+ * Wrapped in Suspense for streaming skeleton fallback.
+ */
 async function MenuContent() {
   let menu: Awaited<ReturnType<typeof getPublicMenuCached>>;
+
   try {
     menu = await getPublicMenuCached();
   } catch (error) {
@@ -25,26 +28,11 @@ async function MenuContent() {
     return <EmptyState />;
   }
 
-  const tabs = menu.categories.map((cat) => ({ id: cat.id, name: cat.name }));
-
   return (
-    <>
-      <Hero restaurantName={menu.settings.restaurantName} />
-      <div className="mx-auto max-w-2xl px-4">
-        <MenuTabs categories={tabs} />
-        <main className="space-y-8 pb-12 pt-4">
-          {menu.categories.map((category, index) => (
-            <CategorySection key={category.id} category={category} priorityStartIndex={index === 0 ? 0 : 999} />
-          ))}
-        </main>
-        <footer className="flex flex-col items-center gap-2 border-t border-border py-8">
-          <span className="font-display text-sm text-muted-foreground">{strings.public.footer}</span>
-          <span className="text-ornament" aria-hidden="true">
-            ✦
-          </span>
-        </footer>
-      </div>
-    </>
+    <MenuShell
+      categories={menu.categories}
+      restaurantName={menu.settings.restaurantName}
+    />
   );
 }
 

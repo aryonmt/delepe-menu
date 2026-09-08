@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { strings } from "@/lib/fa/strings";
 import { formatPrice, formatPriceFrom } from "./price";
 
 /**
@@ -39,6 +40,6 @@ describe("formatPrice", () => {
 
 describe("formatPriceFrom", () => {
   it("prefixes the formatted price with از and a space", () => {
-    expect(formatPriceFrom(550000)).toBe(`از ${formatPrice(550000)}`);
+    expect(formatPriceFrom(550000)).toBe(`${strings.public.fromPrice} ${formatPrice(550000)}`);
   });
 });

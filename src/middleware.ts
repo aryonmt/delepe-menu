@@ -5,7 +5,6 @@ import { SESSION_COOKIE_NAME } from "@/lib/constants";
 import { env } from "@/lib/env";
 
 const SESSION_SECRET = new TextEncoder().encode(env.SESSION_SECRET);
-
 const CSP_REPORT_ONLY =
   "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; font-src 'self'";
 
@@ -22,21 +21,18 @@ export async function middleware(request: NextRequest) {
       pathname,
     );
   }
-
   if (isProtected(pathname) && !authed) {
     return withSecurityHeaders(
       NextResponse.redirect(new URL("/login", request.url)),
       pathname,
     );
   }
-
   if (pathname === "/admin" && authed) {
     return withSecurityHeaders(
       NextResponse.redirect(new URL("/admin/products", request.url)),
       pathname,
     );
   }
-
   return withSecurityHeaders(NextResponse.next(), pathname);
 }
 
@@ -64,7 +60,15 @@ async function hasValidSession(request: NextRequest): Promise<boolean> {
 function withSecurityHeaders(response: NextResponse, pathname: string) {
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  response.headers.set("Content-Security-Policy-Report-Only", CSP_REPORT_ONLY);
+  // CSP ships report-only in v1 (docs/10). Next.js dev tooling relies on
+  // eval-based source maps; sending the header in development only produces
+  // console noise, so it is gated to production here.
+  if (process.env.NODE_ENV === "production") {
+    response.headers.set(
+      "Content-Security-Policy-Report-Only",
+      CSP_REPORT_ONLY,
+    );
+  }
   if (pathname.startsWith("/admin")) {
     response.headers.set("X-Frame-Options", "DENY");
     response.headers.set("Cache-Control", "no-store");

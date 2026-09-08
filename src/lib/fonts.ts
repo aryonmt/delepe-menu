@@ -1,20 +1,20 @@
-import { Markazi_Text, Vazirmatn } from "next/font/google";
+import { Lalezar, Vazirmatn } from "next/font/google";
 
 /**
- * Display face for hero and section titles. next/font downloads at build and
- * self-hosts at runtime (ADR-07 — no Google Fonts requests in the browser).
+ * Display face for the wordmark, chapter titles, and prices.
+ * Replaces Markazi Text per ADR-07 (Phase 0). next/font downloads at build
+ * time and self-hosts at runtime — no Google Fonts requests in the browser.
  */
-export const markaziText = Markazi_Text({
+export const lalezar = Lalezar({
   subsets: ["arabic", "latin"],
-  weight: ["600", "700"],
+  weight: "400",
   variable: "--font-display",
   display: "swap",
 });
 
 /**
- * Body fallback when licensed IRANSans woff2 files are absent from
- * `src/fonts/iransans/`. CSS prefers IRANSans first; the browser skips it
- * until those files are added (see that folder's README).
+ * Body fallback until licensed IRANSans woff2 files are placed in
+ * `src/fonts/iransans/`. CSS prefers IRANSans first (see globals.css).
  */
 export const vazirmatn = Vazirmatn({
   subsets: ["arabic", "latin"],

@@ -1,206 +1,128 @@
+/* «پاتوق» single identity — docs/05. Former 4-theme system retired (ADR-12). */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  :root,
-  [data-theme="warm-honey"] {
-    --background: #faf5ec;
-    --foreground: #2a211a;
-    --card: #fffcf6;
-    --card-foreground: #2a211a;
-    --primary: #96601f;
-    --primary-foreground: #ffffff;
-    --accent: #6e4b26;
+  :root {
+    --background: #0d0a07;
+    --foreground: #f5ebdd;
+    --card: #16110b;
+    --card-2: #1f1811;
+    --card-foreground: #f5ebdd;
+    --muted: #221a11;
+    --muted-foreground: #a8947f;
+    --muted-2: #756350;
+    --border: #2c2115;
+    --line: rgba(232, 163, 61, 0.16);
+    --primary: #e8a33d;
+    --primary-foreground: #1a0f04;
+    --accent: #b86e20;
     --accent-foreground: #ffffff;
-    --muted: #f1e8d8;
-    --muted-foreground: #6b5d4d;
-    --border: #e7dcc9;
-    --ring: #96601f;
-    --destructive: #b3261e;
-    --destructive-foreground: #ffffff;
-    --ornament: #c89b54;
-    --badge-popular: #96601f;
-    --badge-popular-foreground: #ffffff;
-    --badge-new: #6e4b26;
-    --badge-new-foreground: #ffffff;
-    --badge-spicy: #b03a22;
-    --badge-spicy-foreground: #ffffff;
-    --badge-vegetarian: #2f6b3e;
-    --badge-vegetarian-foreground: #ffffff;
-    --radius: 12px;
-    --radius-card: 18px;
-    --radius-image: 14px;
-    --radius-drawer: 24px;
-  }
-
-  [data-theme="midnight-gold"] {
-    --background: #14100c;
-    --foreground: #f4eada;
-    --card: #1e1812;
-    --card-foreground: #f4eada;
-    --primary: #d2a64c;
-    --primary-foreground: #241a08;
-    --accent: #8f6c2f;
-    --accent-foreground: #ffffff;
-    --muted: #241c13;
-    --muted-foreground: #a79883;
-    --border: #35291c;
-    --ring: #d2a64c;
-    --destructive: #e57367;
-    --destructive-foreground: #2a0e0b;
-    --ornament: #d2a64c;
-    --badge-popular: #d2a64c;
-    --badge-popular-foreground: #241a08;
-    --badge-new: #8f6c2f;
-    --badge-new-foreground: #ffffff;
-    --badge-spicy: #e0664a;
-    --badge-spicy-foreground: #2a0e0b;
-    --badge-vegetarian: #63b088;
-    --badge-vegetarian-foreground: #0f1f16;
-  }
-
-  [data-theme="ivory-minimal"] {
-    --background: #fbfaf7;
-    --foreground: #201d19;
-    --card: #ffffff;
-    --card-foreground: #201d19;
-    --primary: #23201b;
-    --primary-foreground: #ffffff;
-    --accent: #9c6b1f;
-    --accent-foreground: #ffffff;
-    --muted: #f2f0eb;
-    --muted-foreground: #6e675c;
-    --border: #e8e4dc;
-    --ring: #23201b;
-    --destructive: #b3261e;
-    --destructive-foreground: #ffffff;
-    --ornament: #b08a3e;
-    --badge-popular: #23201b;
-    --badge-popular-foreground: #ffffff;
-    --badge-new: #9c6b1f;
-    --badge-new-foreground: #ffffff;
-    --badge-spicy: #b03a22;
-    --badge-spicy-foreground: #ffffff;
-    --badge-vegetarian: #2f6b3e;
-    --badge-vegetarian-foreground: #ffffff;
-  }
-
-  [data-theme="deep-emerald"] {
-    --background: #0f1512;
-    --foreground: #ece7db;
-    --card: #17211b;
-    --card-foreground: #ece7db;
-    --primary: #63b088;
-    --primary-foreground: #0f1f16;
-    --accent: #2e6b4f;
-    --accent-foreground: #ffffff;
-    --muted: #1c2921;
-    --muted-foreground: #93a296;
-    --border: #24352c;
-    --ring: #63b088;
-    --destructive: #e57367;
-    --destructive-foreground: #2a0e0b;
-    --ornament: #c89b54;
-    --badge-popular: #c89b54;
-    --badge-popular-foreground: #241a08;
-    --badge-new: #7fc8a9;
-    --badge-new-foreground: #0f1f16;
-    --badge-spicy: #e0664a;
-    --badge-spicy-foreground: #2a0e0b;
-    --badge-vegetarian: #63b088;
-    --badge-vegetarian-foreground: #0f1f16;
-  }
-
-  html {
-    color-scheme: light;
-  }
-
-  html[data-theme="midnight-gold"],
-  html[data-theme="deep-emerald"] {
+    --ring: #e8a33d;
+    --glow: rgba(232, 163, 61, 0.45);
+    --destructive: #f0563a;
+    --destructive-foreground: #240a04;
+    --ornament: #e8a33d;
+    --badge-popular: #e8a33d; --badge-popular-foreground: #1a0f04;
+    --badge-new: #7fd1a8; --badge-new-foreground: #0e1f15;
+    --badge-spicy: #f0563a; --badge-spicy-foreground: #240a04;
+    --badge-vegetarian: #4eab72; --badge-vegetarian-foreground: #0e1f15;
+    --chapter-hue-1: #c89b54; --chapter-hue-2: #8fb8cc; --chapter-hue-3: #c77dbb;
+    --chapter-hue-4: #d96c4a; --chapter-hue-5: #e8763d; --chapter-hue-6: #7fc8a9;
+    --radius: 14px; --radius-card: 20px; --radius-image: 16px; --radius-drawer: 24px; --radius-stamp: 10px;
+    --shadow-card: 0 10px 28px -8px rgb(0 0 0 / 0.7);
+    --shadow-lift: 0 18px 44px -8px rgb(0 0 0 / 0.85);
+    --shadow-stamp: 3px 3px 0 0 rgb(0 0 0 / 0.55);
+    --shadow-pill: 0 0 18px var(--glow);
+    --ambient-glow-1: radial-gradient(circle at 18% 6%, rgba(232, 163, 61, 0.14) 0%, transparent 48%);
+    --ambient-glow-2: radial-gradient(circle at 82% 92%, rgba(240, 86, 58, 0.1) 0%, transparent 52%);
     color-scheme: dark;
   }
-
-  html {
-    transition:
-      color 300ms ease,
-      background-color 300ms ease,
-      border-color 300ms ease,
-      fill 300ms ease,
-      stroke 300ms ease;
-  }
-
-  * {
-    @apply border-border;
-  }
-
+  html { scroll-behavior: smooth; background-color: var(--background); }
+  * { border-color: var(--line); }
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--background); color: var(--foreground);
     font-family: IRANSans, var(--font-vazir), sans-serif;
-    letter-spacing: 0;
+    position: relative; overflow-x: hidden; min-height: 100vh;
   }
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: var(--ambient-glow-1), var(--ambient-glow-2);
+  }
+  ::selection { background: var(--primary); color: var(--primary-foreground); }
 }
 
 @layer utilities {
-  .brand-frame {
-    position: relative;
-    border: 1px solid var(--ornament);
-    box-shadow: inset 0 0 0 4px var(--background), inset 0 0 0 5px var(--ornament);
+  .font-display { font-family: var(--font-display), serif; }
+  .no-scrollbar { scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .edge-fade-x { mask-image: linear-gradient(to left, transparent 0%, black 24px, black calc(100% - 24px), transparent 100%); }
+  .text-gold-gradient {
+    background: linear-gradient(180deg, #fffdf5 8%, var(--primary) 62%, var(--accent) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 4px 22px var(--glow));
   }
+  .card-surface { background: linear-gradient(160deg, var(--card) 0%, var(--card-2) 100%); border: 1px solid var(--line); box-shadow: var(--shadow-card); }
+  .glass-panel { backdrop-filter: blur(18px) saturate(150%); -webkit-backdrop-filter: blur(18px) saturate(150%); background: color-mix(in srgb, var(--background) 88%, transparent); }
+  .brand-frame { border: 1px double var(--line); outline: 1px solid var(--line); outline-offset: -4px; }
+  .shadow-warm { box-shadow: var(--shadow-card); }
+  .ornament-divider { display: block; margin-bottom: 0.25rem; text-align: center; }
+  .grain-overlay::after {
+    content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0.035;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
+  }
+  .ticker { overflow: hidden; }
+  .ticker-track { animation: ticker-marquee 40s linear infinite; will-change: transform; }
+  @media (hover: hover) and (pointer: fine) { .ticker:hover .ticker-track { animation-play-state: paused; } }
+  .peek-flash { animation: peek-flash 0.6s ease-out; }
+}
 
-  .brand-frame::before,
-  .brand-frame::after {
-    content: "";
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    border-color: var(--ornament);
-    border-style: solid;
-  }
+/* Solar System Animations (moved from component to avoid dangerouslySetInnerHTML) */
+.solar-system { --orbit-accent: #14b8a6; --radius-inner: 175px; --radius-mid: 285px; --radius-outer: 395px; }
+@media (max-width: 768px) { .solar-system { --radius-inner: 100px; --radius-mid: 165px; --radius-outer: 230px; } }
+@media (max-width: 480px) { .solar-system { --radius-inner: 70px; --radius-mid: 115px; --radius-outer: 160px; } }
 
-  .brand-frame::before {
-    inset-block-start: -1px;
-    inset-inline-start: -1px;
-    border-width: 2px 0 0 2px;
-  }
+@keyframes ticker-marquee { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+@keyframes peek-flash { 0% { box-shadow: 0 0 0 4px var(--glow); } 100% { box-shadow: 0 0 0 0 transparent; } }
+@keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
+@keyframes peek-overlay-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes peek-sheet-in { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
+.peek-overlay[data-state="open"] { animation: peek-overlay-in 220ms ease-out; }
+.peek-sheet[data-state="open"] { animation: peek-sheet-in 260ms cubic-bezier(0.22, 0.61, 0.36, 1); }
 
-  .brand-frame::after {
-    inset-block-end: -1px;
-    inset-inline-end: -1px;
-    border-width: 0 2px 2px 0;
-  }
+@keyframes custom-orbitMove { 0% { transform: translate(-50%, -50%) rotateZ(0deg) translateX(var(--orbit-radius)); } 100% { transform: translate(-50%, -50%) rotateZ(-360deg) translateX(var(--orbit-radius)); } }
+@keyframes custom-billboardCancel { 0% { transform: translate(-50%, -50%) rotateZ(0deg) rotateY(10deg) rotateX(-65deg); } 100% { transform: translate(-50%, -50%) rotateZ(360deg) rotateY(10deg) rotateX(-65deg); } }
+@keyframes custom-sun-pulse { 0% { transform: scale(0.9); opacity: 0.7; } 100% { transform: scale(1.1); opacity: 1; } }
+@keyframes custom-spin-clockwise { 0% { transform: rotateX(65deg) rotateY(-10deg) rotateZ(0deg); } 100% { transform: rotateX(65deg) rotateY(-10deg) rotateZ(360deg); } }
+@keyframes custom-spin-counter { 0% { transform: rotateX(65deg) rotateY(-10deg) rotateZ(0deg); } 100% { transform: rotateX(65deg) rotateY(-10deg) rotateZ(-360deg); } }
 
-  .ornament-divider {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    color: var(--ornament);
-  }
+.animate-custom-orbit { animation: custom-orbitMove var(--orbit-duration) linear infinite; animation-play-state: var(--orbit-play-state); }
+.animate-custom-billboard { animation: custom-billboardCancel var(--orbit-duration) linear infinite; animation-play-state: var(--orbit-play-state); }
+.animate-custom-sun-pulse { animation: custom-sun-pulse 4s ease-in-out infinite alternate; }
+.animate-custom-spin-cw { animation: custom-spin-clockwise 20s linear infinite; }
+.animate-custom-spin-ccw { animation: custom-spin-counter 30s linear infinite; }
 
-  .ornament-divider::before,
-  .ornament-divider::after {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(
-      to left,
-      transparent,
-      var(--ornament),
-      transparent
-    );
-  }
+.orbit-food-img {
+  position: absolute; left: 50%; top: 50%; max-width: none; max-height: none;
+  pointer-events: auto; user-select: none; cursor: pointer;
+  transition: filter 0.3s ease; will-change: transform;
+}
+.orbit-logo-card {
+  position: absolute; left: 50%; top: 50%; display: flex; align-items: center; gap: 8px;
+  padding: 0.45rem 0.95rem; background: rgba(10, 10, 12, 0.65);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 100px;
+  font-weight: 600; color: #ffffff; white-space: nowrap; user-select: none;
+  cursor: pointer; pointer-events: auto;
+  transition: border-color 0.3s, color 0.3s, background 0.3s, box-shadow 0.3s, scale 0.3s;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    transition-duration: 0s;
-  }
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0s !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0s !important;
-  }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  .ticker { overflow-x: auto; }
+  .ticker-track, .solar-system .animate-custom-orbit, .solar-system .animate-custom-billboard,
+  .solar-system .animate-custom-sun-pulse, .solar-system .animate-custom-spin-cw,
+  .solar-system .animate-custom-spin-ccw { animation: none !important; }
 }

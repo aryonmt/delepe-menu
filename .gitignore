@@ -48,5 +48,6 @@ storage/
 
 # generated AI context dump (regenerate with scripts/dump_project_for_ai.py)
 ai-context.txt
+frontend-context.txt
 scripts/dump_project_for_ai.py
-scripts/dumb_project_for_ai.py
+scripts/dump_frontend_for_ai.py

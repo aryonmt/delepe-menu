@@ -1,20 +1,48 @@
 /** All user-facing Persian copy. Components import keys — never hardcode UI strings. */
 export const strings = {
   meta: {
-    title: "دلِپ · منوی دیجیتال",
-    description: "منوی دیجیتال کافه‌رستوران دلِپ",
+    title: "دِ‌لِ‌پِ · منوی دیجیتال",
+    description: "منوی دیجیتال کافه‌رستوران دِ‌لِ‌پِ",
+  },
+  brand: {
+    /**
+     * Locked brand string (D1). Never normalize or retype — includes ZWNJ.
+     * Unicode: U+062F U+0650 U+200C U+0644 U+0650 U+200C U+067E U+0650
+     */
+    wordmark: "دِ‌لِ‌پِ",
   },
   public: {
     emptyTitle: "منو به‌زودی تکمیل می‌شود",
     emptyHint: "به‌زودی فهرست غذاها و نوشیدنی‌ها اینجا می‌آید.",
     footer: "دلِپ · منوی دیجیتال",
     homeLink: "بازگشت به منو",
-    unavailable: "ناموجود",
+    unavailable: "امروز تموم شد",
     fromPrice: "از",
     subtitle: "منوی دیجیتال",
     otherCategory: "سایر",
     categoriesAria: "دسته‌ها",
     percentSign: "٪",
+    allSubcategories: "همه",
+    subcategoriesAria: "زیردسته‌ها",
+    expandVariants: "نمایش تنوع‌ها",
+    collapseVariants: "بستن تنوع‌ها",
+    loadingHint: "در حال آماده‌سازی سفره…",
+    scrollHint: "منو",
+    dockAria: "دسته‌های منو",
+    tickerAria: "پیشنهادهای منو",
+    peekAria: "جزئیات غذا",
+    closePeek: "بستن",
+  },
+  hero: {
+    pizza: "پیتزا",
+    coffee: "قهوه",
+    cookie: "کوکی",
+    salad: "سالاد",
+    coldDrink: "آیس‌کافه",
+    dessert: "کیک",
+    burger: "برگر",
+    sandwich: "ساندویچ",
+    solarAria: "مدار محصولات دِ‌لِ‌پِ",
   },
   badges: {
     POPULAR: "پرفروش",
@@ -59,6 +87,13 @@ export const strings = {
   },
   admin: {
     productsHeading: "محصولات",
+    settingsHeading: "تنظیمات",
+    restaurantName: "نام رستوران",
+    unavailableMode: "وضعیت ناموجودها",
+    unavailableMuted: "نمایش کم‌رنگ",
+    unavailableHide: "پنهان کردن",
+    save: "ذخیره",
+    settingsSaved: "تنظیمات ذخیره شد",
   },
 } as const;
 

@@ -9,6 +9,7 @@ const config: Config = {
         foreground: "var(--foreground)",
         card: {
           DEFAULT: "var(--card)",
+          2: "var(--card-2)",
           foreground: "var(--card-foreground)",
         },
         primary: {
@@ -21,9 +22,12 @@ const config: Config = {
         },
         muted: {
           DEFAULT: "var(--muted)",
+          2: "var(--muted-2)",
           foreground: "var(--muted-foreground)",
         },
         border: "var(--border)",
+        line: "var(--line)",
+        glow: "var(--glow)",
         ring: "var(--ring)",
         destructive: {
           DEFAULT: "var(--destructive)",
@@ -52,26 +56,30 @@ const config: Config = {
       borderRadius: {
         DEFAULT: "var(--radius)",
         lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        md: "calc(var(--radius) - 3px)",
+        sm: "calc(var(--radius) - 6px)",
         card: "var(--radius-card)",
         image: "var(--radius-image)",
         drawer: "var(--radius-drawer)",
+        stamp: "var(--radius-stamp)",
       },
       fontFamily: {
         sans: ["IRANSans", "var(--font-vazir)", "sans-serif"],
         display: ["var(--font-display)", "serif"],
       },
       fontSize: {
-        body: ["15px", { lineHeight: "1.9" }],
-        secondary: ["12.5px", { lineHeight: "1.8" }],
-        "card-title": ["15.5px", { lineHeight: "1.5", fontWeight: "700" }],
+        body: ["15px", { lineHeight: "1.8" }],
+        secondary: ["12.5px", { lineHeight: "1.7" }],
+        "card-title": ["16px", { lineHeight: "1.35", fontWeight: "800" }],
         section: ["22px", { lineHeight: "1.3" }],
-        hero: ["36px", { lineHeight: "1.2" }],
-        price: ["15px", { lineHeight: "1.5", fontWeight: "700" }],
+        hero: ["36px", { lineHeight: "1.15" }],
+        price: ["17px", { lineHeight: "1.4", fontWeight: "700" }],
       },
       boxShadow: {
-        warm: "0 8px 24px rgb(42 33 26 / 0.08)",
+        card: "var(--shadow-card)",
+        lift: "var(--shadow-lift)",
+        stamp: "var(--shadow-stamp)",
+        pill: "var(--shadow-pill)",
       },
       transitionDuration: {
         fast: "150ms",

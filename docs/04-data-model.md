@@ -84,7 +84,7 @@ model AdminUser {
   username     String   @unique
   passwordHash String
   createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  updatedAt    DateTime @updatedAt()
 }
 ```
 
@@ -104,7 +104,7 @@ model AdminUser {
 | BR-05 | Effective price = `discountActive && discountedPrice ? discountedPrice : price` (variants never discounted, BR-14) |
 | BR-06 | When variants exist, the public card shows «از » + `formatPrice(price)` where `price` = min(variant prices) per BR-13, plus an expand chevron |
 | BR-07 | Reorder commands receive an ordered id array; persistence writes 10/20/30… gaps |
-| BR-08 | Public menu hides categories with zero visible products. `HIDE` removes unavailable products server-side; `MUTED` renders them grayscale + «ناموجود» |
+| BR-08 | Public menu hides categories with zero visible products. `HIDE` removes unavailable products server-side; `MUTED` renders them grayscale + «امروز تموم شد» |
 | BR-09 | Product name unique per category; category name unique per parent — **enforced in use-cases** (see schema note) |
 | BR-10 | Settings is a singleton (id = 1), always upserted |
 | BR-11 | Upload: JPG/PNG/WebP by magic bytes, ≤ 5MB, 4:3 ratio enforced (±2% tolerance server-side) |
@@ -133,10 +133,8 @@ type CategoryDto = {
   children: CategoryDto[]; products: ProductDto[];
 };
 type SettingsDto = { restaurantName: string; theme: ThemeName; unavailableMode: UnavailableMode };
-
 type AdminMenuDto  = { settings: SettingsDto; categories: CategoryDto[] };  // unfiltered
 type PublicMenuDto = { settings: SettingsDto; categories: CategoryDto[] };  // BR-08 applied
-
 type ActionResult<T> =
   | { ok: true; data: T }
   | { ok: false; error: { code: string; fa: string } };
@@ -221,6 +219,9 @@ Prices are in **toman**. `sortOrder` = list order (10, 20, …).
 Two placeholder prices are marked *(owner must verify)*.
 Names use ZWNJ (نیم‌فاصله) per doc 05. `description` and `imageKeyword` are
 authored here — the seed copies them verbatim (no agent invention at seed time).
+The products, categories, prices, badges, and availability below are **sample
+data** used to demonstrate the UI; in the real system they are Admin-managed
+content. Layout logic must never depend on their names, counts, or composition.
 
 ### Category tree
 
@@ -391,17 +392,22 @@ authored here — the seed copies them verbatim (no agent invention at seed time
 
 ## Seed behavior
 
-1. `prisma/seed.ts` upserts settings (`restaurantName: "دلِپ"`), the category tree,
-   and all products above with the exact `description` / `imageKeyword` values
-   from these tables.
+1. `prisma/seed.ts` upserts settings (`restaurantName: "دِ‌لِ‌پِ"` — the exact
+   brand string per doc 05), the category tree, and all products above with the
+   exact `description` / `imageKeyword` values from these tables. Sample product
+   names containing the brand (e.g. «بمب دلِپ») are Admin-managed content and are
+   intentionally left unchanged.
 2. **Admin bootstrap**: an admin is created from `ADMIN_USERNAME`/`ADMIN_PASSWORD`
    **only when `AdminUser` count = 0** (idempotent; re-seeding never resets the
    owner's password).
 3. **Images (deterministic, ADR-10)**: by default the seed rasterizes a branded
-   SVG placeholder per product (theme-colored gradient + category glyph + product
-   initial) into `uploads/` (not `uploads/seed/`). With `SEED_DOWNLOAD_IMAGES=true`
-   it uses keyword-seeded picsum photos as stand-ins, sequential, until real
-   photos exist; any failure falls back to the SVG for that product. E2E never
+   SVG placeholder per product («پاتوق»-hued gradient + product initial + category
+   name; no emoji glyphs) into `uploads/` (not `uploads/seed/`). With
+   `SEED_DOWNLOAD_IMAGES=true` it downloads curated food photography from the
+   fixed keyword→URL map (ADR-10), at seed time only, through the optimizer into
+   self-hosted storage; any failure falls back to the SVG for that product. These
+   downloads are temporary development stand-ins — the owner's real product
+   photography replaces them per-media later with no layout change. E2E never
    depends on downloaded photos. If a product's original file is missing, the
    old Media row and its files (`deleteAll`) are removed before a new one is created.
 4. Seed is idempotent (`upsert` by category/name; skip existing files).

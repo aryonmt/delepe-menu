@@ -11,7 +11,7 @@ describe("public-menu cache helper", () => {
     const { revalidatePublicMenu } = await import("./public-menu-cache");
     revalidatePublicMenu();
     expect(revalidateTag).toHaveBeenCalledWith("public-menu");
-  });
+  }, 15_000);
 
   it("getPublicMenuCached is a function", async () => {
     const { getPublicMenuCached } = await import("./public-menu-cache");

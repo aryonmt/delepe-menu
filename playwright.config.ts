@@ -28,12 +28,12 @@ export default defineConfig({
     hasTouch: true,
   },
   webServer: {
-    // Clean `.next` so ISR HTML is generated against the test DATABASE_URL, not a
-    // leftover production build that used the dev database.
+    // Seed MUTED settings then rebuild ISR against the test DB (globalSetup also
+    // seeds; this second seed covers webServer-before-globalSetup ordering).
     command:
       process.platform === "win32"
-        ? "cmd /c \"if exist .next rmdir /s /q .next && pnpm build && pnpm start\""
-        : "rm -rf .next && pnpm build && pnpm start",
+        ? "cmd /c \"if exist .next rmdir /s /q .next && pnpm db:seed && pnpm build && pnpm start\""
+        : "rm -rf .next && pnpm db:seed && pnpm build && pnpm start",
     url: `${baseURL}/api/health`,
     reuseExistingServer: !process.env.CI,
     timeout: 240_000,

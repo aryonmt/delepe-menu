@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { markaziText, vazirmatn } from "@/lib/fonts";
+import { lalezar, vazirmatn } from "@/lib/fonts";
 import { strings } from "@/lib/fa/strings";
 import "./globals.css";
 
@@ -15,13 +15,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="fa"
-      dir="rtl"
-      data-theme="warm-honey"
-      className={`${vazirmatn.variable} ${markaziText.variable}`}
-    >
-      <body className="min-h-screen bg-background font-sans text-body text-foreground antialiased">
+    <html lang="fa" dir="rtl" className={`${vazirmatn.variable} ${lalezar.variable}`}>
+      <body className="min-h-screen bg-background font-sans text-foreground antialiased">
         {children}
       </body>
     </html>

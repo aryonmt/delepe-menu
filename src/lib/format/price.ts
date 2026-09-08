@@ -1,3 +1,4 @@
+import { strings } from "@/lib/fa/strings";
 import { toPersianDigits } from "./digits";
 
 const MOMAYYEZ = "\u066B";
@@ -15,7 +16,7 @@ export function formatPrice(p: number): string {
 
 /** Variant-card prefix: «از » + formatted price (BR-06). */
 export function formatPriceFrom(p: number): string {
-  return `از ${formatPrice(p)}`;
+  return `${strings.public.fromPrice} ${formatPrice(p)}`;
 }
 
 function formatBelowMillion(p: number): string {

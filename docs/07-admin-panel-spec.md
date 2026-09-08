@@ -12,7 +12,7 @@ Visual quality must match the public menu (same design system, doc 05).
 | `/admin` | Redirects to `/admin/products` |
 | `/admin/products` | Product list + drawer form + dnd reorder + preview button |
 | `/admin/categories` | Two-level tree CRUD + dnd reorder |
-| `/admin/settings` | Restaurant name, theme picker, unavailable mode |
+| `/admin/settings` | Restaurant name, unavailable mode |
 
 Middleware protects `/admin/**` and `/api/admin/**` (docs 03, 10).
 Successful login redirects to `/admin/products`.
@@ -132,11 +132,12 @@ messages + error toast.
 ## Settings page
 
 - Restaurant name input (1..80).
-- Theme picker: 4 cards rendering a mini live preview (hero + 2 cards) using the
-  actual tokens; selected = ring; applies to the preview immediately, to the
-  public site after save.
+- Theme picker — **Deferred (ADR-12)**: the `theme` field persists in the data
+  model and the form keeps its hidden input, but no picker is built in v1; the
+  public UI renders the single «پاتوق» identity (doc 05) regardless of the
+  stored value.
 - Unavailable mode: two radio cards with tiny visual examples
-  (HIDE: hidden-card icon · MUTED: grayscale thumb + «ناموجود»).
+  (HIDE: hidden-card icon · MUTED: grayscale thumb + «امروز تموم شد» stamp).
 - Single «ذخیره» button → `UpdateSettings` → toast.
 
 ## Live preview (phone frame)
@@ -144,7 +145,9 @@ messages + error toast.
 - Drawer (desktop: side panel 380px; mobile: full-screen sheet).
 - `PhoneFrame`: rounded device bezel, notch, status bar (Persian-digits clock),
   scrollable viewport rendering the **pure public components** fed with
-  `toPublicMenu(draft)` and the draft theme.
+  `toPublicMenu(draft)` (the single «پاتوق» identity; the stored theme value is
+  visually inert per ADR-12). The preview renders the shared public components,
+  including the bottom dock, inside the phone frame.
 - Buttons: «بازگشت به منوی ذخیره‌شده» (`resetToSaved`), «بستن».
 
 ## Acceptance criteria (highlights — automatable unless noted)
@@ -152,12 +155,9 @@ messages + error toast.
 1. Owner adds a product with image in < 2 minutes (manual usability pass).
 2. Editing a price in the form updates the phone preview instantly (no save).
 3. Upload shows real progress; a wrong-ratio file is rejected with a Persian message.
-4. Reorder persists after reload; the public menu reflects the new order after
-   revalidation.
+4. Reorder persists after reload; the public menu reflects the new order after revalidation.
 5. Deleting a category with products shows the guard toast; nothing is deleted.
 6. Dirty form + sidebar navigation → confirm dialog appears.
 7. Cancelling the product drawer after edits leaves list and preview unchanged.
-8. Typing Persian digits («۱۲۵۰۰۰») in the price field validates and saves as
-   125000.
-9. A product with variants shows no discount section and an auto-filled,
-   disabled price equal to the cheapest variant.
+8. Typing Persian digits («۱۲۵۰۰۰») in the price field validates and saves as 125000.
+9. A product with variants shows no discount section and an auto-filled, disabled price equal to the cheapest variant.
