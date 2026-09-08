@@ -5,6 +5,7 @@ import { CreateCategoryUseCase } from "@/application/use-cases/categories/create
 import { CreateProductUseCase } from "./create-product";
 import { DeleteProductUseCase } from "./delete-product";
 import { UpdateProductUseCase } from "./update-product";
+import { productDtoToUpdateInput } from "@/application/mappers/product-dto-to-update-input";
 
 describe("CreateProductUseCase", () => {
   it("rejects a non-leaf category (BR-15)", async () => {
@@ -189,6 +190,37 @@ describe("UpdateProductUseCase", () => {
     });
     expect(updated.name).toBe("لاته");
     expect(updated.id).toBe(created.id);
+  });
+
+  it("keeps media when toggling availability via productDtoToUpdateInput", async () => {
+    const repos = createRepos();
+    const { leaf } = await seedLeafCategory(repos);
+    await repos.media.create({
+      id: "pic",
+      fileName: "pic.jpg",
+      mimeType: "image/jpeg",
+      width: 800,
+      height: 800,
+      dominantColor: "#123456",
+      path: "uploads/pic.jpg",
+    });
+    const created = await new CreateProductUseCase(
+      repos.products,
+      repos.categories,
+    ).execute({
+      name: "لاته",
+      price: 250_000,
+      categoryId: leaf.id,
+      mediaId: "pic",
+    });
+    const updated = await new UpdateProductUseCase(
+      repos.products,
+      repos.categories,
+      repos.media,
+      repos.storage,
+    ).execute(productDtoToUpdateInput(created, { isAvailable: false }));
+    expect(updated.isAvailable).toBe(false);
+    expect(updated.media?.id).toBe("pic");
   });
 });
 

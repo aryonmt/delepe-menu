@@ -21,7 +21,7 @@ export function SettingsForm({ settings }: Props) {
   const theme = state?.ok ? state.data.theme : settings.theme;
 
   return (
-    <form action={action} className="mt-8 flex flex-col gap-6">
+    <form action={action} data-testid="settings-form" className="mt-8 flex flex-col gap-6">
       {state && !state.ok ? (
         <p
           role="alert"

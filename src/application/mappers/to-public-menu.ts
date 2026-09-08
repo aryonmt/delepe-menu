@@ -16,7 +16,12 @@ export function toPublicMenu(input: AdminMenuDto): PublicMenuDto {
     .map((category) => filterCategory(category, hideUnavailable))
     .filter(hasVisibleProducts);
   return {
-    settings: { ...input.settings },
+    settings: {
+      ...input.settings,
+      tickerProductIds: Array.isArray(input.settings.tickerProductIds)
+        ? [...input.settings.tickerProductIds]
+        : [],
+    },
     categories,
   };
 }

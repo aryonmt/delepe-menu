@@ -1,3 +1,4 @@
+// src/application/testing/harness.ts
 import { SORT_ORDER_GAP } from "@/lib/constants";
 import { createInMemoryRepos, type InMemoryRepos } from "@/domain/testing/create-repos";
 
@@ -6,10 +7,7 @@ export async function seedLeafCategory(repos: InMemoryRepos, name = "برگر") 
     { name: "غذای اصلی", parentId: null },
     SORT_ORDER_GAP,
   );
-  const leaf = await repos.categories.create(
-    { name, parentId: root.id },
-    SORT_ORDER_GAP,
-  );
+  const leaf = await repos.categories.create({ name, parentId: root.id }, SORT_ORDER_GAP);
   return { root, leaf };
 }
 
@@ -18,6 +16,7 @@ export function defaultSettings() {
     restaurantName: "دلِپ",
     theme: "WARM_HONEY" as const,
     unavailableMode: "MUTED" as const,
+    tickerProductIds: [] as string[],
   };
 }
 

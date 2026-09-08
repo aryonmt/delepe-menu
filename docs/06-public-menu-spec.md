@@ -46,14 +46,16 @@ components remain **pure/presentational** (reused by the admin live preview).
    a parent render under the «سایر» sub-header (existing rule).
 3. **Footer mini** — three-spark divider + `strings.public.footer`.
 
-Overlays (not in flow): **context strip** (sticky top), **dock/spine**
+Overlays (not in flow): **menu nav header** (sticky top: tabs row + context
+strip row), Dish Peek dialog.
 (bottom on mobile / top on `md+`), **Dish Peek** dialog.
 
 ## Behaviors
 
 | ID | Behavior |
 | --- | --- |
-| B-01 Dock & scrollspy | Tap → **near-instant jump** (`scrollIntoView({behavior:"auto"})`) + 250ms settle choreography (opacity/y on the arriving chapter header). Observer-ignore window 600ms. Scrollspy IO `rootMargin:"-30% 0px -55%"`. Active tab indicator springs (`layoutId`); active tab scrolls into view within the dock. `role=tablist/tab` + arrow-key nav preserved (RTL-aware). |
+| B-01 Nav & scrollspy | Tap → near-instant jump (`scrollIntoView({behavior:"auto"})`) offset by the nav header height (`NAV_OFFSET_MOBILE_PX` / `NAV_OFFSET_DESKTOP_PX`) + 250ms settle choreography. Observer-ignore window 600ms. Scrollspy IO focal line 130px below viewport top. |
+
 | B-02 Chips | Filter within active chapter; `popLayout` relayout; «همه» default; strip shows chapter name + chips when children exist. |
 | B-03 Signature tier | Per doc 05 «Signature tier — UI behavior vs content responsibility»: every POPULAR product becomes a signature card; no UI cap; the designation is Admin-owned content; the layout stays graceful for any POPULAR count (self-contained full-width blocks in normal flow). |
 | B-04 Cards | Standard card per doc 05; tap → press scale + open Dish Peek (no navigation, no route). |
@@ -62,7 +64,7 @@ Overlays (not in flow): **context strip** (sticky top), **dock/spine**
 | B-07 Discount | BR-14 (no variants) + BR-04/05; ember price + struck original + −٪ stamp; formula `−{round((1−disc/price)·100)}٪`. |
 | B-08 Badges | doc 05 map; max 2 + `+n`. |
 | B-09 Unavailable | `HIDE` → excluded by the mapper. `MUTED` → grayscale + opacity .7 + «امروز تموم شد» stamp. Copy maps to the single `isAvailable` boolean; if richer availability semantics are ever added to the model, copy mapping must be extended in this doc first. |
-| B-10 Ticker | Items = flattened available products in chapter order, limited to `TICKER_MAX_ITEMS = 16` — **presentation-only** (doc 05): the ticker chooses up to 16 items for display; it never affects menu contents. Unavailable items excluded from the ticker. CSS marquee 40s; paused on hover for fine pointers only (a tap must never freeze it) and static under reduced motion. Tap → instant jump to the card + 600ms ember highlight flash. |
+| B-10 Ticker | Items = `resolveTickerItems(publicMenu)`: curated `settings.tickerProductIds` filtered to available products, capped at `TICKER_MAX_ITEMS = 16`; empty curation falls back to flattened available products in chapter order. Unavailable items never appear. CSS marquee 40s; paused on hover for fine pointers; static under reduced motion. Tap → instant jump + 600ms ember flash. |
 | B-11 Hero | Wordmark ignition once (900ms); `h1` semantics; `data-testid="hero"`. **Binding:** doc 05 «Hero — high-priority visual experimentation area» applies — structural spec plus Phase 1 evaluation/iteration mandate. |
 | B-12 Images | `MenuImage` + media loader (doc 03); tiered `sizes`: standard `(max-width:768px) 160px, 200px` · signature `(max-width:768px) 100vw, 640px` · peek `960px` fixed. First 4 images `priority`, rest lazy. `dominantColor` placeholder + shimmer; error → placeholder art. **No `<img>` may precede menu product images in DOM order** (`media.spec` extracts the first `img[alt]`). |
 | B-13 Empty rules | Mapper prunes empties (BR-08); zero categories → global empty state. |

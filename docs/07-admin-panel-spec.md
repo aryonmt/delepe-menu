@@ -108,7 +108,7 @@ messages + error toast.
 ### Upload editor (modal)
 
 1. Pick/drag file (JPG/PNG/WebP ≤5MB, client pre-check).
-2. `react-easy-crop`: fixed 4:3 aspect, rotate slider, zoom.
+2. `react-easy-crop`: fixed 1:1 aspect, rotate slider, zoom.
 3. Crop → canvas → JPEG blob (q .92) → **XHR** POST `/api/admin/media/upload`
    (real progress bar via `xhr.upload.onprogress`).
 4. Server: auth → magic-bytes → size → ratio ±2% (BR-11) → save original →
@@ -139,7 +139,10 @@ messages + error toast.
 - Unavailable mode: two radio cards with tiny visual examples
   (HIDE: hidden-card icon · MUTED: grayscale thumb + «امروز تموم شد» stamp).
 - Single «ذخیره» button → `UpdateSettings` → toast.
-
+- **Ticker curation card** («پیشنهادهای منو»): sortable list of curated product
+  ids (dnd handle + remove), grouped add-select, save persists
+  `tickerProductIds` via `UpdateSettings` and revalidates the public menu.
+  
 ## Live preview (phone frame)
 
 - Drawer (desktop: side panel 380px; mobile: full-screen sheet).

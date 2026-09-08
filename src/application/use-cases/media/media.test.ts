@@ -19,7 +19,7 @@ describe("UploadMediaUseCase", () => {
     const upload = new UploadMediaUseCase(repos.optimizer, repos.media);
     const bytes = new Uint8Array([0x00, 0x01, 0x02, 0x03]);
     await expect(
-      upload.execute({ bytes, width: 800, height: 600, fileName: "x.bin" }),
+      upload.execute({ bytes, width: 800, height: 800, fileName: "x.bin" }),
     ).rejects.toSatisfy(
       (error: unknown) =>
         error instanceof ValidationError && error.code === "INVALID_UPLOAD",
@@ -33,7 +33,7 @@ describe("UploadMediaUseCase", () => {
       upload.execute({
         bytes: jpegBytes(UPLOAD_MAX_BYTES + 1),
         width: 800,
-        height: 600,
+        height: 800,
         fileName: "big.jpg",
       }),
     ).rejects.toSatisfy(
@@ -42,15 +42,15 @@ describe("UploadMediaUseCase", () => {
     );
   });
 
-  it("rejects an aspect ratio outside 4:3 ±2% (BR-11)", async () => {
+  it("rejects an aspect ratio outside 1:1 ±2% (BR-11)", async () => {
     const repos = createRepos();
     const upload = new UploadMediaUseCase(repos.optimizer, repos.media);
     await expect(
       upload.execute({
         bytes: jpegBytes(200),
-        width: 1000,
-        height: 1000,
-        fileName: "square.jpg",
+        width: 800,
+        height: 600,
+        fileName: "landscape.jpg",
       }),
     ).rejects.toSatisfy(
       (error: unknown) =>
@@ -58,17 +58,17 @@ describe("UploadMediaUseCase", () => {
     );
   });
 
-  it("stores a valid 4:3 jpeg and returns media metadata (BR-11)", async () => {
+  it("stores a valid 1:1 jpeg and returns media metadata (BR-11)", async () => {
     const repos = createRepos();
     const result = await new UploadMediaUseCase(repos.optimizer, repos.media).execute({
       bytes: jpegBytes(200),
       width: 800,
-      height: 600,
+      height: 800,
       fileName: "latte.jpg",
     });
     expect(result.mediaId).toBeTruthy();
     expect(result.width).toBe(800);
-    expect(result.height).toBe(600);
+    expect(result.height).toBe(800);
     expect(result.dominantColor).toMatch(/^#[0-9A-Fa-f]{6}$/);
   });
 });
@@ -79,7 +79,7 @@ describe("DeleteMediaUseCase", () => {
     const uploaded = await new UploadMediaUseCase(repos.optimizer, repos.media).execute({
       bytes: jpegBytes(200),
       width: 800,
-      height: 600,
+      height: 800,
       fileName: "x.jpg",
     });
     await new DeleteMediaUseCase(repos.media, repos.storage).execute({

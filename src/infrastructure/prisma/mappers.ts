@@ -1,3 +1,4 @@
+// src/infrastructure/prisma/mappers.ts
 import type {
   Category as PrismaCategory,
   Media as PrismaMedia,
@@ -68,26 +69,32 @@ export function toCategory(row: PrismaCategory): Category {
   };
 }
 
+function stringIds(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === "string");
+}
+
 export function toSettings(row: PrismaSettings): Settings {
+  // Read by key so a stale generated PrismaSettings type (missing the
+  // tickerProductIds field until `prisma generate`) does not fail typecheck.
   return {
     id: 1,
     restaurantName: row.restaurantName,
     theme: row.theme as ThemeName,
     unavailableMode: row.unavailableMode as UnavailableMode,
+    tickerProductIds: stringIds(
+      (row as unknown as Record<string, unknown>)["tickerProductIds"],
+    ),
   };
 }
 
 type PrismaCategoryTree = PrismaCategory & {
   children: Array<
     PrismaCategory & {
-      products: Array<
-        PrismaProduct & { variants: PrismaVariant[]; media: PrismaMedia | null }
-      >;
+      products: Array<PrismaProduct & { variants: PrismaVariant[]; media: PrismaMedia | null }>;
     }
   >;
-  products: Array<
-    PrismaProduct & { variants: PrismaVariant[]; media: PrismaMedia | null }
-  >;
+  products: Array<PrismaProduct & { variants: PrismaVariant[]; media: PrismaMedia | null }>;
 };
 
 export function toCategoryNode(row: PrismaCategoryTree): CategoryNode {

@@ -27,6 +27,7 @@ function adminMenu(
       restaurantName: "دلِپ",
       theme: "WARM_HONEY",
       unavailableMode,
+      tickerProductIds: [],
     },
     categories,
   };

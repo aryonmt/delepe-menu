@@ -72,11 +72,12 @@ model Media {
 }
 
 model Settings {
-  id              Int             @id @default(1)   // singleton row
-  restaurantName  String
-  theme           ThemeName       @default(WARM_HONEY)
-  unavailableMode UnavailableMode @default(MUTED)
-  updatedAt       DateTime        @updatedAt
+  id               Int             @id @default(1)   // singleton row
+  restaurantName   String
+  theme            ThemeName       @default(WARM_HONEY)
+  unavailableMode  UnavailableMode @default(MUTED)
+  tickerProductIds String[]        @default([])      // curated hero-ticker order; empty = auto
+  updatedAt        DateTime        @updatedAt
 }
 
 model AdminUser {
@@ -107,7 +108,7 @@ model AdminUser {
 | BR-08 | Public menu hides categories with zero visible products. `HIDE` removes unavailable products server-side; `MUTED` renders them grayscale + «امروز تموم شد» |
 | BR-09 | Product name unique per category; category name unique per parent — **enforced in use-cases** (see schema note) |
 | BR-10 | Settings is a singleton (id = 1), always upserted |
-| BR-11 | Upload: JPG/PNG/WebP by magic bytes, ≤ 5MB, 4:3 ratio enforced (±2% tolerance server-side) |
+| BR-11 | Upload: JPG/PNG/WebP by magic bytes, ≤ 5MB, 1:1 ratio enforced (±2% tolerance server-side) |
 | BR-12 | Prices: integer tomans, **1,000 ≤ p ≤ 100,000,000** |
 | BR-13 | Products with ≥ 1 variant: `price` is system-maintained = `min(variant prices)`, recomputed by use-cases on every variant add/update/remove/reorder. The form disables manual price input when variants exist. Products without variants: `price` is manual |
 | BR-14 | Discount (`discountedPrice`/`discountActive`) is allowed only when `variants.length === 0`. Use-cases reject otherwise; the form hides the discount section when variants exist |
@@ -163,7 +164,7 @@ MUTED passthrough, empty-category pruning). Used by `GetPublicMenuUseCase`
 | ReorderProducts | orderedIds[], categoryId | void | ValidationError (BR-07) |
 | UploadMedia | file bytes + meta | `{ mediaId, dominantColor, width, height }` | ValidationError (BR-11), UnauthorizedError |
 | DeleteMedia | mediaId | void | NotFoundError |
-| GetSettings / UpdateSettings | — / restaurantName, theme, unavailableMode | SettingsDto | ValidationError |
+restaurantName, theme, unavailableMode, tickerProductIds? (ordered ids; omitted = preserve existing)
 | Login | username, password | session cookie set | ValidationError, RateLimitError (doc 10) |
 | Logout / ChangePassword | — / current, next | void | UnauthorizedError, ValidationError |
 | VerifySession | cookie | `{ adminId }` | UnauthorizedError |

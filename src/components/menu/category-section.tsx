@@ -1,5 +1,5 @@
+// src/components/menu/category-section.tsx
 "use client";
-
 import type { CategoryDto, ProductDto } from "@/application/dtos";
 import { strings } from "@/lib/fa/strings";
 import { ChapterHeader, SubHeader } from "./chapter-header";
@@ -28,19 +28,17 @@ export function CategorySection({
     hasChildren && !isAllChips(chipId)
       ? (category.children.find((child) => child.id === chipId) ?? null)
       : null;
-
   return (
     <section
       id={`section-${category.id}`}
       data-testid={`section-${category.name}`}
-      className="scroll-mt-[54px] md:scroll-mt-[116px]"
+      className="scroll-mt-[104px] md:scroll-mt-[112px]"
       aria-labelledby={`heading-${category.id}`}
       style={{ "--chapter-hue": `var(--chapter-hue-${(displayIndex % 6) + 1})` } as React.CSSProperties}
     >
       <div id={`heading-${category.id}`}>
         <ChapterHeader title={category.name} displayIndex={displayIndex} settling={settling} />
       </div>
-
       {!hasChildren && (
         <ProductGrid
           products={category.products}
@@ -48,7 +46,6 @@ export function CategorySection({
           onOpenPeek={onOpenPeek}
         />
       )}
-
       {hasChildren && selectedChild && (
         <div className="space-y-3">
           <SubHeader title={selectedChild.name} />
@@ -59,7 +56,6 @@ export function CategorySection({
           />
         </div>
       )}
-
       {hasChildren && !selectedChild && (
         <div className="space-y-8">
           {category.children.map((child) => (

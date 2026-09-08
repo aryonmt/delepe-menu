@@ -1,35 +1,86 @@
+// src/components/menu/dish-ticker.tsx
 "use client";
-
 import { useMemo } from "react";
 import type { ProductDto } from "@/application/dtos";
+import { mediaUrl } from "@/lib/media-url";
 import { formatPrice } from "@/lib/format/price";
 import { strings } from "@/lib/fa/strings";
 
 type Props = {
-  /** Up to TICKER_MAX_ITEMS available products — presentation only. */
+  /** Curated-or-fallback available products (docs/06 B-10). */
   items: ProductDto[];
   onJump: (product: ProductDto) => void;
 };
 
 const CHIP_CLASS =
-  "flex min-h-[44px] shrink-0 items-center gap-2 rounded-full border " +
-  "border-line bg-card/75 px-4 transition-colors duration-fast " +
-  "hover:border-primary/60 hover:bg-card " +
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+  "flex min-h-[44px] shrink-0 items-center gap-2 rounded-full border border-line " +
+  "bg-card/75 ps-1.5 pe-4 transition-colors duration-fast hover:border-primary/60 " +
+  "hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
+/** Decorative 36px thumb: background-image keeps `img[alt]` contracts intact (B-12). */
+function Thumb({ product }: { product: ProductDto }) {
+  if (!product.media) {
+    return (
+      <span
+        aria-hidden="true"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line bg-card-2 font-display text-[15px] text-ornament opacity-70"
+      >
+        ✦
+      </span>
+    );
+  }
+  return (
+    <span
+      aria-hidden="true"
+      className="h-9 w-9 shrink-0 rounded-full border border-line bg-center bg-cover"
+      style={{
+        backgroundImage: `url(${mediaUrl(product.media.id, 320)})`,
+        backgroundColor: product.media.dominantColor,
+      }}
+    />
+  );
+}
+
+function TrackChip({
+  product,
+  onJump,
+  hidden,
+}: {
+  product: ProductDto;
+  onJump: (product: ProductDto) => void;
+  hidden: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      dir="rtl"
+      tabIndex={hidden ? -1 : 0}
+      onClick={() => onJump(product)}
+      className={CHIP_CLASS}
+    >
+      <Thumb product={product} />
+      <span className="font-display whitespace-nowrap text-[13.5px] text-foreground">
+        {product.name}
+      </span>
+      <span aria-hidden="true" className="text-[10px] text-ornament">
+        ،
+      </span>
+      <span className="whitespace-nowrap text-secondary text-primary font-bold">
+        {formatPrice(product.price)}
+      </span>
+    </button>
+  );
+}
 
 export function DishTicker({ items, onJump }: Props) {
-  // Ensure the track never runs out of content, even on very wide screens.
-  // MUST be called before any early returns (Rules of Hooks).
+  // Duplicate short lists so the marquee never runs out of content.
   const sequence = useMemo(() => {
+    if (items.length === 0) return [];
     let list = items;
-    while (list.length < 8) {
-      list = [...list, ...items];
-    }
+    while (list.length < 8) list = [...list, ...items];
     return list;
   }, [items]);
-
-  if (items.length === 0) return null;
-
+  if (sequence.length === 0) return null;
   return (
     <div
       role="group"
@@ -37,55 +88,15 @@ export function DishTicker({ items, onJump }: Props) {
       data-testid="hero-ticker"
       className="ticker border-t border-line bg-background/70 backdrop-blur-md select-none"
     >
-      {/* ltr container flow so dual tracks cycle right-to-left seamlessly */}
       <div className="flex w-full overflow-hidden" dir="ltr">
-        {/* Track 1 (primary) */}
         <div className="ticker-track flex shrink-0 items-center gap-2.5 pe-2.5 py-2">
           {sequence.map((product, index) => (
-            <button
-              key={`t1-${product.id}-${index}`}
-              type="button"
-              dir="rtl"
-              onClick={() => onJump(product)}
-              className={CHIP_CLASS}
-            >
-              <span className="font-display whitespace-nowrap text-[13.5px] text-foreground">
-                {product.name}
-              </span>
-              <span aria-hidden="true" className="text-[10px] text-ornament">
-                ،
-              </span>
-              <span className="whitespace-nowrap text-secondary text-primary font-bold">
-                {formatPrice(product.price)}
-              </span>
-            </button>
+            <TrackChip key={`t1-${product.id}-${index}`} product={product} onJump={onJump} hidden={false} />
           ))}
         </div>
-
-        {/* Track 2 (seamless duplicate — aria-hidden) */}
-        <div
-          aria-hidden="true"
-          className="ticker-track flex shrink-0 items-center gap-2.5 pe-2.5 py-2"
-        >
+        <div aria-hidden="true" className="ticker-track flex shrink-0 items-center gap-2.5 pe-2.5 py-2">
           {sequence.map((product, index) => (
-            <button
-              key={`t2-${product.id}-${index}`}
-              type="button"
-              tabIndex={-1}
-              dir="rtl"
-              onClick={() => onJump(product)}
-              className={CHIP_CLASS}
-            >
-              <span className="font-display whitespace-nowrap text-[13.5px] text-foreground">
-                {product.name}
-              </span>
-              <span aria-hidden="true" className="text-[10px] text-ornament">
-                ،
-              </span>
-              <span className="whitespace-nowrap text-secondary text-primary font-bold">
-                {formatPrice(product.price)}
-              </span>
-            </button>
+            <TrackChip key={`t2-${product.id}-${index}`} product={product} onJump={onJump} hidden={true} />
           ))}
         </div>
       </div>

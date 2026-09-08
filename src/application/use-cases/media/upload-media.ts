@@ -9,7 +9,7 @@ import {
 } from "@/lib/constants";
 import { parseOrThrow } from "@/application/use-cases/shared/parse";
 
-/** BR-11: magic bytes, size, 4:3 ±2%, then persist via optimizer + media repo. */
+/** BR-11: magic bytes, size, 1:1 ±2%, then persist via optimizer + media repo. */
 export class UploadMediaUseCase {
   constructor(
     private readonly optimizer: ImageOptimizer,

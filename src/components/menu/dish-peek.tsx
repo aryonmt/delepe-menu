@@ -75,7 +75,7 @@ export function DishPeek({ product, onClose }: Props) {
                 {strings.public.peekAria}
               </Dialog.Description>
 
-              <div className="relative mb-4 aspect-[4/3] w-full overflow-hidden rounded-image">
+              <div className="relative mb-4 aspect-square w-full overflow-hidden rounded-image">
                 <MenuImage
                   media={product.media}
                   alt={product.name}

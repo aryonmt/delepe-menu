@@ -21,7 +21,7 @@ Exact patch versions are locked in `package.json` / lockfile; this table pins th
 | Client state | zustand | 5.x | Admin draft store (live preview backbone, doc 07) |
 | DnD | @dnd-kit/core + @dnd-kit/sortable | 6.x | Accessible drag-and-drop for ordering |
 | Forms | React Hook Form + @hookform/resolvers + Zod | RHF 7.x · resolvers 5.x · zod 4.x | Typed validation, Persian messages |
-| Crop | react-easy-crop | 5.x | Client crop/rotate with 4:3 lock |
+| Crop | react-easy-crop | 5.x | Client crop/rotate with 1:1 lock |
 | ORM | Prisma | 6.x | Type-safe, migrations, AI-friendly |
 | DB | PostgreSQL | 16 | Relational integrity, enum arrays, Docker-friendly |
 | Auth hashing | @node-rs/argon2 | 2.x | argon2id, prebuilt binaries (no node-gyp in Docker) |
@@ -71,7 +71,7 @@ Exact patch versions are locked in `package.json` / lockfile; this table pins th
   **no emoji glyphs**) by default — fully offline, byte-stable, zero network
   dependency. Optional `SEED_DOWNLOAD_IMAGES=true` downloads **curated food
   photography** per `imageKeyword` (doc 04) from a fixed keyword→URL map
-  (Unsplash CDN with `w=800&h=600&fit=crop` params and/or FoodiesFeed CC0) —
+  (Unsplash CDN with `w=800&h=800&fit=crop` params and/or FoodiesFeed CC0) —
   **at seed time only**, through `SharpImageOptimizer` into self-hosted
   `storage/`, with SVG fallback on any failure. License provenance for every
   curated URL is recorded in `prisma/seed-assets.md` (created with the seed

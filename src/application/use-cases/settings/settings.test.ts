@@ -1,3 +1,4 @@
+// src/application/use-cases/settings/settings.test.ts
 import { describe, expect, it } from "vitest";
 import { NotFoundError, ValidationError } from "@/domain/errors";
 import { createRepos, defaultSettings } from "@/application/testing/harness";
@@ -22,6 +23,39 @@ describe("UpdateSettingsUseCase", () => {
     expect(second.theme).toBe("MIDNIGHT_GOLD");
     expect((await repos.settings.get())?.id).toBe(1);
   });
+  it("preserves the ticker curation when the payload omits it", async () => {
+    const repos = createRepos();
+    const update = new UpdateSettingsUseCase(repos.settings);
+    await update.execute({
+      restaurantName: "دلِپ",
+      theme: "WARM_HONEY",
+      unavailableMode: "MUTED",
+      tickerProductIds: ["a", "b"],
+    });
+    const saved = await update.execute({
+      restaurantName: "دلِپ ۲",
+      theme: "WARM_HONEY",
+      unavailableMode: "MUTED",
+    });
+    expect(saved.tickerProductIds).toEqual(["a", "b"]);
+  });
+  it("replaces the curation when the payload sends one", async () => {
+    const repos = createRepos();
+    const update = new UpdateSettingsUseCase(repos.settings);
+    await update.execute({
+      restaurantName: "دلِپ",
+      theme: "WARM_HONEY",
+      unavailableMode: "MUTED",
+      tickerProductIds: ["a"],
+    });
+    const saved = await update.execute({
+      restaurantName: "دلِپ",
+      theme: "WARM_HONEY",
+      unavailableMode: "MUTED",
+      tickerProductIds: ["c", "b"],
+    });
+    expect(saved.tickerProductIds).toEqual(["c", "b"]);
+  });
 });
 
 describe("GetSettingsUseCase", () => {
@@ -31,12 +65,12 @@ describe("GetSettingsUseCase", () => {
       NotFoundError,
     );
   });
-
   it("returns the singleton after upsert (BR-10)", async () => {
     const repos = createRepos();
     await repos.settings.upsert(defaultSettings());
     const settings = await new GetSettingsUseCase(repos.settings).execute();
     expect(settings.restaurantName).toBe("دلِپ");
+    expect(settings.tickerProductIds).toEqual([]);
   });
 });
 

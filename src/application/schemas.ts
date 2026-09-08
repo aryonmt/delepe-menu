@@ -1,10 +1,7 @@
+// src/application/schemas.ts
 import { z } from "zod";
-import {
-  BADGE_KINDS,
-  THEME_NAMES,
-  UNAVAILABLE_MODES,
-} from "@/domain/entities";
-import { PRICE_MAX_TOMAN, PRICE_MIN_TOMAN } from "@/lib/constants";
+import { BADGE_KINDS, THEME_NAMES, UNAVAILABLE_MODES } from "@/domain/entities";
+import { PRICE_MAX_TOMAN, PRICE_MIN_TOMAN, TICKER_MAX_ITEMS } from "@/lib/constants";
 
 const idSchema = z.string().min(1);
 
@@ -12,13 +9,8 @@ export const createCategorySchema = z.object({
   name: z.string().min(1).max(60),
   parentId: z.string().min(1).nullable().optional(),
 });
-
-export const updateCategorySchema = createCategorySchema.extend({
-  id: idSchema,
-});
-
+export const updateCategorySchema = createCategorySchema.extend({ id: idSchema });
 export const deleteCategorySchema = z.object({ id: idSchema });
-
 export const reorderCategoriesSchema = z.object({
   orderedIds: z.array(idSchema).min(1),
   parentId: z.string().min(1).nullable(),
@@ -29,18 +21,12 @@ const variantSchema = z.object({
   price: z.number().int().min(PRICE_MIN_TOMAN).max(PRICE_MAX_TOMAN),
 });
 
-/** Shared product body — spread into create/update objects (Zod 4 recommends shape reuse over intersection). */
+/** Shared product body — spread into create/update objects. */
 const productFields = {
   name: z.string().min(1).max(120),
   description: z.string().max(500).nullable().optional(),
   price: z.number().int().min(PRICE_MIN_TOMAN).max(PRICE_MAX_TOMAN).optional(),
-  discountedPrice: z
-    .number()
-    .int()
-    .min(PRICE_MIN_TOMAN)
-    .max(PRICE_MAX_TOMAN)
-    .nullable()
-    .optional(),
+  discountedPrice: z.number().int().min(PRICE_MIN_TOMAN).max(PRICE_MAX_TOMAN).nullable().optional(),
   discountActive: z.boolean().optional().default(false),
   isAvailable: z.boolean().optional().default(true),
   badges: z.array(z.enum(BADGE_KINDS)).optional().default([]),
@@ -62,21 +48,12 @@ function requirePriceWhenNoVariants(
   }
 }
 
-export const createProductSchema = z
-  .object(productFields)
-  .superRefine(requirePriceWhenNoVariants);
-
+export const createProductSchema = z.object(productFields).superRefine(requirePriceWhenNoVariants);
 export const updateProductSchema = z
-  .object({
-    id: idSchema,
-    ...productFields,
-  })
+  .object({ id: idSchema, ...productFields })
   .superRefine(requirePriceWhenNoVariants);
-
 export const getProductSchema = z.object({ id: idSchema });
-
 export const deleteProductSchema = z.object({ id: idSchema });
-
 export const reorderProductsSchema = z.object({
   orderedIds: z.array(idSchema).min(1),
   categoryId: idSchema,
@@ -86,6 +63,8 @@ export const updateSettingsSchema = z.object({
   restaurantName: z.string().min(1).max(80),
   theme: z.enum(THEME_NAMES),
   unavailableMode: z.enum(UNAVAILABLE_MODES),
+  /** Omitted = preserve the existing curation (plain settings save). */
+  tickerProductIds: z.array(idSchema).max(TICKER_MAX_ITEMS).optional(),
 });
 
 export const uploadMediaSchema = z.object({
@@ -94,26 +73,19 @@ export const uploadMediaSchema = z.object({
   height: z.number().int().positive(),
   fileName: z.string().min(1).max(200),
 });
-
 export const deleteMediaSchema = z.object({ mediaId: idSchema });
-
 export const getMediaSchema = z.object({ id: z.string().uuid() });
-
 export const loginSchema = z.object({
   username: z.string().min(1).max(40),
   password: z.string().min(1).max(128),
   ip: z.string().min(1),
 });
-
 export const changePasswordSchema = z.object({
   adminId: z.string().min(1),
   current: z.string().min(1).max(128),
   next: z.string().min(8).max(128),
 });
-
-export const verifySessionSchema = z.object({
-  token: z.string().min(1).optional(),
-});
+export const verifySessionSchema = z.object({ token: z.string().min(1).optional() });
 
 export type CreateCategoryInput = z.infer<typeof createCategorySchema>;
 export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>;

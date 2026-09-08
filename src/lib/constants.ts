@@ -3,7 +3,8 @@
 export const PRICE_MIN_TOMAN = 1_000;
 export const PRICE_MAX_TOMAN = 100_000_000;
 export const UPLOAD_MAX_BYTES = 5 * 1024 * 1024;
-export const UPLOAD_ASPECT_RATIO = 4 / 3;
+/** BR-11 (docs/04): uploads are square 1:1 ±2%. */
+export const UPLOAD_ASPECT_RATIO = 1;
 export const UPLOAD_ASPECT_TOLERANCE = 0.02;
 export const MEDIA_WIDTHS = [320, 640, 960] as const;
 export type MediaWidth = (typeof MEDIA_WIDTHS)[number];
@@ -23,6 +24,13 @@ export const LOGIN_FAILURE_DELAY_MS = 300;
 export const PUBLIC_MENU_CACHE_TAG = "public-menu";
 export const PUBLIC_HTML_S_MAXAGE = 60;
 export const MEDIA_CACHE_MAX_AGE = 31_536_000;
+/** Sticky nav header height used for jump offsets (docs/06 B-01). */
+export const NAV_OFFSET_MOBILE_PX = 104;
+export const NAV_OFFSET_DESKTOP_PX = 112;
+/** Scrollspy geometry (docs/06 B-01): focal line + page-edge thresholds. */
+export const SCROLLSPY_FOCAL_LINE_PX = 130;
+export const SCROLLSPY_TOP_THRESHOLD_PX = 180;
+export const SCROLLSPY_BOTTOM_THRESHOLD_PX = 40;
 /* Motion tokens — docs/05. */
 export const DURATION_FAST_MS = 150;
 export const DURATION_BASE_MS = 260;
@@ -37,7 +45,7 @@ export const MOTION_SPRING_DAMPING = 32;
 export const WORDMARK_IGNITION_MS = 900;
 export const TICKER_LOOP_SECONDS = 40;
 /**
- * Presentation-only constant (docs/05/06): caps the ticker display.
- * It NEVER filters, hides, or alters actual menu content.
- */
+* Presentation-only constant (docs/05/06): caps the ticker display.
+* It NEVER filters, hides, or alters actual menu content.
+*/
 export const TICKER_MAX_ITEMS = 16;

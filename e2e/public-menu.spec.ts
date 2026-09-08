@@ -15,7 +15,11 @@ async function loginAsAdmin(page: Page) {
 async function saveUnavailableMode(page: Page, mode: "MUTED" | "HIDE") {
   await page.goto("/admin/settings");
   await page.getByTestId(`unavailable-mode-${mode}`).check();
-  await page.getByRole("button", { name: strings.admin.save }).click();
+  await page
+    .locator("form")
+    .filter({ has: page.getByTestId(`unavailable-mode-${mode}`) })
+    .getByRole("button", { name: strings.admin.save })
+    .click();
   await expect(page.getByRole("status")).toHaveText(strings.admin.settingsSaved);
 }
 

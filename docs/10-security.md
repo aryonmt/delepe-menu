@@ -34,7 +34,7 @@ Two mechanisms, both audited:
 
 ## Upload & media
 
-- Magic-byte sniff (jpeg/png/webp), size ≤ 5MB, ratio 4:3 ±2% (BR-11).
+- Magic-byte sniff (jpeg/png/webp), size ≤ 5MB, ratio 1:1 ±2% (BR-11).
 - Files stored under `STORAGE_ROOT` **outside** the web root, names
   `{randomUUID-v4}.{ext}` (unique, unguessable; variants `{id}_{320|640|960}.webp`,
   doc 03).

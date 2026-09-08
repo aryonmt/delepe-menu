@@ -30,13 +30,13 @@ export default defineConfig({
   webServer: {
     // Seed MUTED settings then rebuild ISR against the test DB (globalSetup also
     // seeds; this second seed covers webServer-before-globalSetup ordering).
-    command:
-      process.platform === "win32"
-        ? "cmd /c \"if exist .next rmdir /s /q .next && pnpm db:seed && pnpm build && pnpm start\""
-        : "rm -rf .next && pnpm db:seed && pnpm build && pnpm start",
+    // Node script — do not wrap in `cmd /c` (Playwright already uses shell:true).
+    command: "node scripts/e2e-webserver.mjs",
     url: `${baseURL}/api/health`,
     reuseExistingServer: !process.env.CI,
-    timeout: 240_000,
+    timeout: 600_000,
+    stdout: "pipe",
+    stderr: "pipe",
     env: {
       ...process.env,
       DATABASE_URL: e2eDatabaseUrl(),

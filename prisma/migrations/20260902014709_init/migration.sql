@@ -123,3 +123,6 @@ ALTER TABLE "public"."Product" ADD CONSTRAINT "Product_mediaId_fkey" FOREIGN KEY
 
 -- AddForeignKey
 ALTER TABLE "public"."ProductVariant" ADD CONSTRAINT "ProductVariant_productId_fkey" FOREIGN KEY ("productId") REFERENCES "public"."Product"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE "public"."Settings"
+  ADD COLUMN "tickerProductIds" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[];

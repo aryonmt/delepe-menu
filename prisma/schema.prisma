@@ -1,3 +1,4 @@
+// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -36,29 +37,27 @@ model Category {
   parent    Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: Restrict)
   children  Category[] @relation("CategoryTree")
   products  Product[]
-
   @@unique([parentId, name])
   @@index([parentId, sortOrder])
 }
 
 model Product {
   id              String           @id @default(cuid())
-  name            String
-  description     String?
-  price           Int
-  discountedPrice Int?
-  discountActive  Boolean          @default(false)
-  isAvailable     Boolean          @default(true)
-  sortOrder       Int
-  badges          BadgeKind[]
-  categoryId      String
-  mediaId         String?          @unique
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  category        Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  media           Media?           @relation(fields: [mediaId], references: [id], onDelete: SetNull)
-  variants        ProductVariant[]
-
+  name             String
+  description      String?
+  price            Int
+  discountedPrice  Int?
+  discountActive   Boolean          @default(false)
+  isAvailable      Boolean          @default(true)
+  sortOrder        Int
+  badges           BadgeKind[]
+  categoryId       String
+  mediaId          String?          @unique
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  category         Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  media            Media?           @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+  variants         ProductVariant[]
   @@unique([categoryId, name])
   @@index([categoryId, sortOrder])
 }
@@ -70,7 +69,6 @@ model ProductVariant {
   price     Int
   sortOrder Int
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-
   @@unique([productId, name])
   @@index([productId, sortOrder])
 }
@@ -88,11 +86,12 @@ model Media {
 }
 
 model Settings {
-  id              Int             @id @default(1)
-  restaurantName  String
-  theme           ThemeName       @default(WARM_HONEY)
-  unavailableMode UnavailableMode @default(MUTED)
-  updatedAt       DateTime        @updatedAt
+  id               Int             @id @default(1)
+  restaurantName   String
+  theme            ThemeName       @default(WARM_HONEY)
+  unavailableMode  UnavailableMode @default(MUTED)
+  tickerProductIds String[]        @default([])
+  updatedAt        DateTime        @updatedAt
 }
 
 model AdminUser {
@@ -100,5 +99,5 @@ model AdminUser {
   username     String   @unique
   passwordHash String
   createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  updatedAt    DateTime @updatedAt()
 }

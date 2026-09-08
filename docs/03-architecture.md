@@ -171,8 +171,8 @@ uploads/{mediaId}_960.webp
 Originals keep their received extension; `deleteAll` covers jpg/png/webp originals + 3 WebP variants.
 
 **Upload flow** (details in doc 07):
-client crop (4:3) → JPEG blob → XHR `POST /api/admin/media/upload` →
-auth → magic bytes (jpeg/png/webp) → ≤ 5MB → ratio 4:3 ±2% →
+client crop (1:1) → JPEG blob → XHR `POST /api/admin/media/upload` →
+auth → magic bytes (jpeg/png/webp) → ≤ 5MB → ratio 1:1 ±2% →
 Sharp: save original, generate 3 WebP variants, extract `dominantColor`
 (`sharp.stats()` dominant channel) → insert Media row → return
 `{ mediaId, dominantColor, width, height }`. Clients build URLs with

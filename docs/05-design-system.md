@@ -228,15 +228,20 @@ chapter order, purely for the ticker presentation. The underlying menu may
 contain any number of products; this constant never filters, hides, or alters
 actual menu content and is never read by the menu rendering path.
 
-**Dock (mobile `<md`).** Fixed bottom; glass blur; height 60px +
-`env(safe-area-inset-bottom)`; horizontal scroll; tab min-width 64px, label
-12.5/700, nowrap + ellipsis; active = ember pill + primary-foreground + scale-pop spring + glow (no shared-layout morph; dock auto-scroll is instant).; content bottom padding 96px. **Spine (`md+`).**
-Sticky top: monogram «دِ» (Lalezar 24, ember) + horizontal tabs + Latin
-lockup at inline-end. Same tablist semantics in both forms.
-`data-testid="category-tabs"`, tabs `tab-{name}` + `data-active`.
-
-**Context strip.** Sticky top (mobile: top-0; `md+`: under the spine), 48px,
-glass. Contains: active chapter name (Lalezar 15 + hue tick) and the chip row
+**Menu nav header (all breakpoints).** One sticky top glass header replaces the
+former bottom dock + separate strip: row 1 = category tabs (same tablist
+semantics, glass capsule, ember pill indicator), row 2 = active chapter name +
+subcategory chips (rendered only when the active chapter has children).
+No fixed bottom navigation exists anymore; content bottom padding is normal.
+`data-testid="category-tabs"`, tabs `tab-{name}` + `data-active`,
+`data-testid="subcategory-chips"` preserved.
+**Dish ticker.** Chip = min-height 44px pill, border `--line`, bg `card/.7` +
+blur; content: 36px circular thumbnail (pre-generated WebP 320 rendered as a
+decorative background-image span, `aria-hidden`, dominantColor fallback),
+name (Lalezar 14), «،» separator, price (12.5, ember). Items come from
+`settings.tickerProductIds` (admin-curated, available-only, capped at
+`TICKER_MAX_ITEMS`); an empty list falls back to the first eligible items in
+chapter order. Track duplicated once, duplicate `aria-hidden`.
 **only when the active chapter has children**. Chips min-height 44px pill,
 `aria-pressed`, `layoutId` fill. `data-testid="subcategory-chips"`.
 
@@ -245,8 +250,8 @@ inline-end, absolute); title Lalezar 30/36; hue tick rule. Section
 `scroll-mt` accounts for strip height only (dock is bottom).
 
 **Signature card** (any product whose badges include POPULAR — 0..N per
-chapter, no cap, no copy claims). Full-width; image 4:3, height 176px mobile /
-224px `md+`, `object-fit:cover; object-position: 50% 40%`; badges row, title
+chapter, no cap, no copy claims). Full-width; image 1:1,
+`object-fit:cover; object-position: 50% 40%`; badges row, title
 17/800 clamp-2, description clamp-2, price Lalezar 19. Tap → Dish Peek.
 
 ### Signature tier — UI behavior vs content responsibility
@@ -267,7 +272,7 @@ chapter, no cap, no copy claims). Full-width; image 4:3, height 176px mobile /
 - A presentation cap may only ever be introduced as a documented product
   decision — never silently as a layout workaround.
 
-**Standard card.** Horizontal; image 42% width, 4:3, rounded-image; title 16/800
+**Standard card.** Horizontal; image 42% width, 1:1, rounded-image; title 16/800
 clamp-1, description clamp-2, price row. `md+`: 2-column grid. Tap → Dish Peek.
 Press: scale .98. Both tiers: `data-testid="product-{name}"`,
 `data-available`, `price`, `price-original`, `discount-chip` preserved.
@@ -288,7 +293,7 @@ spark stamp chip `−{percent}٪` with `--shadow-stamp`. Formula unchanged.
 
 **Dish Peek.** Radix Dialog. Mobile: bottom sheet (slide-up, rounded-t-drawer,
 max-height 86svh, inner scroll). `md+`: centered panel max-w-md, rounded-card.
-Content: image (4:3, full width, 960 variant; placeholder art when media is
+Content: image (1:1, full width, 960 variant; placeholder art when media is
 null), title (Lalezar 24, wraps, no clamp), badges, full description, price
 block or full variant-ticket list (read-only), unavailable stamp when muted.
 Close: X button, Esc, backdrop. Focus trap + `aria-modal` + focus restore

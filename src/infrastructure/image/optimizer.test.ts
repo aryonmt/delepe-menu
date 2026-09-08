@@ -40,9 +40,9 @@ describe("SharpImageOptimizer", () => {
 
   it("produces original + 3 WebP variants + dominantColor hex from a raster fixture", async () => {
     await mkdir(path.join(env.STORAGE_ROOT, "uploads"), { recursive: true });
-    // Create a tiny 8x6 PNG fixture (4:3) — deterministic, no network
+    // Create a tiny 8x8 PNG fixture (1:1) — deterministic, no network
     const fixture = await sharp({
-      create: { width: 8, height: 6, channels: 3, background: { r: 180, g: 100, b: 40 } },
+      create: { width: 8, height: 8, channels: 3, background: { r: 180, g: 100, b: 40 } },
     })
       .png()
       .toBuffer();
@@ -52,7 +52,7 @@ describe("SharpImageOptimizer", () => {
       bytes: new Uint8Array(fixture),
       mimeType: "image/png",
       width: 800,
-      height: 600,
+      height: 800,
     });
 
     createdIds.push(stored.mediaId);
@@ -61,7 +61,7 @@ describe("SharpImageOptimizer", () => {
     expect(stored.path).toBe(`uploads/${stored.mediaId}.jpg`);
     expect(stored.mimeType).toBe("image/jpeg");
     expect(stored.width).toBe(800);
-    expect(stored.height).toBe(600);
+    expect(stored.height).toBe(800);
     expect(stored.dominantColor).toMatch(/^#[0-9A-F]{6}$/);
 
     const dir = path.join(env.STORAGE_ROOT, "uploads");
@@ -74,13 +74,13 @@ describe("SharpImageOptimizer", () => {
 
   it("rasterizes SVG inputs to JPEG + WebP variants", async () => {
     await mkdir(path.join(env.STORAGE_ROOT, "uploads"), { recursive: true });
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="800" height="600" fill="#96601F"/></svg>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800"><rect width="800" height="800" fill="#96601F"/></svg>`;
     const optimizer = new SharpImageOptimizer();
     const stored = await optimizer.process({
       bytes: new TextEncoder().encode(svg),
       mimeType: "image/svg+xml",
       width: 800,
-      height: 600,
+      height: 800,
     });
     createdIds.push(stored.mediaId);
     expect(stored.dominantColor).toMatch(/^#[0-9A-F]{6}$/);

@@ -49,10 +49,15 @@ host port **5433**, database `delepe_test`, doc 12).
    the **test** database, not the dev database on 5432.
 
 E2E runs on `E2E_PORT` (default **3100**) so a dev server on 3000 is never reused.
-Playwright `webServer` deletes `.next`, then runs `pnpm db:seed && pnpm build && pnpm start` with
+Playwright `webServer` runs `node scripts/e2e-webserver.mjs` (wipe `.next`, then
+`pnpm db:deploy && pnpm db:seed && pnpm build && pnpm start`) with
 the test `DATABASE_URL` and repo `STORAGE_ROOT` so ISR HTML (`revalidate = 60`)
-matches the seeded test database (including `unavailableMode: MUTED`). It listens on `E2E_PORT`. Persian locale, mobile
-viewport 390×844 + desktop pass.
+matches the seeded test database (including `unavailableMode: MUTED`). `db:deploy`
+runs first because webServer starts before `globalSetup` and the test database
+must have every Settings column (including `tickerProductIds`) before seed.
+The webServer timeout is **10 minutes** so Windows `next build` (including trace
+collection) can finish before Playwright probes `/api/health`.
+It listens on `E2E_PORT`. Persian locale, mobile viewport 390×844 + desktop pass.
 
 CI must set `E2E_DATABASE_URL` to the job's service Postgres. global-setup
 migrates that database — no extra CI migrate step is required.

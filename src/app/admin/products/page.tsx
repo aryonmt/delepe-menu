@@ -1,24 +1,18 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { container } from "@/infrastructure/di/container";
-import { SESSION_COOKIE_NAME } from "@/lib/constants";
+// src/app/admin/products/page.tsx
 import { strings } from "@/lib/fa/strings";
+import { ProductList } from "@/components/admin/product-list";
 import { AdminSessionPanel } from "./session-panel";
 
-export default async function AdminProductsPage() {
-  const token = (await cookies()).get(SESSION_COOKIE_NAME)?.value;
-  try {
-    await container.verifySession().execute({ token });
-  } catch {
-    redirect("/login");
-  }
-
+export default function AdminProductsPage() {
   return (
-    <main className="mx-auto w-full max-w-lg px-6 py-12">
-      <h1 className="font-display text-hero text-foreground">
+    <div className="mx-auto w-full max-w-5xl px-4 py-8 md:px-8">
+      <h1 className="font-display text-3xl text-foreground mb-6">
         {strings.admin.productsHeading}
       </h1>
+      <ProductList />
+      {/* M2 auth.spec contract: change-password form lives on this page until
+          the M6 dialog (T-063) replaces it. */}
       <AdminSessionPanel />
-    </main>
+    </div>
   );
 }

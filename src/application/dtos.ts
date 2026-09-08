@@ -1,8 +1,5 @@
-import type {
-  BadgeKind,
-  ThemeName,
-  UnavailableMode,
-} from "@/domain/entities";
+// src/application/dtos.ts
+import type { BadgeKind, ThemeName, UnavailableMode } from "@/domain/entities";
 
 export type MediaDto = {
   id: string;
@@ -10,14 +7,12 @@ export type MediaDto = {
   width: number;
   height: number;
 };
-
 export type VariantDto = {
   id: string;
   name: string;
   price: number;
   sortOrder: number;
 };
-
 export type ProductDto = {
   id: string;
   name: string;
@@ -32,7 +27,6 @@ export type ProductDto = {
   variants: VariantDto[];
   media: MediaDto | null;
 };
-
 export type CategoryDto = {
   id: string;
   name: string;
@@ -41,27 +35,17 @@ export type CategoryDto = {
   children: CategoryDto[];
   products: ProductDto[];
 };
-
 export type SettingsDto = {
   restaurantName: string;
   theme: ThemeName;
   unavailableMode: UnavailableMode;
+  tickerProductIds: string[];
 };
-
-export type AdminMenuDto = {
-  settings: SettingsDto;
-  categories: CategoryDto[];
-};
-
-export type PublicMenuDto = {
-  settings: SettingsDto;
-  categories: CategoryDto[];
-};
-
+export type AdminMenuDto = { settings: SettingsDto; categories: CategoryDto[] };
+export type PublicMenuDto = { settings: SettingsDto; categories: CategoryDto[] };
 export type ActionResult<T> =
   | { ok: true; data: T }
   | { ok: false; error: { code: string; fa: string } };
-
 export type UploadMediaResult = {
   mediaId: string;
   dominantColor: string;

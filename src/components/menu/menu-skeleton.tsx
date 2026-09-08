@@ -48,7 +48,7 @@ export function MenuSkeleton() {
               <ShimmerBox className="h-3 w-5/6 rounded" />
               <ShimmerBox className="h-4 w-20 rounded" />
             </div>
-            <ShimmerBox className="aspect-[4/3] w-[42%] rounded-image" />
+            <ShimmerBox className="aspect-square w-[42%] rounded-image" />
           </div>
         ))}
       </div>

@@ -10,7 +10,7 @@ type Props = {
   alt: string;
   priority?: boolean;
   muted?: boolean;
-  /** Fill an explicitly-sized parent (4:3 crops via object-fit). */
+  /** Fill an explicitly-sized parent (1:1 crops via object-fit). */
   fill?: boolean;
   sizes?: string;
   objectPosition?: string;
@@ -93,7 +93,7 @@ export function MenuImage({
           src={mediaUrl(media.id, 640)}
           alt={alt}
           width={640}
-          height={480}
+          height={640}
           sizes={sizes}
           priority={priority}
           onLoad={() => setIsLoaded(true)}

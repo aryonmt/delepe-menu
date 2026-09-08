@@ -1,17 +1,13 @@
+// src/application/mappers/to-dto.ts
 import type { CategoryNode, ProductWithRelations, Settings } from "@/domain/entities";
-import type {
-  CategoryDto,
-  MediaDto,
-  ProductDto,
-  SettingsDto,
-  VariantDto,
-} from "@/application/dtos";
+import type { CategoryDto, MediaDto, ProductDto, SettingsDto, VariantDto } from "@/application/dtos";
 
 export function toSettingsDto(settings: Settings): SettingsDto {
   return {
     restaurantName: settings.restaurantName,
     theme: settings.theme,
     unavailableMode: settings.unavailableMode,
+    tickerProductIds: [...(settings.tickerProductIds ?? [])],
   };
 }
 

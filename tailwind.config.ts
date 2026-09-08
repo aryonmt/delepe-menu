@@ -26,6 +26,11 @@ const config: Config = {
           foreground: "var(--muted-foreground)",
         },
         border: "var(--border)",
+        input: "var(--border)",
+        popover: {
+          DEFAULT: "var(--card)",
+          foreground: "var(--card-foreground)",
+        },
         line: "var(--line)",
         glow: "var(--glow)",
         ring: "var(--ring)",

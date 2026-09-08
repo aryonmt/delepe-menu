@@ -155,7 +155,7 @@ Constraints:
   /media/[mediaId]?w= validates w ∈ {320,640,960} (default 640), streams
   pre-generated WebP with Cache-Control immutable, 404 on bad id/w, originals
   never served; lib/media-url.ts helper + MenuImage with custom loader
-  (≤320→320, ≤640→640, else 960), 4:3, dominantColor + shimmer.
+  (≤320→320, ≤640→640, else 960), 1:1, dominantColor + shimmer.
 - Admin bootstrap: create the admin from ADMIN_USERNAME/ADMIN_PASSWORD only when
   AdminUser count = 0.
 - Scrollspy: IntersectionObserver rootMargin "-40% 0px -55%"; tabs indicator via
@@ -229,7 +229,7 @@ Constraints:
 - Numeric inputs accept Persian digits; normalize in the form layer before Zod.
 - Variant products: price input disabled + auto = min(variants); discount section
   hidden (BR-13/14).
-- Upload: react-easy-crop 4:3 → JPEG q0.92 → XHR to /api/admin/media/upload with
+- Upload: react-easy-crop 1:1 → JPEG q0.92 → XHR to /api/admin/media/upload with
   real upload progress reusing SharpImageOptimizer from M3; orphan media deleted
   on cancel (DeleteMedia).
 - Reorder enabled only for a single selected leaf category with empty search.

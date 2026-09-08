@@ -152,7 +152,7 @@ export function ProductCard({
         whileTap={{ scale: 0.98 }}
         className="group relative w-full cursor-pointer overflow-hidden rounded-card bg-gradient-to-b from-card to-card-2 shadow-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <div className="relative h-44 w-full overflow-hidden md:h-56">
+        <div className="relative aspect-square w-full overflow-hidden">
           <MenuImage
             media={product.media}
             alt={product.name}
@@ -202,7 +202,7 @@ export function ProductCard({
         <div className="mt-2">{priceBlock}</div>
       </div>
       <div className="relative w-[42%] shrink-0 self-center">
-        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-image">
+        <div className="relative aspect-square w-full overflow-hidden rounded-image">
           <MenuImage
             media={product.media}
             alt={product.name}
