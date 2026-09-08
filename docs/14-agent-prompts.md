@@ -278,7 +278,7 @@ Validation checklist:
 Standard trailer applies.
 ```
 
-## M7 · Themes & Visual QA
+## M7 · Identity & Visual QA
 
 ```text
 You are implementing milestone M7 of Delepe Menu.
@@ -286,25 +286,25 @@ You are implementing milestone M7 of Delepe Menu.
 Read first: AGENTS.md → docs/05-design-system.md (full) →
 docs/11-performance-accessibility.md → docs/13 (M7).
 
-Goal: tasks T-070..T-071 — wire all 4 themes end-to-end with the 300ms
-cross-fade, verify contrast of every token pair, polish ornament/frame motifs
-and dark-theme glow.
+Goal: tasks T-070..T-071 — verify the single «پاتوق» identity (ADR-12): no
+data-theme on the public layout, one token set, contrast of every docs/05
+text/on-color pair, three-spark/wordmark polish, glow and grain within
+documented values.
 
 Constraints:
 - Token values are EXACTLY the docs/05 tables — do not invent or tweak colors.
   If a pair fails the contrast check, stop and report it (that means the doc is
   wrong; fix the doc in the same commit with the corrected value).
-- Theme switching only swaps data-theme + the CSS color transition; zero JS
-  re-layout.
+- Settings.theme stays in the data model and stays visually inert.
 
-Tests: scripted contrast check (node script or Playwright evaluating computed
-colors against WCAG 4.5:1) covering every text/on-color pair × 4 themes;
+Tests: unit contrast check (WCAG 4.5:1) of every text/on-color pair; wiring
+test that layouts/globals have no data-theme; QA report in docs/15;
 visual side-by-side review against docs/05.
 
 Validation checklist:
-- [ ] all 4 themes selectable in settings and reflected on / after save
-- [ ] contrast report shows ≥ 4.5:1 everywhere
-- [ ] reduced-motion: cross-fade disabled
+- [ ] public UI uses one identity; no data-theme attribute
+- [ ] contrast report shows ≥ 4.5:1 on every text pair
+- [ ] wordmark kasras unclipped; grain/glow match docs/05
 
 Standard trailer applies.
 ```

@@ -11,17 +11,19 @@
     --card-foreground: #f5ebdd;
     --muted: #221a11;
     --muted-foreground: #a8947f;
-    --muted-2: #756350;
+    --muted-2: #968064;
     --border: #2c2115;
     --line: rgba(232, 163, 61, 0.16);
     --primary: #e8a33d;
     --primary-foreground: #1a0f04;
-    --accent: #b86e20;
+    --accent: #a86218;
     --accent-foreground: #ffffff;
     --ring: #e8a33d;
     --glow: rgba(232, 163, 61, 0.45);
     --destructive: #f0563a;
     --destructive-foreground: #240a04;
+    --spark: #f0563a;
+    --spark-foreground: #240a04;
     --ornament: #e8a33d;
     --badge-popular: #e8a33d; --badge-popular-foreground: #1a0f04;
     --badge-new: #7fd1a8; --badge-new-foreground: #0e1f15;
@@ -76,7 +78,7 @@
   .peek-flash { animation: peek-flash 0.6s ease-out; }
 }
 /* Solar System animations (component-level <style> is forbidden by docs/10). */
-.solar-system { --orbit-accent: #14b8a6; --radius-inner: 175px; --radius-mid: 285px; --radius-outer: 395px; }
+.solar-system { --orbit-accent: #e8a33d; --radius-inner: 175px; --radius-mid: 285px; --radius-outer: 395px; }
 @media (max-width: 768px) { .solar-system { --radius-inner: 100px; --radius-mid: 165px; --radius-outer: 230px; } }
 @media (max-width: 480px) { .solar-system { --radius-inner: 70px; --radius-mid: 115px; --radius-outer: 160px; } }
 @keyframes ticker-marquee { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }

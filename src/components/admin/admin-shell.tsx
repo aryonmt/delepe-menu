@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { LayoutGrid, Package, Settings } from "lucide-react";
 import type { AdminMenuDto } from "@/application/dtos";
 import { AdminUserMenu } from "@/components/admin/admin-user-menu";
+import { BrandWordmark } from "@/components/brand/brand-wordmark";
 import { PreviewDrawer } from "@/components/admin/preview-drawer";
 import { Button } from "@/components/ui/button";
 import {
@@ -73,7 +74,9 @@ export function AdminShell({ initialData, children }: Props) {
       </header>
 
       <aside className="hidden md:flex fixed inset-y-0 start-0 z-50 w-64 flex-col border-e border-border bg-card p-4">
-        <h2 className="font-display text-xl text-primary mb-8">{strings.brand.wordmark}</h2>
+        <h2 className="mb-8">
+          <BrandWordmark className="text-xl text-primary" />
+        </h2>
         <nav className="flex flex-col gap-2 flex-1">
           {links.map((link) => (
             <Link

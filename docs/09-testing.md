@@ -22,6 +22,8 @@ development loop.
 
 - `lib/format/price` — exact golden cases from doc 04 (including carry + minimum).
 - `lib/format/digits` — Persian ↔ ASCII digit conversion.
+- `lib/contrast` + `lib/identity-tokens` — every docs/05 text/on-color pair
+  ≥ 4.5:1; chapter hues ≥ 3:1; single-identity wiring (no `data-theme`).
 - `application/mappers/to-public-menu` — HIDE filters unavailable, MUTED keeps
   them, empty categories pruned, settings passthrough.
 - Every use-case: happy path + each BR it owns

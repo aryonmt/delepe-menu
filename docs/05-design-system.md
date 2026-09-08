@@ -73,6 +73,9 @@ Rules:
 
 All text/on-color pairs ≥ 4.5:1 (computed; M7 re-verifies with a contrast tool).
 `--spark` is used as a *fill* (stamps/badges) — never as small body text.
+M7 contrast pass: `--muted-2` was `#756350` (failed AA on card surfaces) and
+`--accent` was `#B86E20` (failed AA with white ink). Corrected values are in
+the table below; see `docs/15-m7-visual-qa.md`.
 
 | Token | Value | Role |
 | --- | --- | --- |
@@ -83,12 +86,12 @@ All text/on-color pairs ≥ 4.5:1 (computed; M7 re-verifies with a contrast tool
 | `--card-foreground` | `#F5EBDD` | |
 | `--muted` | `#221A11` | |
 | `--muted-foreground` | `#A8947F` | secondary text |
-| `--muted-2` | `#756350` | tertiary text |
+| `--muted-2` | `#968064` | tertiary text |
 | `--border` | `#2C2115` | |
 | `--line` | `rgba(232,163,61,.16)` | hairlines |
 | `--primary` | `#E8A33D` | **Ember** — the brand light source |
 | `--primary-foreground` | `#1A0F04` | |
-| `--accent` | `#B86E20` | |
+| `--accent` | `#A86218` | |
 | `--accent-foreground` | `#FFFFFF` | |
 | `--ring` | `#E8A33D` | focus rings |
 | `--glow` | `rgba(232,163,61,.45)` | |
@@ -128,8 +131,8 @@ Assignment rule (design constant): a top-level category's hue =
   separate themes. Where a hue carries information it must hold ≥ 3:1
   against its backdrop.
 - Note: `honey` and `cocoa` from the earlier draft were dropped to honor the
-  approved six-hue decision. Tomato↔flame separation is checked in the M7
-  visual QA pass.
+  approved six-hue decision. Tomato↔flame stay distinct (`#D96C4A` vs
+  `#E8763D`); asserted in the M7 contrast suite.
 
 Ambient layers: `--ambient-glow-1/-2` warm radial gradients on the canvas
 (top-start ember, bottom-end spark tint) + `.grain-overlay` utility.
@@ -144,7 +147,7 @@ Ambient layers: `--ambient-glow-1/-2` warm radial gradients on the canvas
 
 | Use | Size / weight | Face |
 | --- | --- | --- |
-| Wordmark | 72px mobile / 88px `md+`, lh 1.15 | Lalezar |
+| Wordmark | 64px mobile / 88px `md+`, lh 1.15 | Lalezar |
 | Ticker item | name 14px / price 12.5px | Lalezar / body |
 | Chapter title | 30px mobile / 36px `md+` | Lalezar |
 | Chapter ghost number | 88px, opacity .1 (decorative) | Lalezar |

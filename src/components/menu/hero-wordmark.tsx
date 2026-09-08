@@ -1,6 +1,7 @@
 "use client";
 import { motion, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
+import { BrandWordmark } from "@/components/brand/brand-wordmark";
 import { SolarSystem, type OrbitConfig } from "@/components/ui/solar-system";
 import { strings } from "@/lib/fa/strings";
 
@@ -51,7 +52,7 @@ export function HeroWordmark({ restaurantName, children }: Props) {
           initial={reduceMotion ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: [0.22, 0.61, 0.36, 1] }}
-          className="font-display text-gold-gradient text-[52px] leading-[1.3] pb-1 md:text-[76px] md:leading-[1.25]"
+          className="font-display text-gold-gradient pb-[0.12em] text-[64px] leading-[1.15] md:text-[88px]"
         >
           {restaurantName}
         </motion.h1>
@@ -78,8 +79,8 @@ export function HeroWordmark({ restaurantName, children }: Props) {
           aria-label={strings.hero.solarAria}
           centerLogoAlt={restaurantName}
           centerLogo={
-            <span aria-hidden="true" className="font-display text-gold-gradient block whitespace-nowrap text-[20px] leading-none md:text-[26px]">
-              {strings.brand.wordmark}
+            <span aria-hidden="true">
+              <BrandWordmark className="text-gold-gradient text-[20px] md:text-[26px]" />
             </span>
           }
         />

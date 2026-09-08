@@ -111,8 +111,8 @@ Format: `ID · description · [docs] · deps · output · tests`.
 
 | ID | Task | Docs | Deps | Output | Tests |
 | --- | --- | --- | --- | --- | --- |
-| T-070 | «پاتوق» identity wiring verified end-to-end (`data-theme` attribute removed from the public layout; single token set) | 05 | T-061 | identity wiring | visual |
-| T-071 | Contrast verification of every text/on-color pair in doc 05 (single identity); three-spark/wordmark polish; glow and grain tuning | 05, 11 | T-070 | QA report | contrast tool ≥ 4.5 |
+| ~~T-070~~ | «پاتوق» identity wiring verified end-to-end (`data-theme` attribute removed from the public layout; single token set) | 05 | T-061 | identity wiring | visual |
+| ~~T-071~~ | Contrast verification of every text/on-color pair in doc 05 (single identity); three-spark/wordmark polish; glow and grain tuning | 05, 11 | T-070 | QA report | contrast tool ≥ 4.5 |
 
 ### M8 · Hardening & Ship
 
