@@ -1,12 +1,11 @@
 // src/components/admin/product-form.tsx
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { z } from "zod";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Plus, Trash2, X } from "lucide-react";
-import type { ProductDto } from "@/application/dtos";
+import { X } from "lucide-react";
+import type { MediaDto, ProductDto, UploadMediaResult } from "@/application/dtos";
 import { createProductSchema } from "@/application/schemas";
 import {
   createProductAction,
@@ -14,46 +13,42 @@ import {
   updateProductAction,
 } from "@/app/admin/products/_actions";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { useMenuDraftStore } from "@/hooks/use-menu-draft-store";
-import { toAsciiDigits } from "@/lib/format/digits";
-import { toPersianDigits } from "@/lib/format/digits";
-import { formatPrice } from "@/lib/format/price";
+import { PREVIEW_PANEL_WIDTH_PX } from "@/lib/constants";
 import { strings } from "@/lib/fa/strings";
 import { toast } from "sonner";
+import { ProductFormFields } from "./product-form-fields";
+import {
+  type FormInput,
+  type FormOutput,
+  provisionalProduct,
+} from "./product-form-draft";
 import { UploadEditor } from "./upload-editor";
-
-type FormInput = z.input<typeof createProductSchema>;
-type FormOutput = z.output<typeof createProductSchema>;
 
 type Props = { product: ProductDto | null; onClose: () => void };
 
-/** Normalize FA/EN digit text to a number before Zod sees it (docs/03). */
-function parseDigitInput(value: unknown): number | undefined {
-  if (value === "" || value === null || value === undefined) return undefined;
-  const parsed = Number(toAsciiDigits(String(value)));
-  return Number.isNaN(parsed) ? undefined : parsed;
-}
-
 export function ProductForm({ product, onClose }: Props) {
   const draft = useMenuDraftStore((s) => s.draft);
-  const upsert = useMenuDraftStore((s) => s.upsertProduct);
+  const upsertProduct = useMenuDraftStore((s) => s.upsertProduct);
+  const removeProduct = useMenuDraftStore((s) => s.removeProduct);
   const clearDirty = useMenuDraftStore((s) => s.clearDirty);
-  const [mediaId, setMediaId] = useState<string | null>(product?.media?.id ?? null);
+  const beginEditSession = useMenuDraftStore((s) => s.beginEditSession);
+  const cancelEditSession = useMenuDraftStore((s) => s.cancelEditSession);
+  const commitEditSession = useMenuDraftStore((s) => s.commitEditSession);
+
+  const [tempId] = useState(() => `draft-${Math.random().toString(36).slice(2)}`);
+  const [mediaDto, setMediaDto] = useState<MediaDto | null>(product?.media ?? null);
   const pendingMediaRef = useRef<string | null>(null);
-  const isEdit = Boolean(product);
+  const isEdit = product !== null;
   const categories = useMemo(() => draft?.categories ?? [], [draft]);
 
-  /* Orphan cleanup (docs/07 step 6): an upload never attached is deleted. */
+  useEffect(() => {
+    beginEditSession();
+    return () => {
+      cancelEditSession();
+    };
+  }, [beginEditSession, cancelEditSession]);
+
   useEffect(() => {
     return () => {
       const orphan = pendingMediaRef.current;
@@ -64,7 +59,7 @@ export function ProductForm({ product, onClose }: Props) {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty: rhfDirty },
     control,
     setValue,
   } = useForm<FormInput, unknown, FormOutput>({
@@ -83,25 +78,26 @@ export function ProductForm({ product, onClose }: Props) {
   });
 
   const { fields, append, remove } = useFieldArray({ control, name: "variants" });
-  const variants = useWatch({ control, name: "variants" });
-  const watchedBadges = useWatch({ control, name: "badges" }) ?? [];
-  const watchedDiscountActive = useWatch({ control, name: "discountActive" });
+  const values = useWatch({ control });
+  const watchedDescription = values?.description ?? "";
   const watchedPrice = useWatch({ control, name: "price" });
-  const watchedDescription = useWatch({ control, name: "description" }) ?? "";
-  const [categoryId, setCategoryId] = useState(product?.categoryId ?? "");
-  const hasVariants = Boolean(variants && variants.length > 0);
+  const watchedDiscountActive = useWatch({ control, name: "discountActive" });
+  const watchedVariants = useWatch({ control, name: "variants" });
+  const variantValues = useMemo(() => watchedVariants ?? [], [watchedVariants]);
+  const hasVariants = variantValues.some((v) => v?.name && v?.price > 0);
 
+  const [categoryId, setCategoryId] = useState(product?.categoryId ?? "");
   useEffect(() => {
     setValue("categoryId", categoryId);
   }, [categoryId, setValue]);
 
   useEffect(() => {
     if (!hasVariants) return;
-    const prices = (variants ?? [])
+    const prices = variantValues
       .map((v) => Number(v?.price) || 0)
       .filter((p) => p > 0);
     setValue("price", prices.length > 0 ? Math.min(...prices) : undefined);
-  }, [hasVariants, variants, setValue]);
+  }, [hasVariants, variantValues, setValue]);
 
   const parentCategory = useMemo(
     () =>
@@ -110,30 +106,40 @@ export function ProductForm({ product, onClose }: Props) {
       ) ?? null,
     [categories, categoryId],
   );
-  const selectedParent = categories.find((c) => c.id === parentCategory?.id) ?? null;
+  const selectedParent =
+    categories.find((c) => c.id === parentCategory?.id) ?? null;
   const childValue =
     selectedParent && selectedParent.children.length > 0 ? categoryId : "";
 
-  const onParentChange = (value: string) => {
-    const parent = categories.find((c) => c.id === value);
-    if (!parent) return;
-    setCategoryId(
-      parent.children.length > 0 ? (parent.children[0]?.id ?? "") : parent.id,
-    );
-  };
+  const lastJson = useRef("");
+  const baseMedia = product?.media ?? null;
+  useEffect(() => {
+    if (!values) return;
+    const mediaChanged = mediaDto !== baseMedia;
+    if (!rhfDirty && !mediaChanged) return;
+    const json = JSON.stringify({ values, mediaId: mediaDto?.id ?? null });
+    if (json === lastJson.current) return;
+    lastJson.current = json;
+    upsertProduct(provisionalProduct(product, tempId, values, mediaDto));
+  }, [values, mediaDto, rhfDirty, baseMedia, product, tempId, upsertProduct]);
 
-  const toggleBadge = (badge: FormOutput["badges"][number]) => {
-    const next = watchedBadges.includes(badge)
-      ? watchedBadges.filter((b) => b !== badge)
-      : [...watchedBadges, badge];
-    setValue("badges", next);
-  };
-
-  const onUploadComplete = (id: string) => {
+  const onUploadComplete = (result: UploadMediaResult) => {
     const previous = pendingMediaRef.current;
-    if (previous && previous !== id) void deleteMediaAction(previous);
-    pendingMediaRef.current = id;
-    setMediaId(id);
+    if (previous && previous !== result.mediaId) {
+      void deleteMediaAction(previous);
+    }
+    pendingMediaRef.current = result.mediaId;
+    setMediaDto({
+      id: result.mediaId,
+      dominantColor: result.dominantColor,
+      width: result.width,
+      height: result.height,
+    });
+  };
+
+  const handleCancel = () => {
+    cancelEditSession();
+    onClose();
   };
 
   const onSubmit = async (data: FormOutput) => {
@@ -153,28 +159,44 @@ export function ProductForm({ product, onClose }: Props) {
         formData.append("variants", JSON.stringify(variant));
       }
     }
-    if (mediaId) formData.append("mediaId", mediaId);
+    if (mediaDto) formData.append("mediaId", mediaDto.id);
     if (product) formData.append("id", product.id);
 
     const action = isEdit ? updateProductAction : createProductAction;
-    const res = await action(null, formData);
-    if (res.ok) {
+    const result = await action(null, formData);
+    if (result.ok) {
       pendingMediaRef.current = null;
-      upsert(res.data);
+      if (!isEdit) removeProduct(tempId);
+      upsertProduct(result.data);
+      commitEditSession();
       clearDirty();
       toast.success(isEdit ? strings.admin.productUpdated : strings.admin.productCreated);
       onClose();
       return;
     }
-    toast.error(res.error.fa);
+    toast.error(result.error.fa);
   };
 
   return (
-    <Dialog.Root open onOpenChange={() => onClose()}>
+    <Dialog.Root
+      modal={false}
+      open
+      onOpenChange={(open) => {
+        if (!open) handleCancel();
+      }}
+    >
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
-        <Dialog.Content className="fixed inset-y-0 end-0 w-full max-w-md bg-card border-s border-border z-50 overflow-y-auto p-6 shadow-xl">
-          <div className="flex items-center justify-between mb-6">
+        <Dialog.Overlay
+          className="fixed bottom-0 start-0 end-0 top-14 z-[55] bg-black/50 md:end-[380px]"
+          data-preview-gap={PREVIEW_PANEL_WIDTH_PX}
+        />
+        <Dialog.Content
+          className="fixed bottom-0 start-0 top-14 z-[70] w-full max-w-md overflow-y-auto border-e border-border bg-card p-6 shadow-xl md:start-64"
+          onPointerDownOutside={(event) => event.preventDefault()}
+          onInteractOutside={(event) => event.preventDefault()}
+          onFocusOutside={(event) => event.preventDefault()}
+        >
+          <div className="mb-6 flex items-center justify-between">
             <Dialog.Title className="text-xl font-bold">
               {isEdit ? strings.admin.editProduct : strings.admin.newProduct}
             </Dialog.Title>
@@ -191,194 +213,28 @@ export function ProductForm({ product, onClose }: Props) {
             className="space-y-4"
           >
             <UploadEditor
-              currentMediaId={mediaId}
+              currentMediaId={mediaDto?.id ?? null}
               onUploadComplete={onUploadComplete}
-              onRemove={() => setMediaId(null)}
+              onRemove={() => setMediaDto(null)}
             />
-            <div className="space-y-2">
-              <Label htmlFor="pf-name">{strings.admin.name}</Label>
-              <Input id="pf-name" {...register("name")} />
-              {errors.name && (
-                <p className="text-xs text-destructive">{errors.name.message as string}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="pf-description">{strings.admin.description}</Label>
-              <Input id="pf-description" maxLength={500} {...register("description")} />
-              <p className="text-xs text-muted-foreground">
-                {toPersianDigits(watchedDescription.length)} / {toPersianDigits(500)}{" "}
-                {strings.admin.descriptionCounter}
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>{strings.admin.parentCategory}</Label>
-                <Select value={parentCategory?.id ?? ""} onValueChange={onParentChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={strings.admin.selectPlaceholder} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              {selectedParent && selectedParent.children.length > 0 && (
-                <div className="space-y-2">
-                  <Label>{strings.admin.childCategory}</Label>
-                  <Select value={childValue} onValueChange={setCategoryId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={strings.admin.selectPlaceholder} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {selectedParent.children.map((child) => (
-                        <SelectItem key={child.id} value={child.id}>
-                          {child.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-            </div>
-            {errors.categoryId && (
-              <p className="text-xs text-destructive">
-                {errors.categoryId.message as string}
-              </p>
-            )}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="pf-price">{strings.admin.price}</Label>
-                {hasVariants && (
-                  <span className="text-xs text-muted-foreground">
-                    {strings.admin.systemMaintainedPrice}
-                  </span>
-                )}
-              </div>
-              <Input
-                id="pf-price"
-                type="text"
-                inputMode="numeric"
-                disabled={hasVariants}
-                {...register("price", { setValueAs: parseDigitInput })}
-              />
-              {typeof watchedPrice === "number" && watchedPrice > 0 && (
-                <p className="text-xs text-muted-foreground">{formatPrice(watchedPrice)}</p>
-              )}
-              {errors.price && (
-                <p className="text-xs text-destructive">{errors.price.message as string}</p>
-              )}
-            </div>
-            {!hasVariants && (
-              <div className="space-y-3 p-3 border border-border rounded-lg">
-                <div className="flex items-center gap-2">
-                  <Controller
-                    name="discountActive"
-                    control={control}
-                    render={({ field }) => (
-                      <Switch
-                        id="pf-discount-active"
-                        checked={Boolean(field.value)}
-                        onCheckedChange={field.onChange}
-                      />
-                    )}
-                  />
-                  <Label htmlFor="pf-discount-active">{strings.admin.discountActive}</Label>
-                </div>
-                {watchedDiscountActive && (
-                  <div className="space-y-2">
-                    <Label htmlFor="pf-discounted-price">
-                      {strings.admin.discountedPrice}
-                    </Label>
-                    <Input
-                      id="pf-discounted-price"
-                      type="text"
-                      inputMode="numeric"
-                      {...register("discountedPrice", { setValueAs: parseDigitInput })}
-                    />
-                    {errors.discountedPrice && (
-                      <p className="text-xs text-destructive">
-                        {errors.discountedPrice.message as string}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-            <div className="space-y-2">
-              <Label>{strings.admin.badges}</Label>
-              <div className="flex flex-wrap gap-2">
-                {(["POPULAR", "NEW", "SPICY", "VEGETARIAN"] as const).map((badge) => (
-                  <button
-                    key={badge}
-                    type="button"
-                    aria-pressed={watchedBadges.includes(badge)}
-                    onClick={() => toggleBadge(badge)}
-                    className={`rounded-full border px-3 py-1 text-xs font-bold transition-colors ${
-                      watchedBadges.includes(badge)
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "border-line bg-card-2/60 text-muted-foreground"
-                    }`}
-                  >
-                    {strings.badges[badge]}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>{strings.admin.variants}</Label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => append({ name: "", price: 0 })}
-                >
-                  <Plus className="h-3 w-3 me-1" />
-                  {strings.admin.addVariant}
-                </Button>
-              </div>
-              {fields.map((field, index) => (
-                <div key={field.id} className="flex gap-2">
-                  <Input
-                    placeholder={strings.admin.variantName}
-                    {...register(`variants.${index}.name`)}
-                  />
-                  <Input
-                    placeholder={strings.admin.variantPrice}
-                    type="text"
-                    inputMode="numeric"
-                    {...register(`variants.${index}.price`, { setValueAs: parseDigitInput })}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    aria-label={strings.admin.delete}
-                    onClick={() => remove(index)}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-            <div className="flex items-center gap-2">
-              <Controller
-                name="isAvailable"
-                control={control}
-                render={({ field }) => (
-                  <Switch
-                    id="pf-is-available"
-                    checked={Boolean(field.value)}
-                    onCheckedChange={field.onChange}
-                  />
-                )}
-              />
-              <Label htmlFor="pf-is-available">{strings.admin.available}</Label>
-            </div>
+            <ProductFormFields
+              register={register}
+              control={control}
+              errors={errors}
+              setValue={setValue}
+              fields={fields}
+              append={append}
+              remove={remove}
+              categories={categories}
+              setCategoryId={setCategoryId}
+              parentCategory={parentCategory}
+              selectedParent={selectedParent}
+              childValue={childValue}
+              hasVariants={hasVariants}
+              watchedDescription={watchedDescription}
+              watchedPrice={watchedPrice}
+              watchedDiscountActive={watchedDiscountActive}
+            />
             <Button type="submit" className="w-full">
               {strings.admin.save}
             </Button>

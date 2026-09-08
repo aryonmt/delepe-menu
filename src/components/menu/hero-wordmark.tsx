@@ -40,13 +40,13 @@ export function HeroWordmark({ restaurantName, children }: Props) {
   return (
     <header
       data-testid="hero"
-      className="grain-overlay relative isolate flex min-h-[min(95svh,900px)] flex-col overflow-hidden text-center"
+      className="grain-overlay relative isolate flex min-h-[min(52svh,420px)] flex-col overflow-hidden text-center md:min-h-[min(72svh,620px)]"
     >
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0" style={{ background: "var(--ambient-glow-1), var(--ambient-glow-2)" }} />
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0" style={{ background: "radial-gradient(65% 55% at 50% 46%, rgba(232,163,61,0.22) 0%, rgba(184,110,32,0.08) 55%, transparent 75%)" }} />
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-28" style={{ background: "linear-gradient(to top, var(--background) 0%, transparent 100%)" }} />
       
-      <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-col items-center px-4 pt-10 md:pt-14">
+      <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-col items-center px-4 pt-6 md:pt-14">
         <motion.h1
           initial={reduceMotion ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}

@@ -210,14 +210,23 @@ public UI** (seed SVG glyphs no longer use emoji — see ADR-10).
 no physical left/right in components; directional icons mirrored via
 `rtl:rotate-180`. Ticker: duplicated track loops seamlessly, drifting toward
 inline-end (rightward in RTL); verified visually in Phase 4.
+**Text fields.** `dir` follows the first letter or digit in the value: Latin
+or any numeric digit (ASCII / Persian / Arabic-Indic) → `ltr`; Arabic/Persian
+letters → `rtl`. Empty fields follow the page (`rtl`). Radios, checkboxes,
+file inputs, and hidden fields are excluded.
 
 ## Component specs (visual)
 
-**Hero.** `min-height: min(72svh, 620px)`; wordmark centered; eyebrow chip
-(`strings.public.subtitle`) above it; **optional tagline slot renders only when
-a non-empty string exists (currently none — documented, not a bug)**; ticker
-anchored to the hero's bottom edge; ambient glows + grain + vignette. `h1` =
-the rendered restaurant name. `data-testid="hero"`.
+**Hero.** Mobile `min-height: min(52svh, 420px)`; from `md` `min(72svh, 620px)`.
+Wordmark centered; eyebrow chip (`strings.public.subtitle`) above it;
+**optional tagline slot renders only when a non-empty string exists (currently
+none — documented, not a bug)**; ticker anchored to the hero's bottom edge;
+ambient glows + grain + vignette. `h1` = the rendered restaurant name.
+`data-testid="hero"`.
+**Hero solar stage.** Mobile layout height `200px`; from `md` `450px`. Inner 3D
+disc `240px` on mobile, `940px` from `md`. Orbit CSS variables on `.solar-system`
+(inner / mid / outer): desktop `175px` / `285px` / `395px`; ≤768px `100px` /
+`165px` / `230px`; ≤480px `70px` / `115px` / `160px`.
 
 **Dish ticker.** Chip = min-height 44px pill, border `--line`, bg `card/.7` +
 blur; content: name (Lalezar 14) + «،» separator + price (12.5, ember).

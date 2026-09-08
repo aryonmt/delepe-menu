@@ -15,6 +15,14 @@ import {
   SCROLLSPY_TOP_THRESHOLD_PX,
 } from "@/lib/constants";
 import { strings } from "@/lib/fa/strings";
+import {
+  clientHeightOf,
+  findSection,
+  relativeTopOf,
+  scrollHeightOf,
+  scrollTopOf,
+  type ScrollRoot,
+} from "./scroll-root";
 
 type CategoryTab = { id: string; name: string };
 type Props = {
@@ -23,6 +31,8 @@ type Props = {
   onActiveIdChange: (id: string) => void;
   /** Near-instant jump + settle choreography owned by the shell (docs/06 B-01). */
   onJump: (id: string) => void;
+  /** Phone-frame preview scrolls a div, not the window (docs/07). */
+  scrollRoot?: ScrollRoot;
 };
 type ButtonBox = { left: number; top: number; width: number; height: number };
 const INDICATOR_SPRING: Transition = { type: "spring", stiffness: 420, damping: 34, mass: 0.8 };
@@ -31,7 +41,13 @@ const INDICATOR_SPRING: Transition = { type: "spring", stiffness: 420, damping: 
  * Category tabs row of the unified sticky nav header (docs/05/06).
  * No longer fixed to the bottom on mobile — the header owns stickiness.
  */
-export function Dock({ categories, activeId, onActiveIdChange, onJump }: Props) {
+export function Dock({
+  categories,
+  activeId,
+  onActiveIdChange,
+  onJump,
+  scrollRoot,
+}: Props) {
   const reduceMotion = useReducedMotion();
   const trackRef = useRef<HTMLDivElement | null>(null);
   const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
@@ -74,20 +90,22 @@ export function Dock({ categories, activeId, onActiveIdChange, onJump }: Props) 
 
   /* Scrollspy: nav sits on top, focal line below the header (docs/06 B-01). */
   useEffect(() => {
-    if (categories.length === 0) return;
+    const root: ScrollRoot | undefined =
+      scrollRoot ?? (typeof window === "undefined" ? undefined : window);
+    if (categories.length === 0 || !root) return;
     let rafId: number | null = null;
     const handleScroll = () => {
       if (ignoreScrollRef.current) return;
       if (rafId !== null) cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(() => {
-        if (window.scrollY < SCROLLSPY_TOP_THRESHOLD_PX) {
+        if (scrollTopOf(root) < SCROLLSPY_TOP_THRESHOLD_PX) {
           const first = categories[0];
           if (first && first.id !== activeId) onActiveIdChange(first.id);
           return;
         }
         const atBottom =
-          window.innerHeight + window.scrollY >=
-          document.documentElement.scrollHeight - SCROLLSPY_BOTTOM_THRESHOLD_PX;
+          clientHeightOf(root) + scrollTopOf(root) >=
+          scrollHeightOf(root) - SCROLLSPY_BOTTOM_THRESHOLD_PX;
         if (atBottom) {
           const last = categories[categories.length - 1];
           if (last && last.id !== activeId) onActiveIdChange(last.id);
@@ -95,22 +113,22 @@ export function Dock({ categories, activeId, onActiveIdChange, onJump }: Props) 
         }
         let matchingId = categories[0]?.id;
         for (const category of categories) {
-          const el = document.getElementById(`section-${category.id}`);
+          const el = findSection(root, category.id);
           if (!el) continue;
-          if (el.getBoundingClientRect().top <= SCROLLSPY_FOCAL_LINE_PX) {
+          if (relativeTopOf(el, root) <= SCROLLSPY_FOCAL_LINE_PX) {
             matchingId = category.id;
           }
         }
         if (matchingId && matchingId !== activeId) onActiveIdChange(matchingId);
       });
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    root.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      root.removeEventListener("scroll", handleScroll);
       if (rafId !== null) cancelAnimationFrame(rafId);
     };
-  }, [categories, activeId, onActiveIdChange]);
+  }, [categories, activeId, onActiveIdChange, scrollRoot]);
 
   useEffect(() => {
     const container = trackRef.current;

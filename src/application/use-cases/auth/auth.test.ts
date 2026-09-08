@@ -115,6 +115,7 @@ describe("ChangePasswordUseCase", () => {
       adminId: admin.id,
       current: PASSWORD,
       next: "new-secret-99",
+      confirm: "new-secret-99",
     });
     const updated = await users.findById(admin.id);
     expect(updated?.passwordHash).toBe("hash:new-secret-99");
@@ -126,15 +127,29 @@ describe("ChangePasswordUseCase", () => {
     const admin = await seedAdmin(users);
     const change = new ChangePasswordUseCase(users, hasher);
     await expect(
-      change.execute({ adminId: admin.id, current: PASSWORD, next: "short" }),
+      change.execute({
+        adminId: admin.id,
+        current: PASSWORD,
+        next: "short",
+        confirm: "short",
+      }),
     ).rejects.toBeInstanceOf(ValidationError);
     await expect(
       change.execute({
         adminId: admin.id,
         current: "wrong",
         next: "long-enough",
+        confirm: "long-enough",
       }),
     ).rejects.toMatchObject({ code: "INVALID_CREDENTIALS" });
+    await expect(
+      change.execute({
+        adminId: admin.id,
+        current: PASSWORD,
+        next: "long-enough",
+        confirm: "does-not-match",
+      }),
+    ).rejects.toMatchObject({ code: "PASSWORD_MISMATCH" });
   });
 });
 

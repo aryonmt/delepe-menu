@@ -19,15 +19,17 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Plus, X } from "lucide-react";
-import type { CategoryDto, ProductDto, SettingsDto } from "@/application/dtos";
+import type { CategoryDto, ProductDto } from "@/application/dtos";
 import { updateTickerAction } from "@/app/admin/settings/_actions";
 import { Button } from "@/components/ui/button";
+import { useMenuDraftStore } from "@/hooks/use-menu-draft-store";
 import { mediaUrl } from "@/lib/media-url";
 import { strings } from "@/lib/fa/strings";
 import { toast } from "sonner";
 
-type Props = { settings: SettingsDto; categories: CategoryDto[] };
 type Row = { product: ProductDto; categoryName: string };
+
+const EMPTY_CATEGORIES: CategoryDto[] = [];
 
 function flattenProducts(categories: CategoryDto[]): Row[] {
   const out: Row[] = [];
@@ -101,18 +103,38 @@ function SortableRow({
   );
 }
 
-export function TickerManager({ settings, categories }: Props) {
+export function TickerManager() {
+  const savedVersion = useMenuDraftStore((s) => s.savedVersion);
+  return <TickerEditor key={savedVersion} />;
+}
+
+function TickerEditor() {
+  const draft = useMenuDraftStore((s) => s.draft);
+  const updateSettings = useMenuDraftStore((s) => s.updateSettings);
+  const clearDirty = useMenuDraftStore((s) => s.clearDirty);
+  const categories = draft?.categories ?? EMPTY_CATEGORIES;
   const all = useMemo(() => flattenProducts(categories), [categories]);
   const byId = useMemo(() => new Map(all.map((row) => [row.product.id, row])), [all]);
-  const [ids, setIds] = useState<string[]>(
-    settings.tickerProductIds?.filter((id) => byId.has(id)) ?? [],
-  );
+  const [ids, setIds] = useState(() => {
+    const snapshot = useMenuDraftStore.getState().draft;
+    const map = new Map(
+      flattenProducts(snapshot?.categories ?? []).map((row) => [row.product.id, row] as const),
+    );
+    return snapshot?.settings.tickerProductIds?.filter((id) => map.has(id)) ?? [];
+  });
   const [pick, setPick] = useState("");
   const [saving, setSaving] = useState(false);
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
+
+  const applyIds = (next: string[]) => {
+    setIds(next);
+    const current = useMenuDraftStore.getState().draft?.settings;
+    if (!current) return;
+    updateSettings({ ...current, tickerProductIds: next });
+  };
 
   const rows = ids
     .map((id) => byId.get(id))
@@ -122,8 +144,8 @@ export function TickerManager({ settings, categories }: Props) {
   const onDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    setIds((current) =>
-      arrayMove(current, current.indexOf(String(active.id)), current.indexOf(String(over.id))),
+    applyIds(
+      arrayMove(ids, ids.indexOf(String(active.id)), ids.indexOf(String(over.id))),
     );
   };
 
@@ -131,8 +153,13 @@ export function TickerManager({ settings, categories }: Props) {
     setSaving(true);
     const result = await updateTickerAction(ids);
     setSaving(false);
-    if (result.ok) toast.success(strings.admin.tickerSaved);
-    else toast.error(result.error.fa);
+    if (result.ok) {
+      updateSettings(result.data);
+      clearDirty();
+      toast.success(strings.admin.tickerSaved);
+      return;
+    }
+    toast.error(result.error.fa);
   };
 
   return (
@@ -153,9 +180,7 @@ export function TickerManager({ settings, categories }: Props) {
                 <SortableRow
                   key={row.product.id}
                   row={row}
-                  onRemove={() =>
-                    setIds((current) => current.filter((id) => id !== row.product.id))
-                  }
+                  onRemove={() => applyIds(ids.filter((id) => id !== row.product.id))}
                 />
               ))}
             </ul>
@@ -187,7 +212,8 @@ export function TickerManager({ settings, categories }: Props) {
           variant="outline"
           disabled={!pick}
           onClick={() => {
-            if (pick) setIds((current) => [...current, pick]);
+            if (!pick) return;
+            applyIds([...ids, pick]);
             setPick("");
           }}
         >

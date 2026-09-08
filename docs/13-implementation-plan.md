@@ -92,20 +92,20 @@ Format: `ID · description · [docs] · deps · output · tests`.
 
 | ID | Task | Docs | Deps | Output | Tests |
 | --- | --- | --- | --- | --- | --- |
-| T-050 | Admin layout (sidebar/bottom-nav), draft store + hydration (`GetAdminMenu`), unsaved-changes guard | 03, 07 | T-022, T-013 | shell + store | unit store mutators |
-| T-051 | Products list: search, category filter, client pagination, availability switch (optimistic + revert) | 07 | T-050 | list | E2E list cases |
-| T-052 | Product drawer form (RHF+Zod): digits normalization, variant auto-price, discount hiding, badges | 04, 07 | T-050 | form | unit schemas + E2E |
-| T-053 | Upload editor + orphan cleanup, reusing SharpImageOptimizer | 03, 07 | T-052, T-033 | media editor | E2E upload w/ fixture |
-| T-054 | Delete confirm (BR-03) + dnd reorder (BR-07, leaf-only rule) | 04, 07 | T-051 | CRUD complete | E2E `admin-products.spec` full |
+| ~~T-050~~ | Admin layout (sidebar/bottom-nav), draft store + hydration (`GetAdminMenu`), unsaved-changes guard | 03, 07 | T-022, T-013 | shell + store | unit store mutators |
+| ~~T-051~~ | Products list: search, category filter, client pagination, availability switch (optimistic + revert) | 07 | T-050 | list | E2E list cases |
+| ~~T-052~~ | Product drawer form (RHF+Zod): digits normalization, variant auto-price, discount hiding, badges | 04, 07 | T-050 | form | unit schemas + E2E |
+| ~~T-053~~ | Upload editor + orphan cleanup, reusing SharpImageOptimizer | 03, 07 | T-052, T-033 | media editor | E2E upload w/ fixture |
+| ~~T-054~~ | Delete confirm (BR-03); product-row dnd retired (order lives on categories) | 04, 07 | T-051 | CRUD complete | E2E `admin-products.spec` full |
 
 ### M6 · Admin: Categories, Settings, Live Preview
 
 | ID | Task | Docs | Deps | Output | Tests |
 | --- | --- | --- | --- | --- | --- |
-| T-060 | Categories tree CRUD + dnd + guards (BR-01/02/15/16) | 04, 07 | T-050 | categories page | E2E `admin-categories.spec` |
-| T-061 ∥ | Settings page: name, unavailable-mode radios (theme picker deferred per ADR-12) | 05, 07 | T-050 | settings page | E2E part |
-| T-062 | Phone-frame preview (`toPublicMenu(draft)`) + «بازگشت به منوی ذخیره‌شده» | 07 | T-050, T-040 | live preview | E2E `settings-preview.spec` |
-| T-063 | Change-password dialog; mobile admin QA | 07, 10 | T-050 | dialog | E2E `auth.spec` extension |
+| ~~T-060~~ | Categories tree CRUD + dnd + guards (BR-01/02/15/16) | 04, 07 | T-050 | categories page | E2E `admin-categories.spec` |
+| ~~T-061~~ ∥ | Settings page: name, unavailable-mode radios (theme picker deferred per ADR-12) | 05, 07 | T-050 | settings page | E2E part |
+| ~~T-062~~ | Phone-frame preview (`toPublicMenu(draft)`) + «بازگشت به منوی ذخیره‌شده» | 07 | T-050, T-040 | live preview | E2E `settings-preview.spec` |
+| ~~T-063~~ | Change-password dialog; mobile admin QA | 07, 10 | T-050 | dialog | E2E `auth.spec` extension |
 
 ### M7 · Identity & Visual QA
 

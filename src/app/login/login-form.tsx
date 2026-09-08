@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import type { ActionResult } from "@/application/dtos";
 import { strings } from "@/lib/fa/strings";
 import { loginAction } from "./_actions";
@@ -25,7 +26,7 @@ export function LoginForm() {
       ) : null}
       <label className="flex flex-col gap-1 text-secondary text-muted-foreground">
         {strings.auth.username}
-        <input
+        <Input
           name="username"
           type="text"
           autoComplete="username"
@@ -36,7 +37,7 @@ export function LoginForm() {
       </label>
       <label className="flex flex-col gap-1 text-secondary text-muted-foreground">
         {strings.auth.password}
-        <input
+        <Input
           name="password"
           type="password"
           autoComplete="current-password"

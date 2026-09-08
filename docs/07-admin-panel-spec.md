@@ -37,7 +37,10 @@ Successful login redirects to `/admin/products`.
 - Desktop: inline-start sidebar (icons + Persian labels), content area.
 - Mobile: top bar + bottom navigation (3 items) — thumb-reachable.
 - Top bar: «پیش‌نمایش» button (opens preview drawer), user menu
-  (تغییر رمز عبور dialog, خروج).
+  (trigger label «حساب کاربری»; تغییر رمز عبور dialog, خروج).
+- Change password: current + new + repeat new; «ذخیره رمز» opens an in-dialog
+  confirmation («تأیید تغییر رمز») before the mutation. Mismatch →
+  `PASSWORD_MISMATCH`.
 - Unsaved-changes: `isDirty` → `beforeunload` + confirm dialog
   («تغییرات ذخیره‌نشده دارید») on internal navigation.
 
@@ -82,10 +85,10 @@ Rules (deterministic):
 - List: responsive table/cards; row = thumb 48px (`mediaUrl(id, 320)`), name,
   category, effective price, availability Switch (instant action), edit, delete.
 - Client-side pagination 20/page over the (filtered) draft list.
-- **Reorder**: enabled only when the filter selects exactly one **leaf** category
-  (a child, or a top-level category without children) and search is empty; rows
-  become dnd-kit sortable (handle icon); drop → `ReorderProducts` action.
-  Otherwise handles are disabled with a hint («برای مرتب‌سازی، یک دسته انتخاب کنید»).
+- **Reorder**: product rows are **not** drag-sortable on this page (owner
+  decision). Sort order is edited on the Categories tree; `ReorderProducts`
+  remains a server use-case for that path. The products toolbar is search +
+  category filter only.
 - **Delete**: confirm dialog showing the product name in bold; on success also
   removes image files (BR-03); success toast. No undo (out of scope).
 

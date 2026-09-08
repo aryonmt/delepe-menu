@@ -11,7 +11,9 @@
 - Middleware (edge, jose only) guards `/admin/**` + `/api/admin/**` as
   defense-in-depth; **every** server action & route handler re-verifies the
   session via `VerifySessionUseCase`.
-- Password change does **not** invalidate other sessions (stateless JWT, single
+- Password change requires the current password, a new password (≥8), a matching
+  confirmation field, and an explicit UI confirm step before the mutation.
+  Password change does **not** invalidate other sessions (stateless JWT, single
   admin — accepted for v1; revisit if roles are ever added).
 
 ## Login hardening

@@ -84,6 +84,7 @@ export const changePasswordSchema = z.object({
   adminId: z.string().min(1),
   current: z.string().min(1).max(128),
   next: z.string().min(8).max(128),
+  confirm: z.string().min(1).max(128),
 });
 export const verifySessionSchema = z.object({ token: z.string().min(1).optional() });
 

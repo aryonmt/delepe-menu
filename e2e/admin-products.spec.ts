@@ -4,6 +4,7 @@ import { strings } from "../src/lib/fa/strings";
 
 const username = process.env.ADMIN_USERNAME ?? "admin";
 const password = process.env.ADMIN_PASSWORD ?? "change-me-now";
+
 /* 1x1 red PNG — square fixture satisfies BR-11 (1:1). */
 const PIXEL_PNG = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
@@ -25,7 +26,9 @@ function row(page: Page, name: string) {
 test.describe("admin products", () => {
   test("authenticated admin sees the seeded list", async ({ page }) => {
     await loginAsAdmin(page);
-    await expect(page.getByRole("heading", { name: strings.admin.productsHeading })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: strings.admin.productsHeading }),
+    ).toBeVisible();
     await expect(row(page, "اسپرسو")).toBeVisible();
   });
 
@@ -59,6 +62,7 @@ test.describe("admin products", () => {
     await toggle.click();
     await expect(toggle).not.toHaveAttribute("data-state", before ?? "checked");
     await page.reload();
+    await loginAsAdmin(page);
     await expect(row(page, "اسپرسو").getByRole("switch")).not.toHaveAttribute(
       "data-state",
       before ?? "checked",
@@ -100,7 +104,9 @@ test.describe("admin products", () => {
       mimeType: "image/png",
       buffer: PIXEL_PNG,
     });
-    const cropDialog = page.getByRole("dialog").filter({ hasText: strings.admin.cropImage });
+    const cropDialog = page
+      .getByRole("dialog")
+      .filter({ hasText: strings.admin.cropImage });
     await expect(cropDialog).toBeVisible();
     await cropDialog.getByRole("button", { name: strings.admin.save }).click();
     await expect(page.getByText(strings.admin.imageUploaded)).toBeVisible();
@@ -117,32 +123,8 @@ test.describe("admin products", () => {
     await expect(row(page, "آب هویج")).toHaveCount(0);
   });
 
-  test("reorder handles disabled while searching", async ({ page }) => {
+  test("product reorder UI is absent (product dnd retired)", async ({ page }) => {
     await loginAsAdmin(page);
-    await page.getByRole("combobox").first().click();
-    await page.getByRole("option", { name: "غذای اصلی / بشقاب" }).click();
-    await expect(page.getByTestId("reorder-handle").first()).toBeEnabled();
-    await page.getByPlaceholder(strings.admin.searchPlaceholder).fill("پنه");
-    await expect(page.getByTestId("reorder-handle").first()).toBeDisabled();
-  });
-
-  test("reorder leaf category persists across reload (BR-07)", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.getByRole("combobox").first().click();
-    await page.getByRole("option", { name: "غذای اصلی / بشقاب" }).click();
-    const firstBefore = await page.getByTestId("admin-product-name").first().innerText();
-    const secondBefore = await page.getByTestId("admin-product-name").nth(1).innerText();
-    const handle0 = page.getByTestId("reorder-handle").nth(0);
-    const handle1 = page.getByTestId("reorder-handle").nth(1);
-    await handle0.hover();
-    await page.mouse.down();
-    await handle1.hover();
-    await page.mouse.move(page.mouse as never, 0);
-    await page.mouse.up();
-    await page.reload();
-    await page.getByRole("combobox").first().click();
-    await page.getByRole("option", { name: "غذای اصلی / بشقاب" }).click();
-    await expect(page.getByTestId("admin-product-name").first()).toHaveText(secondBefore);
-    expect(firstBefore).not.toBe(secondBefore);
+    await expect(page.getByTestId("reorder-handle")).toHaveCount(0);
   });
 });

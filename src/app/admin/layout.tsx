@@ -14,13 +14,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect("/login");
   }
   const menu = await container.getAdminMenu().execute();
-  
+
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <AdminShell initialData={menu} />
-      <main className="pb-20 md:pb-0 md:ps-64">
-        {children}
-      </main>
+      <AdminShell initialData={menu}>{children}</AdminShell>
       <Toaster richColors position="top-center" />
     </div>
   );

@@ -58,13 +58,13 @@ export const SolarSystem = React.forwardRef<HTMLDivElement, SolarSystemProps>(
       <div
         ref={ref}
         className={cn(
-          'solar-system relative flex items-center justify-center w-full max-w-[940px] h-[320px] md:h-[450px] perspective-[1200px] select-none overflow-visible',
+          'solar-system relative flex h-[200px] w-full max-w-[940px] select-none items-center justify-center overflow-visible perspective-[1200px] md:h-[450px]',
           className,
         )}
         {...props}
       >
         <div
-          className="absolute w-[360px] h-[360px] md:w-[940px] md:h-[940px] flex items-center justify-center"
+          className="absolute flex h-[240px] w-[240px] items-center justify-center md:h-[940px] md:w-[940px]"
           style={{ transform: 'rotateX(65deg) rotateY(-10deg)', transformStyle: 'preserve-3d' }}
         >
           {/* Sun core */}

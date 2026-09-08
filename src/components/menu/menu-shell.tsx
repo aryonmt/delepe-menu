@@ -10,12 +10,21 @@ import { DishPeek } from "./dish-peek";
 import { DishTicker } from "./dish-ticker";
 import { Dock } from "./dock";
 import { HeroWordmark } from "./hero-wordmark";
+import {
+  findSection,
+  relativeTopOf,
+  scrollTopOf,
+  scrollToY,
+  type ScrollRoot,
+} from "./scroll-root";
 
 type Props = {
   categories: CategoryDto[];
   restaurantName: string;
   /** Resolved ticker items (curated or fallback) from the page. */
   tickerItems: ProductDto[];
+  /** Contained scroller for the admin phone preview (docs/07). */
+  scrollRoot?: HTMLElement | null;
 };
 
 /** leaf/top categoryId → top-level categoryId (chip state is keyed by top-level). */
@@ -28,7 +37,7 @@ function buildTopLevelIndex(categories: CategoryDto[]): Map<string, string> {
   return map;
 }
 
-export function MenuShell({ categories, restaurantName, tickerItems }: Props) {
+export function MenuShell({ categories, restaurantName, tickerItems, scrollRoot }: Props) {
   const [activeId, setActiveId] = useState<string>(categories[0]?.id ?? "");
   const [chipByCategory, setChipByCategory] = useState<Record<string, ChipId>>({});
   const [peekProduct, setPeekProduct] = useState<ProductDto | null>(null);
@@ -45,16 +54,16 @@ export function MenuShell({ categories, restaurantName, tickerItems }: Props) {
   const selectedChip = (active && chipByCategory[active.id]) || ALL_SUBCATEGORY_CHIP;
 
   const jumpToCategory = useCallback((id: string) => {
-    const target = document.getElementById(`section-${id}`);
+    const root: ScrollRoot = scrollRoot ?? window;
+    const target = findSection(root, id);
     if (!target) return;
-    const isDesktop = window.innerWidth >= 768;
+    const isDesktop = !scrollRoot && window.innerWidth >= 768;
     const headerOffset = isDesktop ? NAV_OFFSET_DESKTOP_PX : NAV_OFFSET_MOBILE_PX;
-    const rect = target.getBoundingClientRect();
-    const absoluteTargetTop = rect.top + window.scrollY - headerOffset;
-    window.scrollTo({ top: Math.max(0, absoluteTargetTop), behavior: "auto" });
+    const top = relativeTopOf(target, root) + scrollTopOf(root) - headerOffset;
+    scrollToY(root, Math.max(0, top));
     setSettlingId(id);
     window.setTimeout(() => setSettlingId((current) => (current === id ? null : current)), 400);
-  }, []);
+  }, [scrollRoot]);
 
   const jumpToProduct = useCallback(
     (product: ProductDto) => {
@@ -63,7 +72,8 @@ export function MenuShell({ categories, restaurantName, tickerItems }: Props) {
         setChipByCategory((prev) => ({ ...prev, [topLevelId]: ALL_SUBCATEGORY_CHIP }));
       }
       window.requestAnimationFrame(() => {
-        const element = document.querySelector(
+        const scope: ParentNode = scrollRoot ?? document;
+        const element = scope.querySelector(
           `[data-testid="product-${CSS.escape(product.name)}"]`,
         );
         if (!(element instanceof HTMLElement)) return;
@@ -74,7 +84,7 @@ export function MenuShell({ categories, restaurantName, tickerItems }: Props) {
         window.setTimeout(() => element.classList.remove("peek-flash"), 650);
       });
     },
-    [topLevelIndex],
+    [topLevelIndex, scrollRoot],
   );
 
   return (
@@ -90,6 +100,7 @@ export function MenuShell({ categories, restaurantName, tickerItems }: Props) {
           activeId={activeId}
           onActiveIdChange={setActiveId}
           onJump={jumpToCategory}
+          scrollRoot={scrollRoot ?? undefined}
         />
         <ContextStrip
           activeCategory={active}

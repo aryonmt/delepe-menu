@@ -1,11 +1,12 @@
 // src/components/admin/admin-shell.tsx
 "use client";
-import { useEffect, useState } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutGrid, LogOut, Package, Settings } from "lucide-react";
+import { LayoutGrid, Package, Settings } from "lucide-react";
 import type { AdminMenuDto } from "@/application/dtos";
-import { logoutAction } from "@/app/admin/_actions";
+import { AdminUserMenu } from "@/components/admin/admin-user-menu";
+import { PreviewDrawer } from "@/components/admin/preview-drawer";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -21,19 +22,19 @@ import { useMenuDraftStore } from "@/hooks/use-menu-draft-store";
 import { useUnsavedWarning } from "@/hooks/use-unsaved-warning";
 import { strings } from "@/lib/fa/strings";
 
-type Props = { initialData: AdminMenuDto };
+type Props = { initialData: AdminMenuDto; children: ReactNode };
 
-export function AdminShell({ initialData }: Props) {
-  const hydrate = useMenuDraftStore((s) => s.hydrate);
+export function AdminShell({ initialData, children }: Props) {
+  if (useMenuDraftStore.getState().draft === null) {
+    useMenuDraftStore.getState().hydrate(initialData);
+  }
+
   const isDirty = useUnsavedWarning();
   const pathname = usePathname();
   const router = useRouter();
   const [showNavConfirm, setShowNavConfirm] = useState(false);
   const [pendingPath, setPendingPath] = useState<string | null>(null);
-
-  useEffect(() => {
-    hydrate(initialData);
-  }, [hydrate, initialData]);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const handleNav = (event: React.MouseEvent, href: string) => {
     if (isDirty && href !== pathname) {
@@ -58,10 +59,21 @@ export function AdminShell({ initialData }: Props) {
 
   return (
     <>
+      <header className="sticky top-0 z-[80] flex h-14 items-center justify-between gap-3 border-b border-border bg-card px-4 md:ps-72">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          data-testid="admin-preview"
+          onClick={() => setPreviewOpen(true)}
+        >
+          {strings.admin.preview}
+        </Button>
+        <AdminUserMenu />
+      </header>
+
       <aside className="hidden md:flex fixed inset-y-0 start-0 z-50 w-64 flex-col border-e border-border bg-card p-4">
-        <h2 className="font-display text-xl text-primary mb-8">
-          {strings.brand.wordmark}
-        </h2>
+        <h2 className="font-display text-xl text-primary mb-8">{strings.brand.wordmark}</h2>
         <nav className="flex flex-col gap-2 flex-1">
           {links.map((link) => (
             <Link
@@ -79,13 +91,10 @@ export function AdminShell({ initialData }: Props) {
             </Link>
           ))}
         </nav>
-        <form action={logoutAction}>
-          <Button type="submit" variant="outline" className="w-full justify-start gap-3">
-            <LogOut className="h-4 w-4" />
-            {strings.auth.logout}
-          </Button>
-        </form>
       </aside>
+
+      <main className="pb-20 md:pb-0 md:ps-64">{children}</main>
+
       <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 flex items-center justify-around border-t border-border bg-card p-2">
         {links.map((link) => (
           <Link
@@ -101,6 +110,9 @@ export function AdminShell({ initialData }: Props) {
           </Link>
         ))}
       </nav>
+
+      <PreviewDrawer open={previewOpen} onOpenChange={setPreviewOpen} />
+
       <AlertDialog open={showNavConfirm} onOpenChange={setShowNavConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -113,9 +125,7 @@ export function AdminShell({ initialData }: Props) {
             <AlertDialogCancel onClick={() => setPendingPath(null)}>
               {strings.admin.stay}
             </AlertDialogCancel>
-            <AlertDialogAction onClick={confirmNav}>
-              {strings.admin.leave}
-            </AlertDialogAction>
+            <AlertDialogAction onClick={confirmNav}>{strings.admin.leave}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

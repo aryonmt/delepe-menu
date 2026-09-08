@@ -14,7 +14,8 @@ import { toast } from "sonner";
 
 type Props = {
   currentMediaId: string | null;
-  onUploadComplete: (mediaId: string) => void;
+  /** Full optimizer result so the form can build a live preview DTO. */
+  onUploadComplete: (result: UploadMediaResult) => void;
   onRemove: () => void;
 };
 
@@ -103,7 +104,9 @@ export function UploadEditor({ currentMediaId, onUploadComplete, onRemove }: Pro
     const xhr = new XMLHttpRequest();
     xhr.open("POST", "/api/admin/media/upload");
     xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) setProgress((event.loaded / event.total) * 100);
+      if (event.lengthComputable) {
+        setProgress((event.loaded / event.total) * 100);
+      }
     };
     xhr.onload = () => {
       setIsUploading(false);
@@ -113,7 +116,7 @@ export function UploadEditor({ currentMediaId, onUploadComplete, onRemove }: Pro
       }
       const res = JSON.parse(xhr.responseText) as ActionResult<UploadMediaResult>;
       if (res.ok) {
-        onUploadComplete(res.data.mediaId);
+        onUploadComplete(res.data);
         setIsOpen(false);
         toast.success(strings.admin.imageUploaded);
         return;

@@ -27,6 +27,8 @@ export const MEDIA_CACHE_MAX_AGE = 31_536_000;
 /** Sticky nav header height used for jump offsets (docs/06 B-01). */
 export const NAV_OFFSET_MOBILE_PX = 104;
 export const NAV_OFFSET_DESKTOP_PX = 112;
+/** Admin live-preview drawer width on desktop (docs/07). */
+export const PREVIEW_PANEL_WIDTH_PX = 380;
 /** Scrollspy geometry (docs/06 B-01): focal line + page-edge thresholds. */
 export const SCROLLSPY_FOCAL_LINE_PX = 130;
 export const SCROLLSPY_TOP_THRESHOLD_PX = 180;
