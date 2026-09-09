@@ -7,7 +7,7 @@ import { resolveTickerItems } from "@/application/mappers/ticker";
 import { NotFoundError } from "@/domain/errors";
 import { getPublicMenuCached } from "@/lib/public-menu-cache";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 async function MenuContent() {
   let menu: Awaited<ReturnType<typeof getPublicMenuCached>>;

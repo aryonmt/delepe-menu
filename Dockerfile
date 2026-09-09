@@ -12,6 +12,11 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
 FROM base AS build
+# Placeholder only: image build has no Postgres. Settings.get maps P1001/P2021
+# to null. Runtime Compose supplies the real DATABASE_URL.
+ENV DATABASE_URL="postgresql://delepe:delepe@127.0.0.1:1/delepe_build"
+ENV SESSION_SECRET="docker-image-build-session-secret-32"
+ENV STORAGE_ROOT="/tmp/storage"
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN pnpm exec prisma generate

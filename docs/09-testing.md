@@ -53,7 +53,7 @@ host port **5433**, database `delepe_test`, doc 12).
 E2E runs on `E2E_PORT` (default **3100**) so a dev server on 3000 is never reused.
 Playwright `webServer` runs `node scripts/e2e-webserver.mjs` (wipe `.next`, then
 `pnpm db:deploy && pnpm db:seed && pnpm build && pnpm start`) with
-the test `DATABASE_URL` and repo `STORAGE_ROOT` so ISR HTML (`revalidate = 60`)
+the test `DATABASE_URL` and repo `STORAGE_ROOT` so the running app
 matches the seeded test database (including `unavailableMode: MUTED`). `db:deploy`
 runs first because webServer starts before `globalSetup` and the test database
 must have every Settings column (including `tickerProductIds`) before seed.
@@ -61,8 +61,10 @@ The webServer timeout is **10 minutes** so Windows `next build` (including trace
 collection) can finish before Playwright probes `/api/health`.
 It listens on `E2E_PORT`. Persian locale, mobile viewport 390×844 + desktop pass.
 
-CI must set `E2E_DATABASE_URL` to the job's service Postgres. global-setup
-migrates that database — no extra CI migrate step is required.
+CI must set `E2E_DATABASE_URL` to the job's service Postgres. The `quality`
+job runs `pnpm db:deploy` before `pnpm build` so a migrated schema exists if
+Next still evaluates the public menu during collect-page-data. Playwright `webServer` / global-setup still
+migrate and seed for E2E independently.
 
 Seeded SVG placeholders for public-menu specs land in M3 (ADR-10).
 
@@ -80,9 +82,9 @@ Critical specs:
 ## CI (GitHub Actions)
 
 Job `quality`: install → `pnpm lint` → `pnpm typecheck` → `pnpm test` →
-`pnpm build` → bundle check (`pnpm check:bundle` / `@next/bundle-analyzer`:
-`@dnd-kit`, `react-easy-crop` absent from the public bundle) → `pnpm audit --audit-level=high`
-(advisory) → `pnpm test:e2e` (set `E2E_DATABASE_URL` to the job's service Postgres
-service; global-setup migrates it — no extra migrate step).
+`pnpm db:deploy` (job Postgres) → `pnpm build` → bundle check
+(`pnpm check:bundle` / `@next/bundle-analyzer`: `@dnd-kit`, `react-easy-crop`
+absent from the public bundle) → `pnpm audit --audit-level=high`
+(advisory) → `pnpm test:e2e` (same `E2E_DATABASE_URL`; webServer migrate/seed).
 Playwright report + trace uploaded as artifacts.
 Branch protection: `quality` must pass on PRs to `main`.

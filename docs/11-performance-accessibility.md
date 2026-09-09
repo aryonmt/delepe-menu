@@ -30,8 +30,9 @@
   chapters — **verify scrollspy against CV-enabled sections in Phase 4**
   (fallback: CV on deep chapters only); no `will-change` spam;
   IntersectionObserver passive.
-- Caching: public HTML `s-maxage=60` + tag revalidate on mutations;
-  `/media` immutable 1y; admin no-store.
+- Caching: public menu DTO tagged cache + `revalidateTag` on mutations;
+  public HTML is dynamic RSC so `next build` does not need a live `Settings`
+  table; `/media` immutable 1y; admin no-store.
 
 ## Accessibility (WCAG 2.1 AA practical subset)
 

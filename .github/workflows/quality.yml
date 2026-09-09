@@ -46,6 +46,8 @@ jobs:
         run: pnpm typecheck
       - name: Unit tests
         run: pnpm test
+      - name: Migrate CI database
+        run: pnpm db:deploy
       - name: Build + bundle analysis
         env:
           ANALYZE: "true"

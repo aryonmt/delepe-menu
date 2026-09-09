@@ -28,7 +28,7 @@ export default defineConfig({
     hasTouch: true,
   },
   webServer: {
-    // Seed MUTED settings then rebuild ISR against the test DB (globalSetup also
+    // Seed MUTED settings then production-build against the test DB (globalSetup also
     // seeds; this second seed covers webServer-before-globalSetup ordering).
     // Node script — do not wrap in `cmd /c` (Playwright already uses shell:true).
     command: "node scripts/e2e-webserver.mjs",

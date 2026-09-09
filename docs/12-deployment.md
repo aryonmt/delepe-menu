@@ -50,6 +50,10 @@ unchecked (login rate limiting keys on it, doc 10).
 Dockerfile (multi-stage, node:22-bookworm-slim, corepack pnpm):
 `deps → build (output: standalone) → runner` (non-root user, copies
 `.next/standalone`, `public`, `prisma`, `src` for seed, storage entrypoint).
+The **build** stage uses a placeholder `DATABASE_URL` (no live DB). Public `/`
+is dynamic RSC plus tagged menu cache, so image build does not require
+`Settings`. Runtime Compose supplies the real `DATABASE_URL`; entrypoint
+migrates, then seed fills the menu.
 
 ## VPS runbook (condensed)
 

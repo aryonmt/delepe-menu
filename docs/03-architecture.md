@@ -198,7 +198,8 @@ creation is cancelled after an upload, the form calls `DeleteMediaUseCase`
 - Public menu: tagged cache (above).
 - `/media/[mediaId]`: immutable 1y (unique filenames).
 - Admin HTML: `Cache-Control: no-store`.
-- Public HTML: `s-maxage=60` + tag revalidation on mutations.
+- Public HTML: dynamic RSC (no build-time Prisma). Menu DTO uses tagged
+  `unstable_cache` + `revalidateTag` on mutations.
 
 ## Conventions
 

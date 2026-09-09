@@ -4,7 +4,8 @@
  * `shell: true`, which on Windows nests cmd and exits immediately.
  *
  * Sequence: wipe `.next` → migrate + seed the test DB → production build →
- * standalone start. ISR HTML must match the seeded database (docs/09).
+ * standalone start. The public route is dynamic; seed still must run before
+ * Playwright hits `/` (docs/09).
  */
 import { existsSync, rmSync } from "node:fs";
 import { execSync, spawn } from "node:child_process";

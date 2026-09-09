@@ -2,13 +2,19 @@ import type { PrismaClient } from "@prisma/client";
 import type { Media, Settings } from "@/domain/entities";
 import type { MediaRepository, SettingsRepository } from "@/domain/ports";
 import { toMedia, toSettings } from "../mappers";
+import { isUnusableDatabase } from "../unusable-database";
 
 export class PrismaSettingsRepository implements SettingsRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
   async get(): Promise<Settings | null> {
-    const row = await this.prisma.settings.findUnique({ where: { id: 1 } });
-    return row ? toSettings(row) : null;
+    try {
+      const row = await this.prisma.settings.findUnique({ where: { id: 1 } });
+      return row ? toSettings(row) : null;
+    } catch (error) {
+      if (isUnusableDatabase(error)) return null;
+      throw error;
+    }
   }
 
   async upsert(input: Omit<Settings, "id">): Promise<Settings> {
