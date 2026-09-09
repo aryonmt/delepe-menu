@@ -72,7 +72,7 @@ Critical specs:
 | --- | --- |
 | `public-menu.spec` | Load, hero, tabs scrollspy, chips filter, variants expand («از …» on مارگاریتا), discount UI (−۱۷٪ کوکی), badges, MUTED grayscale + HIDE absence, empty/error states |
 | `auth.spec` | Login success/failure (generic Persian error), logout, change password, redirect rules (`/admin` → products; authed `/login` → products), **rate limit: 5 fails → 6th attempt returns `RATE_LIMITED` + «تعداد تلاش‌ها بیش از حد مجاز است؛ ۱۵ دقیقه دیگر تلاش کنید»** |
-| `admin-products.spec` | Create with upload (fixture image), edit, discount validation, availability switch (optimistic + revert on failure), delete confirm, reorder persistence, Persian-digit price input, variant auto-price (BR-13), discount hidden with variants (BR-14) |
+| `admin-products.spec` | Create with upload (fixture image), edit, discount validation, availability switch (optimistic + revert on failure), delete confirm, product-row dnd absent (order lives on categories), Persian-digit price input, variant auto-price (BR-13), discount hidden with variants (BR-14) |
 | `admin-categories.spec` | Create child (depth guard BR-01), child-under-product-owner guard (BR-16), delete guard toast (BR-02), reorder |
 | `settings-preview.spec` | Preview reflects the single «پاتوق» identity for both draft and saved state (no public theme switcher exists; the legacy 4-theme system is retired per ADR-12); settings mutations (restaurant name, unavailable mode) reflected in the phone preview and, after save, on the public menu; draft reset button; drawer cancel leaves preview unchanged |
 | `a11y.spec` | axe-core scan of `/`, `/login`, `/admin/products` — zero critical violations |
@@ -80,8 +80,8 @@ Critical specs:
 ## CI (GitHub Actions)
 
 Job `quality`: install → `pnpm lint` → `pnpm typecheck` → `pnpm test` →
-`pnpm build` → bundle check (`@next/bundle-analyzer`: `@dnd-kit`,
-`react-easy-crop` absent from the public bundle) → `pnpm audit --audit-level=high`
+`pnpm build` → bundle check (`pnpm check:bundle` / `@next/bundle-analyzer`:
+`@dnd-kit`, `react-easy-crop` absent from the public bundle) → `pnpm audit --audit-level=high`
 (advisory) → `pnpm test:e2e` (set `E2E_DATABASE_URL` to the job's service Postgres
 service; global-setup migrates it — no extra migrate step).
 Playwright report + trace uploaded as artifacts.

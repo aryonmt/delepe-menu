@@ -35,6 +35,7 @@ Constraints:
   `framer-motion`).
 - globals.css must define EVERY token in docs/05 for ALL 4 themes
   (data-theme attribute values are the kebab-case names listed there).
+  **Historical — superseded by ADR-12 / M4R: a single «پاتوق» identity.**
 - IRANSans loads from src/fonts/iransans/ with Vazirmatn fallback when files are
   missing; Markazi Text via next/font. No runtime Google Fonts requests.
 - lib/format/price.ts + digits.ts are implemented test-first against the golden

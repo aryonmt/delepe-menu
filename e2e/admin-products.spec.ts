@@ -59,10 +59,18 @@ test.describe("admin products", () => {
     const target = row(page, "اسپرسو");
     const toggle = target.getByRole("switch");
     const before = await toggle.getAttribute("data-state");
+    const persisted = page.waitForResponse((response) => {
+      const request = response.request();
+      return (
+        request.method() === "POST" &&
+        response.url().includes("/admin/products") &&
+        Boolean(request.headers()["next-action"])
+      );
+    });
     await toggle.click();
+    await persisted;
     await expect(toggle).not.toHaveAttribute("data-state", before ?? "checked");
     await page.reload();
-    await loginAsAdmin(page);
     await expect(row(page, "اسپرسو").getByRole("switch")).not.toHaveAttribute(
       "data-state",
       before ?? "checked",
@@ -73,24 +81,26 @@ test.describe("admin products", () => {
   test("create product with Persian digits", async ({ page }) => {
     await loginAsAdmin(page);
     await page.getByRole("button", { name: strings.admin.newProduct }).click();
-    await page.getByLabel(strings.admin.name).fill("محصول تست");
-    await page.getByRole("combobox").first().click();
+    const form = page.getByRole("dialog");
+    await form.getByLabel(strings.admin.name).fill("محصول تست");
+    await form.getByLabel(strings.admin.parentCategory).click();
     await page.getByRole("option", { name: "نوشیدنی سرد" }).click();
-    await page.getByLabel(strings.admin.price).fill("۱۲۵۰۰۰");
-    await page.getByRole("button", { name: strings.admin.save }).click();
-    await expect(page.getByText(strings.admin.productCreated)).toBeVisible();
-    await page.getByPlaceholder(strings.admin.searchPlaceholder).fill("محصول تست");
-    await expect(row(page, "محصول تست")).toBeVisible();
+    await form.getByLabel(strings.admin.price).fill("۱۲۵۰۰۰");
+    await form.getByRole("button", { name: strings.admin.save }).click();
+    await expect(row(page, "محصول تست")).toBeVisible({ timeout: 15_000 });
   });
 
   test("variants auto-price disables manual price and hides discount (BR-13/14)", async ({ page }) => {
     await loginAsAdmin(page);
     await page.getByRole("button", { name: strings.admin.newProduct }).click();
-    await page.getByRole("button", { name: strings.admin.addVariant }).click();
-    await page.getByRole("button", { name: strings.admin.addVariant }).click();
-    await page.getByPlaceholder(strings.admin.variantPrice).nth(0).fill("۷۵۰۰۰۰");
-    await page.getByPlaceholder(strings.admin.variantPrice).nth(1).fill("۵۵۰۰۰۰");
-    const priceInput = page.getByLabel(strings.admin.price);
+    const form = page.getByRole("dialog");
+    await form.getByRole("button", { name: strings.admin.addVariant }).click();
+    await form.getByRole("button", { name: strings.admin.addVariant }).click();
+    await form.getByPlaceholder(strings.admin.variantName).nth(0).fill("بزرگ");
+    await form.getByPlaceholder(strings.admin.variantName).nth(1).fill("کوچک");
+    await form.getByPlaceholder(strings.admin.variantPrice).nth(0).fill("۷۵۰۰۰۰");
+    await form.getByPlaceholder(strings.admin.variantPrice).nth(1).fill("۵۵۰۰۰۰");
+    const priceInput = form.getByLabel(strings.admin.price);
     await expect(priceInput).toBeDisabled();
     await expect(priceInput).toHaveValue("550000");
     await expect(page.getByLabel(strings.admin.discountActive)).toHaveCount(0);

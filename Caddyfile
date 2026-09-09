@@ -1,0 +1,13 @@
+# Default HTTP on :80 (bare IP). Set CADDY_SITE=menu.example.com for auto-TLS (docs/12).
+{$CADDY_SITE:http://:80} {
+	encode gzip
+	reverse_proxy app:3000
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		Content-Security-Policy-Report-Only "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; font-src 'self'"
+		-Server
+	}
+	@https protocol https
+	header @https Strict-Transport-Security "max-age=31536000; includeSubDomains"
+}

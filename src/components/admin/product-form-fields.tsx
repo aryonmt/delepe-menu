@@ -87,7 +87,7 @@ export function ProductFormFields({
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>{strings.admin.parentCategory}</Label>
+          <Label htmlFor="pf-parent-category">{strings.admin.parentCategory}</Label>
           <Select
             value={parentCategory?.id ?? ""}
             onValueChange={(value) => {
@@ -100,7 +100,7 @@ export function ProductFormFields({
               );
             }}
           >
-            <SelectTrigger>
+            <SelectTrigger id="pf-parent-category" aria-label={strings.admin.parentCategory}>
               <SelectValue placeholder={strings.admin.selectPlaceholder} />
             </SelectTrigger>
             <SelectContent>
@@ -114,9 +114,9 @@ export function ProductFormFields({
         </div>
         {selectedParent && selectedParent.children.length > 0 && (
           <div className="space-y-2">
-            <Label>{strings.admin.childCategory}</Label>
+            <Label htmlFor="pf-child-category">{strings.admin.childCategory}</Label>
             <Select value={childValue} onValueChange={setCategoryId}>
-              <SelectTrigger>
+              <SelectTrigger id="pf-child-category" aria-label={strings.admin.childCategory}>
                 <SelectValue placeholder={strings.admin.selectPlaceholder} />
               </SelectTrigger>
               <SelectContent>

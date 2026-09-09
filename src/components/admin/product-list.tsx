@@ -103,7 +103,10 @@ export function ProductList() {
             setPage(1);
           }}
         >
-          <SelectTrigger className="w-full md:w-[220px]">
+          <SelectTrigger
+            aria-label={strings.admin.allCategories}
+            className="w-full md:w-[220px]"
+          >
             <SelectValue placeholder={strings.admin.allCategories} />
           </SelectTrigger>
           <SelectContent>

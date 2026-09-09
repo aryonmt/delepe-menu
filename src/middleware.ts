@@ -3,10 +3,14 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { SESSION_COOKIE_NAME } from "@/lib/constants";
 import { env } from "@/lib/env";
+import {
+  CSP_REPORT_ONLY,
+  HEADER_FRAME_DENY,
+  HEADER_NOSNIFF,
+  HEADER_REFERRER,
+} from "@/lib/security-headers";
 
 const SESSION_SECRET = new TextEncoder().encode(env.SESSION_SECRET);
-const CSP_REPORT_ONLY =
-  "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; font-src 'self'";
 
 /**
  * Edge session guard. Imports jose only for crypto (no Prisma, no argon2).
@@ -58,8 +62,8 @@ async function hasValidSession(request: NextRequest): Promise<boolean> {
 }
 
 function withSecurityHeaders(response: NextResponse, pathname: string) {
-  response.headers.set("X-Content-Type-Options", "nosniff");
-  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set("X-Content-Type-Options", HEADER_NOSNIFF);
+  response.headers.set("Referrer-Policy", HEADER_REFERRER);
   // CSP ships report-only in v1 (docs/10). Next.js dev tooling relies on
   // eval-based source maps; sending the header in development only produces
   // console noise, so it is gated to production here.
@@ -70,7 +74,7 @@ function withSecurityHeaders(response: NextResponse, pathname: string) {
     );
   }
   if (pathname.startsWith("/admin")) {
-    response.headers.set("X-Frame-Options", "DENY");
+    response.headers.set("X-Frame-Options", HEADER_FRAME_DENY);
     response.headers.set("Cache-Control", "no-store");
   }
   return response;

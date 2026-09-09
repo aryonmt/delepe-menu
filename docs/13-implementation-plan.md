@@ -118,11 +118,11 @@ Format: `ID · description · [docs] · deps · output · tests`.
 
 | ID | Task | Docs | Deps | Output | Tests |
 | --- | --- | --- | --- | --- | --- |
-| T-080 | CI workflow (full `quality` job per doc 09) | 09 | all | green CI | CI run |
-| T-081 ∥ | Backup cron script + documented restore test | 12 | — | scripts | restore drill |
-| T-082 ∥ | Caddyfile + compose prod profile + Dockerfile | 12 | T-001 | deploy assets | build |
-| T-083 | README final pass, `.env.example`, security headers check | 10, 12 | — | docs | checklist |
-| T-084 | Fresh-clone → `docker compose up` → seed → healthy app on a VPS < 15 min | 12 | T-080..083 | runbook proven | timed drill |
+| ~~T-080~~ | CI workflow (full `quality` job per doc 09) | 09 | all | green CI | CI run |
+| ~~T-081~~ ∥ | Backup cron script + documented restore test | 12 | — | scripts | restore drill |
+| ~~T-082~~ ∥ | Caddyfile + compose prod profile + Dockerfile | 12 | T-001 | deploy assets | build |
+| ~~T-083~~ | README final pass, `.env.example`, security headers check | 10, 12 | — | docs | checklist |
+| ~~T-084~~ | Fresh-clone → `docker compose up` → seed → healthy app on a VPS < 15 min | 12 | T-080..083 | runbook proven | timed drill |
 
 ## Milestones (detail)
 

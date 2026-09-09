@@ -1,0 +1,17 @@
+node_modules
+.next
+.git
+.github
+e2e
+playwright-report
+test-results
+coverage
+storage
+docs
+*.md
+!README.md
+.env
+.env.*
+!.env.example
+ai-context.txt
+frontend-context.txt
