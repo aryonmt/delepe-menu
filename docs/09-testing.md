@@ -81,7 +81,7 @@ Critical specs:
 
 ## CI (GitHub Actions)
 
-Job `quality`: install → `pnpm lint` → `pnpm typecheck` → `pnpm test` →
+Job `quality`: install → `prisma generate` → `pnpm lint` → `pnpm typecheck` → `pnpm test` →
 `pnpm db:deploy` (job Postgres) → `pnpm build` → bundle check
 (`pnpm check:bundle` / `@next/bundle-analyzer`: `@dnd-kit`, `react-easy-crop`
 absent from the public bundle) → `pnpm audit --audit-level=high`
