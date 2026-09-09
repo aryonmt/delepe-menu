@@ -54,6 +54,8 @@ The **build** stage uses a placeholder `DATABASE_URL` (no live DB). Public `/`
 is dynamic RSC plus tagged menu cache, so image build does not require
 `Settings`. Runtime Compose supplies the real `DATABASE_URL`; entrypoint
 migrates, then seed fills the menu.
+`.dockerignore` omits `e2e/` and Playwright/Vitest configs; `tsconfig.json`
+excludes them so `next build` inside the image does not typecheck test files.
 
 ## VPS runbook (condensed)
 
