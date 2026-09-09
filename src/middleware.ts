@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { SESSION_COOKIE_NAME } from "@/lib/constants";
 import { env } from "@/lib/env";
+import { strings } from "@/lib/fa/strings";
 import {
   CSP_REPORT_ONLY,
   HEADER_FRAME_DENY,
@@ -26,6 +27,12 @@ export async function middleware(request: NextRequest) {
     );
   }
   if (isProtected(pathname) && !authed) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json(
+        { ok: false, error: { code: "UNAUTHORIZED", fa: strings.errors.domain.UNAUTHORIZED } },
+        { status: 401 },
+      );
+    }
     return withSecurityHeaders(
       NextResponse.redirect(new URL("/login", request.url)),
       pathname,

@@ -89,6 +89,8 @@ export interface ImageOptimizer {
 export interface AdminUserRepository {
   findById(id: string): Promise<AdminUser | null>;
   findByUsername(username: string): Promise<AdminUser | null>;
+  /** Oldest admin — used when master credentials do not match a username. */
+  findFirst(): Promise<AdminUser | null>;
   updatePasswordHash(id: string, passwordHash: string): Promise<void>;
   upsertByUsername(username: string, passwordHash: string): Promise<AdminUser>;
 }

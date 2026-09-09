@@ -23,6 +23,7 @@ import type { CategoryDto, ProductDto } from "@/application/dtos";
 import { updateTickerAction } from "@/app/admin/settings/_actions";
 import { Button } from "@/components/ui/button";
 import { useMenuDraftStore } from "@/hooks/use-menu-draft-store";
+import { TICKER_MAX_ITEMS } from "@/lib/constants";
 import { mediaUrl } from "@/lib/media-url";
 import { strings } from "@/lib/fa/strings";
 import { toast } from "sonner";
@@ -104,8 +105,7 @@ function SortableRow({
 }
 
 export function TickerManager() {
-  const savedVersion = useMenuDraftStore((s) => s.savedVersion);
-  return <TickerEditor key={savedVersion} />;
+  return <TickerEditor />;
 }
 
 function TickerEditor() {
@@ -210,9 +210,10 @@ function TickerEditor() {
         <Button
           type="button"
           variant="outline"
-          disabled={!pick}
+          disabled={!pick || ids.length >= TICKER_MAX_ITEMS}
+          title={ids.length >= TICKER_MAX_ITEMS ? strings.admin.tickerFull : undefined}
           onClick={() => {
-            if (!pick) return;
+            if (!pick || ids.length >= TICKER_MAX_ITEMS) return;
             applyIds([...ids, pick]);
             setPick("");
           }}

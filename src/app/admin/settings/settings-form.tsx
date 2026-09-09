@@ -17,7 +17,10 @@ export function SettingsForm() {
     async (prev: ActionResult<SettingsDto> | null, formData: FormData) => {
       const result = await updateSettingsAction(prev, formData);
       if (result.ok) {
-        updateSettings(result.data);
+        const tickerProductIds =
+          useMenuDraftStore.getState().draft?.settings.tickerProductIds ??
+          result.data.tickerProductIds;
+        updateSettings({ ...result.data, tickerProductIds });
         clearDirty();
       }
       return result;

@@ -19,6 +19,7 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
+    "db:seed:e2e": "tsx prisma/e2e-seed.ts",
     "admin:reset": "tsx scripts/admin-reset.ts",
     "check:bundle": "node scripts/check-public-bundle.mjs",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm check:bundle"

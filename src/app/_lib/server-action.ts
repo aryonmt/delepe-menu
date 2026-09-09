@@ -65,14 +65,18 @@ export async function assertSameOrigin(): Promise<void> {
   }
 }
 
+export function ipFromForwardedHeader(forwarded: string | null): string | null {
+  if (!forwarded) return null;
+  const hops = forwarded
+    .split(",")
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0);
+  return hops[hops.length - 1] ?? null;
+}
+
 export async function clientIp(): Promise<string> {
   const headerList = await headers();
-  const forwarded = headerList.get("x-forwarded-for");
-  if (forwarded) {
-    const first = forwarded.split(",")[0]?.trim();
-    if (first) {
-      return first;
-    }
-  }
+  const forwarded = ipFromForwardedHeader(headerList.get("x-forwarded-for"));
+  if (forwarded) return forwarded;
   return headerList.get("x-real-ip") ?? "unknown";
 }

@@ -13,7 +13,7 @@ function clockLabel(now: Date): string {
 
 /** Device chrome for the admin live preview (docs/07). */
 export function PhoneFrame({ children, viewportRef }: Props) {
-  const [clock, setClock] = useState(() => clockLabel(new Date()));
+  const [clock, setClock] = useState("");
 
   useEffect(() => {
     const tick = () => setClock(clockLabel(new Date()));
@@ -36,7 +36,7 @@ export function PhoneFrame({ children, viewportRef }: Props) {
       </div>
       <div
         ref={viewportRef}
-        className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-background"
+        className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain bg-background"
         aria-label={strings.admin.preview}
       >
         {children}

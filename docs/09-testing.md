@@ -45,15 +45,15 @@ host port **5433**, database `delepe_test`, doc 12).
 `e2e/global-setup.ts` then:
 1. runs `prisma migrate deploy` against `E2E_DATABASE_URL` (default
    `postgresql://delepe:delepe@localhost:5433/delepe_test`);
-2. runs `tsx prisma/seed.ts` against that same URL (menu + media; skips admin
-   bootstrap when `ADMIN_*` are unset);
+2. runs `tsx prisma/seed.ts` (settings + admin bootstrap) then
+   `tsx prisma/e2e-seed.ts` (sample catalog + SVG media) against that same URL;
 3. runs `scripts/admin-reset.ts` against that same URL so the admin exists in
    the **test** database, not the dev database on 5432.
 
 E2E runs on `E2E_PORT` (default **3100**) so a dev server on 3000 is never reused.
 Playwright `webServer` runs `node scripts/e2e-webserver.mjs` (wipe `.next`, then
-`pnpm db:deploy && pnpm db:seed && pnpm build && pnpm start`) with
-the test `DATABASE_URL` and repo `STORAGE_ROOT` so the running app
+`pnpm db:deploy && pnpm db:seed && pnpm db:seed:e2e && pnpm build && pnpm start`)
+with the test `DATABASE_URL` and repo `STORAGE_ROOT` so the running app
 matches the seeded test database (including `unavailableMode: MUTED`). `db:deploy`
 runs first because webServer starts before `globalSetup` and the test database
 must have every Settings column (including `tickerProductIds`) before seed.
@@ -66,7 +66,7 @@ job runs `pnpm db:deploy` before `pnpm build` so a migrated schema exists if
 Next still evaluates the public menu during collect-page-data. Playwright `webServer` / global-setup still
 migrate and seed for E2E independently.
 
-Seeded SVG placeholders for public-menu specs land in M3 (ADR-10).
+Seeded SVG placeholders for public-menu specs come from `pnpm db:seed:e2e` (ADR-10).
 
 Critical specs:
 

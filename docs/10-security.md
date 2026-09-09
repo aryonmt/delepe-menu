@@ -6,8 +6,12 @@
 - Session: JWT HS256 (`jose`), payload `{ sub: <AdminUser.id>, iat, exp }`,
   `exp = iat + 7 days`; cookie `delepe_session`: HttpOnly, SameSite=Lax,
   **Path=/** (single valid path — required so `/api/admin/**` routes receive it),
-  Secure in production.
-- `SESSION_SECRET` ≥ 32 bytes from env; rotation = restart + logout-all (acceptable).
+  **Secure when the request is HTTPS** (`X-Forwarded-Proto: https` from Caddy).
+  HTTP-on-IP first deploys omit Secure so the owner can log into admin.
+- `SESSION_SECRET` ≥ 32 bytes from env; Compose production (`DATABASE_URL` host
+  `db`) **refuses** the `.env.example` placeholder. Rotation = restart + logout-all
+  (acceptable). `.env.example` `ADMIN_PASSWORD=change-me-now` is also refused on
+  that runtime; generate unique values before `docker compose up`.
 - Middleware (edge, jose only) guards `/admin/**` + `/api/admin/**` as
   defense-in-depth; **every** server action & route handler re-verifies the
   session via `VerifySessionUseCase`.

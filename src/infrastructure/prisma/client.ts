@@ -11,6 +11,4 @@ export const prisma =
     datasources: { db: { url: env.DATABASE_URL } },
   });
 
-if (env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
-}
+globalForPrisma.prisma = prisma;

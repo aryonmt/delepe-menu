@@ -79,7 +79,7 @@ src/
 │   └── utils.ts
 └── hooks/                        # use-unsaved-warning, use-reduced-motion-safe, …
 e2e/                              # Playwright specs
-prisma/                           # schema, migrations, seed.ts
+prisma/                           # schema, migrations, seed.ts, e2e-seed.ts
 scripts/                          # admin-reset.ts
 ```
 

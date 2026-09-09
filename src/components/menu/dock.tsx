@@ -55,6 +55,13 @@ export function Dock({
   const settleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [box, setBox] = useState<ButtonBox | null>(null);
   const [isReady, setIsReady] = useState(false);
+  const activeIdRef = useRef(activeId);
+  const onActiveIdChangeRef = useRef(onActiveIdChange);
+
+  useEffect(() => {
+    activeIdRef.current = activeId;
+    onActiveIdChangeRef.current = onActiveIdChange;
+  }, [activeId, onActiveIdChange]);
 
   const measure = useCallback((id: string) => {
     const button = buttonRefs.current.get(id);
@@ -98,9 +105,10 @@ export function Dock({
       if (ignoreScrollRef.current) return;
       if (rafId !== null) cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(() => {
+        const currentId = activeIdRef.current;
         if (scrollTopOf(root) < SCROLLSPY_TOP_THRESHOLD_PX) {
           const first = categories[0];
-          if (first && first.id !== activeId) onActiveIdChange(first.id);
+          if (first && first.id !== currentId) onActiveIdChangeRef.current(first.id);
           return;
         }
         const atBottom =
@@ -108,7 +116,7 @@ export function Dock({
           scrollHeightOf(root) - SCROLLSPY_BOTTOM_THRESHOLD_PX;
         if (atBottom) {
           const last = categories[categories.length - 1];
-          if (last && last.id !== activeId) onActiveIdChange(last.id);
+          if (last && last.id !== currentId) onActiveIdChangeRef.current(last.id);
           return;
         }
         let matchingId = categories[0]?.id;
@@ -119,7 +127,9 @@ export function Dock({
             matchingId = category.id;
           }
         }
-        if (matchingId && matchingId !== activeId) onActiveIdChange(matchingId);
+        if (matchingId && matchingId !== currentId) {
+          onActiveIdChangeRef.current(matchingId);
+        }
       });
     };
     root.addEventListener("scroll", handleScroll, { passive: true });
@@ -128,7 +138,7 @@ export function Dock({
       root.removeEventListener("scroll", handleScroll);
       if (rafId !== null) cancelAnimationFrame(rafId);
     };
-  }, [categories, activeId, onActiveIdChange, scrollRoot]);
+  }, [categories, scrollRoot]);
 
   useEffect(() => {
     const container = trackRef.current;

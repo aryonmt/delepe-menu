@@ -69,9 +69,10 @@ export function MenuShell({ categories, restaurantName, tickerItems, scrollRoot 
     (product: ProductDto) => {
       const topLevelId = topLevelIndex.get(product.categoryId);
       if (topLevelId) {
+        setActiveId(topLevelId);
         setChipByCategory((prev) => ({ ...prev, [topLevelId]: ALL_SUBCATEGORY_CHIP }));
       }
-      window.requestAnimationFrame(() => {
+      const scroll = () => {
         const scope: ParentNode = scrollRoot ?? document;
         const element = scope.querySelector(
           `[data-testid="product-${CSS.escape(product.name)}"]`,
@@ -82,6 +83,9 @@ export function MenuShell({ categories, restaurantName, tickerItems, scrollRoot 
         void element.offsetWidth;
         element.classList.add("peek-flash");
         window.setTimeout(() => element.classList.remove("peek-flash"), 650);
+      };
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(scroll);
       });
     },
     [topLevelIndex, scrollRoot],
@@ -141,7 +145,11 @@ export function MenuShell({ categories, restaurantName, tickerItems, scrollRoot 
         <span className="font-display text-xs text-muted-foreground">{strings.public.footer}</span>
       </footer>
 
-      <DishPeek product={peekProduct} onClose={() => setPeekProduct(null)} />
+      <DishPeek
+        product={peekProduct}
+        onClose={() => setPeekProduct(null)}
+        container={scrollRoot}
+      />
     </>
   );
 }

@@ -8,7 +8,7 @@
  * cwd = .next/standalone, so a relative STORAGE_ROOT would resolve against the
  * wrong directory. We load `.env` here (real env vars always win) and
  * absolutize STORAGE_ROOT against the repo root, so the server reads the same
- * `storage/` folder that `pnpm db:seed` wrote.
+ * `storage/` folder that seed / `pnpm db:seed:e2e` wrote.
  */
 import { cpSync, existsSync, readFileSync } from "node:fs";
 import { spawn } from "node:child_process";

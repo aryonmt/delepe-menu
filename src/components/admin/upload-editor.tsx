@@ -1,6 +1,6 @@
 // src/components/admin/upload-editor.tsx
 "use client";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Cropper, { type Area } from "react-easy-crop";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Upload, X } from "lucide-react";
@@ -30,6 +30,22 @@ export function UploadEditor({ currentMediaId, onUploadComplete, onRemove }: Pro
   const [progress, setProgress] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const xhrRef = useRef<XMLHttpRequest | null>(null);
+
+  useEffect(() => {
+    return () => {
+      xhrRef.current?.abort();
+    };
+  }, []);
+
+  const closeDialog = (open: boolean) => {
+    if (!open) {
+      xhrRef.current?.abort();
+      xhrRef.current = null;
+      setIsUploading(false);
+    }
+    setIsOpen(open);
+  };
 
   const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -102,6 +118,7 @@ export function UploadEditor({ currentMediaId, onUploadComplete, onRemove }: Pro
     formData.append("width", String(cropped.width));
     formData.append("height", String(cropped.height));
     const xhr = new XMLHttpRequest();
+    xhrRef.current = xhr;
     xhr.open("POST", "/api/admin/media/upload");
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable) {
@@ -109,7 +126,9 @@ export function UploadEditor({ currentMediaId, onUploadComplete, onRemove }: Pro
       }
     };
     xhr.onload = () => {
+      if (xhrRef.current !== xhr) return;
       setIsUploading(false);
+      xhrRef.current = null;
       if (xhr.status !== 200) {
         toast.error(strings.admin.imageUploadFailed);
         return;
@@ -123,8 +142,16 @@ export function UploadEditor({ currentMediaId, onUploadComplete, onRemove }: Pro
       }
       toast.error(res.error.fa);
     };
+    xhr.onabort = () => {
+      if (xhrRef.current === xhr) {
+        xhrRef.current = null;
+        setIsUploading(false);
+      }
+    };
     xhr.onerror = () => {
+      if (xhrRef.current !== xhr) return;
       setIsUploading(false);
+      xhrRef.current = null;
       toast.error(strings.admin.imageUploadFailed);
     };
     xhr.send(formData);
@@ -165,7 +192,7 @@ export function UploadEditor({ currentMediaId, onUploadComplete, onRemove }: Pro
           onChange={onFileChange}
         />
       </div>
-      <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog.Root open={isOpen} onOpenChange={closeDialog}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
           <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 rounded-lg border border-border bg-background p-6 shadow-lg">
@@ -200,7 +227,7 @@ export function UploadEditor({ currentMediaId, onUploadComplete, onRemove }: Pro
               </div>
             )}
             <div className="mt-4 flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setIsOpen(false)}>
+              <Button variant="outline" onClick={() => closeDialog(false)}>
                 {strings.admin.cancel}
               </Button>
               <Button onClick={() => void handleUpload()} disabled={isUploading}>

@@ -29,7 +29,7 @@ services:
       POSTGRES_PASSWORD: delepe
       POSTGRES_DB: delepe_test
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     tmpfs:
       - /var/lib/postgresql/data
     healthcheck:
@@ -48,6 +48,9 @@ services:
       DATABASE_URL: postgresql://delepe:${POSTGRES_PASSWORD:-delepe}@db:5432/delepe
       STORAGE_ROOT: /data/storage
       PORT: "3000"
+      HOSTNAME: "0.0.0.0"
+      HOME: /home/nextjs
+      COREPACK_HOME: /home/nextjs/.cache/node/corepack
     volumes:
       - storage:/data/storage
     depends_on:

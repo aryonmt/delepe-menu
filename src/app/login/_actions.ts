@@ -25,7 +25,7 @@ export async function loginAction(
       ip: await clientIp(),
     });
     const jar = await cookies();
-    jar.set(SESSION_COOKIE_NAME, result.token, sessionCookieOptions());
+    jar.set(SESSION_COOKIE_NAME, result.token, await sessionCookieOptions());
   } catch (error) {
     if (isNextRedirect(error)) {
       throw error;

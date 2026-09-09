@@ -1,11 +1,7 @@
 import os from "node:os";
 import type { NextConfig } from "next";
 import withBundleAnalyzer from "@next/bundle-analyzer";
-import {
-  CSP_REPORT_ONLY,
-  HEADER_NOSNIFF,
-  HEADER_REFERRER,
-} from "./src/lib/security-headers";
+import { HEADER_NOSNIFF, HEADER_REFERRER } from "./src/lib/security-headers";
 
 /** LAN IPv4 hosts so a phone on the same Wi-Fi can load `pnpm dev` (Next 15). */
 function lanDevOrigins(): string[] {
@@ -31,10 +27,6 @@ const nextConfig: NextConfig = {
         headers: [
           { key: "X-Content-Type-Options", value: HEADER_NOSNIFF },
           { key: "Referrer-Policy", value: HEADER_REFERRER },
-          {
-            key: "Content-Security-Policy-Report-Only",
-            value: CSP_REPORT_ONLY,
-          },
         ],
       },
     ];

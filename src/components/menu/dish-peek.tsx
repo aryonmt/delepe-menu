@@ -12,6 +12,8 @@ import { MenuImage } from "./menu-image";
 type Props = {
   product: ProductDto | null;
   onClose: () => void;
+  /** Phone-frame preview: portal into the viewport instead of document.body. */
+  container?: HTMLElement | null;
 };
 
 function discountView(product: ProductDto) {
@@ -34,7 +36,7 @@ function discountView(product: ProductDto) {
  * Dish Peek — exploration/viewer only (docs/06 B-05).
  * No cart, tray, ordering, or checkout semantics.
  */
-export function DishPeek({ product, onClose }: Props) {
+export function DishPeek({ product, onClose, container }: Props) {
   const hasVariants = (product?.variants.length ?? 0) > 0;
   const isMuted = product ? !product.isAvailable : false;
   const discount = product ? discountView(product) : null;
@@ -46,11 +48,19 @@ export function DishPeek({ product, onClose }: Props) {
         if (!open) onClose();
       }}
     >
-      <Dialog.Portal>
-        <Dialog.Overlay className="peek-overlay fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" />
+      <Dialog.Portal container={container ?? undefined}>
+        <Dialog.Overlay
+          className={`peek-overlay inset-0 z-50 bg-black/70 backdrop-blur-sm ${
+            container ? "absolute" : "fixed"
+          }`}
+        />
         <Dialog.Content
           data-testid="dish-peek"
-          className="peek-sheet fixed inset-x-0 bottom-0 z-50 max-h-[86svh] overflow-y-auto rounded-t-drawer border-t border-line bg-card p-5 shadow-lift focus:outline-none md:inset-0 md:m-auto md:h-fit md:max-h-[80vh] md:w-full md:max-w-md md:rounded-card md:border"
+          className={`peek-sheet z-50 max-h-[86svh] overflow-y-auto rounded-t-drawer border-t border-line bg-card p-5 shadow-lift focus:outline-none md:h-fit md:max-h-[80vh] md:w-full md:max-w-md md:rounded-card md:border ${
+            container
+              ? "absolute inset-x-0 bottom-0 md:inset-2 md:m-0 md:max-w-none"
+              : "fixed inset-x-0 bottom-0 md:inset-0 md:m-auto"
+          }`}
         >
           {product && (
             <>

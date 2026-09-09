@@ -15,6 +15,11 @@ export class InMemoryAdminUserRepository implements AdminUserRepository {
     return row ? { ...row } : null;
   }
 
+  async findFirst(): Promise<AdminUser | null> {
+    const row = [...this.users.values()][0];
+    return row ? { ...row } : null;
+  }
+
   async updatePasswordHash(id: string, passwordHash: string): Promise<void> {
     const existing = this.users.get(id);
     if (!existing) {

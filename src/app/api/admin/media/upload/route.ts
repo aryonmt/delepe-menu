@@ -3,11 +3,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { container } from "@/infrastructure/di/container";
 import { SESSION_COOKIE_NAME } from "@/lib/constants";
-import { toActionFailure } from "@/app/_lib/server-action";
+import { toActionFailure, assertSameOrigin } from "@/app/_lib/server-action";
 
 export async function POST(req: NextRequest) {
   const token = (await cookies()).get(SESSION_COOKIE_NAME)?.value;
   try {
+    await assertSameOrigin();
     await container.verifySession().execute({ token });
   } catch {
     return NextResponse.json({ ok: false, error: { code: "UNAUTHORIZED", fa: "نشست شما معتبر نیست" } }, { status: 401 });

@@ -78,7 +78,7 @@ export const container = {
   updateProduct: () =>
     new UpdateProductUseCase(productRepo, categoryRepo, mediaRepo, storage),
   deleteProduct: () =>
-    new DeleteProductUseCase(productRepo, mediaRepo, storage),
+    new DeleteProductUseCase(productRepo, mediaRepo, storage, settingsRepo),
   reorderProducts: () => new ReorderProductsUseCase(productRepo),
   getSettings: () => new GetSettingsUseCase(settingsRepo),
   updateSettings: () => new UpdateSettingsUseCase(settingsRepo),

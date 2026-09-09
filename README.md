@@ -16,7 +16,7 @@ Persian admin panel for the owner.
 - Custom auth (argon2id + HTTP-only session cookie)
 - Client crop/rotate upload with Sharp variants
 - Live phone-frame preview of unsaved admin changes
-- Offline deterministic seed (branded SVG placeholders)
+- Empty catalog after first seed; the owner fills categories and products in admin
 
 ## Tech stack (summary)
 
@@ -37,21 +37,23 @@ cp .env.example .env          # fill SESSION_SECRET, ADMIN_* (keep DATABASE_URL 
 docker compose up -d db       # PostgreSQL 16 on 127.0.0.1:5432
 docker compose --profile test up -d db-test  # E2E Postgres on 5433
 pnpm db:migrate
-pnpm db:seed
+pnpm db:seed                  # settings + first admin; empty public menu
 pnpm dev                      # http://localhost:3000
 ```
 
 Admin: `http://localhost:3000/admin` (credentials from `.env`).
 Default seed login is `admin` / `change-me-now` until you change it.
+`pnpm db:seed:e2e` loads the sample catalog used by Playwright only.
 
 ## Production (VPS)
 
 See [`docs/12-deployment.md`](docs/12-deployment.md) for the full runbook.
+**Persian VPS checklist (all commands):** [`docs/16-vps-setup-fa.md`](docs/16-vps-setup-fa.md).
 
 ```bash
 cp .env.example .env          # set SESSION_SECRET and ADMIN_* 
 docker compose up -d --build
-docker compose exec app pnpm db:seed
+docker compose exec app ./node_modules/.bin/prisma db seed
 curl -sf http://127.0.0.1/api/health
 # {"ok":true,"db":true}
 ```
@@ -70,7 +72,8 @@ Daily backups: `scripts/backup.sh`. Restore: `scripts/restore.sh <dump> <storage
 | `pnpm test:e2e` | Playwright on port 3100 (needs `db-test`) |
 | `pnpm test:integration` | Prisma specs against `db-test` |
 | `pnpm check:bundle` | Fail if dnd-kit / react-easy-crop leak into the public bundle |
-| `pnpm db:migrate` / `pnpm db:deploy` / `pnpm db:seed` | Prisma |
+| `pnpm db:migrate` / `pnpm db:deploy` / `pnpm db:seed` | Prisma (seed = settings + admin) |
+| `pnpm db:seed:e2e` | Sample catalog + SVG placeholders (Playwright only) |
 | `pnpm admin:reset` | Create or reset an admin (recovery) |
 | `pnpm check` | lint + typecheck + unit + build + bundle check |
 
@@ -78,7 +81,7 @@ Daily backups: `scripts/backup.sh`. Restore: `scripts/restore.sh <dump> <storage
 
 ```text
 docs/               specifications (English)
-prisma/             schema, migrations, seed
+prisma/             schema, migrations, production seed, E2E catalog seed
 scripts/            admin:reset, backup/restore, Docker entrypoint, CI helpers
 e2e/                Playwright specs
 .github/workflows   `quality` CI job
@@ -106,6 +109,7 @@ src/lib             env, tokens, strings, formatting
 | [10-security](docs/10-security.md) | Auth, headers, recovery |
 | [11-performance-accessibility](docs/11-performance-accessibility.md) | Budgets, a11y |
 | [12-deployment](docs/12-deployment.md) | Docker, Caddy, backups |
+| [16-vps-setup-fa](docs/16-vps-setup-fa.md) | Persian Ubuntu VPS checklist |
 | [13-implementation-plan](docs/13-implementation-plan.md) | Milestones |
 | [14-agent-prompts](docs/14-agent-prompts.md) | Agent prompts per milestone |
 | [15-m7-visual-qa](docs/15-m7-visual-qa.md) | Identity contrast QA |

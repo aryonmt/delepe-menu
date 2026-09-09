@@ -59,10 +59,7 @@ export function CategoryTree() {
   const requestDelete = async (category: CategoryDto) => {
     const blocked = category.products.length > 0 || category.children.length > 0;
     if (blocked) {
-      const formData = new FormData();
-      formData.append("id", category.id);
-      const result = await deleteCategoryAction(null, formData);
-      toast.error(result.ok ? strings.errors.domain.CATEGORY_NOT_EMPTY : result.error.fa);
+      toast.error(strings.errors.domain.CATEGORY_NOT_EMPTY);
       return;
     }
     setDeleteTarget(category);
@@ -152,6 +149,14 @@ export function CategoryTree() {
                   onAddChild={(c) =>
                     setDialog({ mode: "create-child", parentId: c.id })
                   }
+                  onMoveUp={
+                    index > 0
+                      ? () => {
+                          const overId = categories[index - 1]?.id;
+                          if (overId) applyReorder(null, topIds, category.id, overId);
+                        }
+                      : undefined
+                  }
                   onMoveDown={
                     index < categories.length - 1
                       ? () => {
@@ -173,6 +178,17 @@ export function CategoryTree() {
                         depth={1}
                         onEdit={(c) => setDialog({ mode: "edit", category: c })}
                         onDelete={(c) => void requestDelete(c)}
+                        onMoveUp={
+                          childIndex > 0
+                            ? () => {
+                                const childIds = category.children.map((item) => item.id);
+                                const overId = childIds[childIndex - 1];
+                                if (overId) {
+                                  applyReorder(category.id, childIds, child.id, overId);
+                                }
+                              }
+                            : undefined
+                        }
                         onMoveDown={
                           childIndex < category.children.length - 1
                             ? () => {

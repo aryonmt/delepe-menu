@@ -15,6 +15,11 @@ export class PrismaAdminUserRepository implements AdminUserRepository {
     return row ? toAdminUser(row) : null;
   }
 
+  async findFirst(): Promise<AdminUser | null> {
+    const row = await this.prisma.adminUser.findFirst({ orderBy: { createdAt: "asc" } });
+    return row ? toAdminUser(row) : null;
+  }
+
   async updatePasswordHash(id: string, passwordHash: string): Promise<void> {
     await this.prisma.adminUser.update({
       where: { id },

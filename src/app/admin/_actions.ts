@@ -16,7 +16,7 @@ export async function logoutAction(): Promise<void> {
   await assertSameOrigin();
   await container.logout().execute();
   const jar = await cookies();
-  clearSessionCookie(jar);
+  await clearSessionCookie(jar);
   redirect("/login");
 }
 

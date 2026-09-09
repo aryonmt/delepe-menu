@@ -77,6 +77,26 @@ describe("useMenuDraftStore", () => {
     expect(useMenuDraftStore.getState().isDirty).toBe(true);
   });
 
+  it("upsertProduct keeps the product at its current index in the same category", () => {
+    const data = menu();
+    const leaf = data.categories[0]?.children[0];
+    if (!leaf) throw new Error("missing leaf");
+    const second = product("آمریکانو", "leaf");
+    second.sortOrder = 20;
+    leaf.products.push(second);
+    useMenuDraftStore.getState().hydrate(data);
+    const edited = product("اسپرسو", "leaf");
+    edited.price = 111_000;
+    useMenuDraftStore.getState().upsertProduct(edited);
+    const names = useMenuDraftStore
+      .getState()
+      .draft?.categories[0]?.children[0]?.products.map((item) => item.name);
+    expect(names).toEqual(["اسپرسو", "آمریکانو"]);
+    expect(
+      useMenuDraftStore.getState().draft?.categories[0]?.children[0]?.products[0]?.price,
+    ).toBe(111_000);
+  });
+
   it("cancelEditSession restores the snapshot and dirty flag (docs/07 AC-7)", () => {
     useMenuDraftStore.getState().hydrate(menu());
     useMenuDraftStore.getState().beginEditSession();

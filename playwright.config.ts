@@ -28,8 +28,8 @@ export default defineConfig({
     hasTouch: true,
   },
   webServer: {
-    // Seed MUTED settings then production-build against the test DB (globalSetup also
-    // seeds; this second seed covers webServer-before-globalSetup ordering).
+    // Bootstrap settings + E2E catalog, then production-build against the test DB
+    // (globalSetup also seeds; this second seed covers webServer-before-globalSetup).
     // Node script — do not wrap in `cmd /c` (Playwright already uses shell:true).
     command: "node scripts/e2e-webserver.mjs",
     url: `${baseURL}/api/health`,

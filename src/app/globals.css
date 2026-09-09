@@ -45,7 +45,7 @@
   body {
     background-color: var(--background); color: var(--foreground);
     font-family: IRANSans, var(--font-vazir), sans-serif;
-    position: relative; overflow-x: hidden; min-height: 100vh;
+    position: relative; overflow-x: clip; min-height: 100vh;
   }
   body::before {
     content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;

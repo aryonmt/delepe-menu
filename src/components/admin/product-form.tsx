@@ -31,7 +31,6 @@ export function ProductForm({ product, onClose }: Props) {
   const draft = useMenuDraftStore((s) => s.draft);
   const upsertProduct = useMenuDraftStore((s) => s.upsertProduct);
   const removeProduct = useMenuDraftStore((s) => s.removeProduct);
-  const clearDirty = useMenuDraftStore((s) => s.clearDirty);
   const beginEditSession = useMenuDraftStore((s) => s.beginEditSession);
   const cancelEditSession = useMenuDraftStore((s) => s.cancelEditSession);
   const commitEditSession = useMenuDraftStore((s) => s.commitEditSession);
@@ -169,7 +168,6 @@ export function ProductForm({ product, onClose }: Props) {
       if (!isEdit) removeProduct(tempId);
       upsertProduct(result.data);
       commitEditSession();
-      clearDirty();
       toast.success(isEdit ? strings.admin.productUpdated : strings.admin.productCreated);
       onClose();
       return;

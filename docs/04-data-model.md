@@ -214,15 +214,16 @@ Unit-test exactly these cases (golden table):
 | 1000000 | ۱ میلیون تومان |
 | 1999500 | ۲ میلیون تومان (carry) |
 
-## Seed data (REAL Delepe menu — transcribed from the physical menu)
+## Sample catalog (E2E fixture — transcribed from the physical menu)
 
 Prices are in **toman**. `sortOrder` = list order (10, 20, …).
 Two placeholder prices are marked *(owner must verify)*.
 Names use ZWNJ (نیم‌فاصله) per doc 05. `description` and `imageKeyword` are
-authored here — the seed copies them verbatim (no agent invention at seed time).
+authored here — `prisma/e2e-seed.ts` copies them verbatim (no agent invention).
 The products, categories, prices, badges, and availability below are **sample
-data** used to demonstrate the UI; in the real system they are Admin-managed
-content. Layout logic must never depend on their names, counts, or composition.
+data** for Playwright and local UI demos; production `prisma db seed` does
+**not** insert them. In the real system they are Admin-managed content. Layout
+logic must never depend on their names, counts, or composition.
 
 ### Category tree
 
@@ -284,7 +285,7 @@ content. Layout logic must never depend on their names, counts, or composition.
 | آب طالبی | 230000 | آب طالبی رسیده | melon juice | |
 | طالبی‌بستنی | 320000 | آب طالبی با بستنی وانیلی | melon smoothie | |
 | آب سیب | 240000 | آب سیب تازه | apple juice | |
-| آب کرفس | 200000 | آب کرفس طبیعی | celery juice | seed: `isAvailable=false` (demo MUTED) |
+| آب کرفس | 200000 | آب کرفس طبیعی | celery juice | E2E: `isAvailable=false` (demo MUTED) |
 | شیرموز | 280000 | شیر و موز تازه | banana milk | |
 | شیرموز‌بستنی | 350000 | شیر، موز و بستنی وانیلی | banana milkshake | |
 | موهیتو | 270000 | نعناع تازه، لیمو و سودا | mojito | |
@@ -309,7 +310,7 @@ content. Layout logic must never depend on their names, counts, or composition.
 | --- | --- | --- | --- | --- |
 | کیک روز | 330000 | کیک تازه‌ی روزانه | cake slice | |
 | کوکی بزرگ | 190000 | کوکی شکلاتی بزرگ | chocolate chip cookie | |
-| کوکی متوسط | 115000 | کوکی شکلاتی تازه | cookie | seed discount: `discountedPrice=95000, discountActive=true` (demo) |
+| کوکی متوسط | 115000 | کوکی شکلاتی تازه | cookie | E2E discount: `discountedPrice=95000, discountActive=true` (demo) |
 | باقلوا | 120000 | باقلوای سنتی با پسته | baklava | |
 
 ### پیش‌غذا و سالاد / پیش‌غذا
@@ -393,22 +394,20 @@ content. Layout logic must never depend on their names, counts, or composition.
 
 ## Seed behavior
 
-1. `prisma/seed.ts` upserts settings (`restaurantName: "دِ‌لِ‌پِ"` — the exact
-   brand string per doc 05), the category tree, and all products above with the
-   exact `description` / `imageKeyword` values from these tables. Sample product
-   names containing the brand (e.g. «بمب دلِپ») are Admin-managed content and are
-   intentionally left unchanged.
-2. **Admin bootstrap**: an admin is created from `ADMIN_USERNAME`/`ADMIN_PASSWORD`
-   **only when `AdminUser` count = 0** (idempotent; re-seeding never resets the
-   owner's password).
-3. **Images (deterministic, ADR-10)**: by default the seed rasterizes a branded
-   SVG placeholder per product («پاتوق»-hued gradient + product initial + category
-   name; no emoji glyphs) into `uploads/` (not `uploads/seed/`). With
-   `SEED_DOWNLOAD_IMAGES=true` it downloads curated food photography from the
-   fixed keyword→URL map (ADR-10), at seed time only, through the optimizer into
-   self-hosted storage; any failure falls back to the SVG for that product. These
-   downloads are temporary development stand-ins — the owner's real product
-   photography replaces them per-media later with no layout change. E2E never
-   depends on downloaded photos. If a product's original file is missing, the
-   old Media row and its files (`deleteAll`) are removed before a new one is created.
-4. Seed is idempotent (`upsert` by category/name; skip existing files).
+1. **Production** (`prisma/seed.ts` / `pnpm db:seed` / `prisma db seed`): creates
+   settings (`restaurantName: "دِ‌لِ‌پِ"` — the exact brand string per doc 05)
+   when the settings row is missing, and creates an admin from
+   `ADMIN_USERNAME`/`ADMIN_PASSWORD` **only when `AdminUser` count = 0**
+   (idempotent; re-seeding never resets the owner's password **or** existing
+   settings). It does **not** insert categories, products, variants, or media.
+   The public menu shows the empty state until the owner adds content in admin.
+2. **E2E catalog** (`prisma/e2e-seed.ts` / `pnpm db:seed:e2e`): after the same
+   bootstrap, upserts the category tree and products in the tables above. Not
+   registered as Prisma's `prisma.seed`, so a client `db:seed` never fills the
+   menu. Re-run is idempotent (`upsert` by category/name).
+3. **Images (deterministic, ADR-10)**: the E2E catalog rasterizes a branded SVG
+   placeholder per product («پاتوق»-hued gradient + product initial + category
+   name; no emoji glyphs) into `uploads/` (not `uploads/seed/`). If a product's
+   original file is missing, the old Media row and its files (`deleteAll`) are
+   removed before a new one is created. Owner photography replaces placeholders
+   in admin with no layout change.

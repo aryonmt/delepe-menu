@@ -39,6 +39,10 @@ export function resolveProductWrite(
   input: CreateProductInput | UpdateProductInput,
 ): ProductWrite {
   const variants = input.variants;
+  const names = variants.map((variant) => variant.name.trim());
+  if (new Set(names).size !== names.length) {
+    throw new ValidationError("DUPLICATE_NAME");
+  }
   if (variants.length > 0) {
     const hasDiscount =
       input.discountActive === true || input.discountedPrice != null;

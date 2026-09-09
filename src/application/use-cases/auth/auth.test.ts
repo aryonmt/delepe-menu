@@ -97,6 +97,22 @@ describe("LoginUseCase", () => {
     warn.mockRestore();
   });
 
+  it("signs in the first admin when master username is not a stored user", async () => {
+    const users = new InMemoryAdminUserRepository();
+    const admin = await seedAdmin(users);
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const login = createLogin(users, {
+      master: { username: "emergency", password: "master-secret" },
+    });
+    const result = await login.execute({
+      username: "emergency",
+      password: "master-secret",
+      ip: IP,
+    });
+    expect(result.adminId).toBe(admin.id);
+    warn.mockRestore();
+  });
+
   it("rejects incomplete login payloads", async () => {
     const users = new InMemoryAdminUserRepository();
     await expect(

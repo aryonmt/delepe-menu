@@ -24,6 +24,7 @@ interface MenuDraftState {
   upsertProduct: (product: ProductDto) => void;
   removeProduct: (id: string) => void;
   updateProductAvailability: (id: string, isAvailable: boolean) => void;
+  reorderProducts: (categoryId: string, orderedIds: string[]) => void;
   upsertCategory: (category: CategoryDto) => void;
   removeCategory: (id: string) => void;
   reorderCategories: (parentId: string | null, orderedIds: string[]) => void;
@@ -36,6 +37,22 @@ function clone<T>(value: T): T {
 }
 
 /** Every product list in the tree (top-level + children), for in-place edits. */
+function insertBySortOrder(list: ProductDto[], product: ProductDto): void {
+  const index = list.findIndex((item) => item.sortOrder > product.sortOrder);
+  if (index === -1) list.push(product);
+  else list.splice(index, 0, product);
+}
+
+function findProductList(draft: AdminMenuDto, categoryId: string): ProductDto[] | null {
+  for (const category of draft.categories) {
+    if (category.id === categoryId) return category.products;
+    for (const child of category.children) {
+      if (child.id === categoryId) return child.products;
+    }
+  }
+  return null;
+}
+
 function productLists(draft: AdminMenuDto): ProductDto[][] {
   const lists: ProductDto[][] = [];
   for (const category of draft.categories) {
@@ -94,25 +111,33 @@ export const useMenuDraftStore = create<MenuDraftState>((set, get) => ({
     const draft = get().draft;
     if (!draft) return;
     const next = clone(draft);
+    let placed = false;
     for (const list of productLists(next)) {
       const index = list.findIndex((item) => item.id === product.id);
-      if (index !== -1) list.splice(index, 1);
-    }
-    let placed = false;
-    for (const category of next.categories) {
-      if (category.id === product.categoryId) {
-        category.products.push(product);
+      if (index === -1) continue;
+      if (list[index]?.categoryId === product.categoryId) {
+        list[index] = product;
         placed = true;
         break;
       }
-      for (const child of category.children) {
-        if (child.id === product.categoryId) {
-          child.products.push(product);
+      list.splice(index, 1);
+    }
+    if (!placed) {
+      for (const category of next.categories) {
+        if (category.id === product.categoryId) {
+          insertBySortOrder(category.products, product);
           placed = true;
           break;
         }
+        for (const child of category.children) {
+          if (child.id === product.categoryId) {
+            insertBySortOrder(child.products, product);
+            placed = true;
+            break;
+          }
+        }
+        if (placed) break;
       }
-      if (placed) break;
     }
     set({ draft: next, isDirty: true });
   },
@@ -137,6 +162,19 @@ export const useMenuDraftStore = create<MenuDraftState>((set, get) => ({
         if (item.id === id) item.isAvailable = isAvailable;
       }
     }
+    set({ draft: next, isDirty: true });
+  },
+
+  reorderProducts: (categoryId, orderedIds) => {
+    const draft = get().draft;
+    if (!draft) return;
+    const next = clone(draft);
+    const list = findProductList(next, categoryId);
+    if (!list) return;
+    list.sort((a, b) => orderedIds.indexOf(a.id) - orderedIds.indexOf(b.id));
+    list.forEach((item, index) => {
+      item.sortOrder = (index + 1) * 10;
+    });
     set({ draft: next, isDirty: true });
   },
 

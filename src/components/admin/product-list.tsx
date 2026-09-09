@@ -1,9 +1,9 @@
 // src/components/admin/product-list.tsx
 "use client";
 import { useMemo, useState } from "react";
-import { Edit, Plus, Search, Trash2 } from "lucide-react";
-import type { ProductDto } from "@/application/dtos";
-import { updateProductAvailabilityAction } from "@/app/admin/products/_actions";
+import { Plus, Search } from "lucide-react";
+import type { AdminMenuDto, CategoryDto, ProductDto } from "@/application/dtos";
+import { reorderProductsAction } from "@/app/admin/products/_actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,24 +13,49 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { useMenuDraftStore } from "@/hooks/use-menu-draft-store";
 import { LIST_PAGE_SIZE } from "@/lib/constants";
 import { toPersianDigits } from "@/lib/format/digits";
-import { formatPrice } from "@/lib/format/price";
 import { strings } from "@/lib/fa/strings";
 import { toast } from "sonner";
-import { DeleteConfirm } from "./delete-confirm";
 import { ProductForm } from "./product-form";
+import { ProductRow } from "./product-row";
+
+function matchingCategoryIds(draft: AdminMenuDto, catFilter: string): Set<string> | null {
+  if (catFilter === "all") return null;
+  const parent = draft.categories.find((category) => category.id === catFilter);
+  if (parent && parent.children.length > 0) {
+    return new Set([parent.id, ...parent.children.map((child) => child.id)]);
+  }
+  return new Set([catFilter]);
+}
+
+function findCategory(draft: AdminMenuDto, id: string): CategoryDto | null {
+  for (const category of draft.categories) {
+    if (category.id === id) return category;
+    for (const child of category.children) {
+      if (child.id === id) return child;
+    }
+  }
+  return null;
+}
+
+function moveId(ids: string[], from: number, to: number): string[] {
+  const next = [...ids];
+  const [id] = next.splice(from, 1);
+  if (!id) return ids;
+  next.splice(to, 0, id);
+  return next;
+}
 
 /**
  * Admin product list (docs/07). Search/filter/pagination are client-side over
- * the draft. Product drag-and-drop is intentionally ABSENT (owner decision):
- * ordering lives with categories only.
+ * the draft. Within a leaf category, order is adjusted with up/down controls.
  */
 export function ProductList() {
   const draft = useMenuDraftStore((s) => s.draft);
   const clearDirty = useMenuDraftStore((s) => s.clearDirty);
+  const reorderStore = useMenuDraftStore((s) => s.reorderProducts);
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("all");
   const [page, setPage] = useState(1);
@@ -49,6 +74,13 @@ export function ProductList() {
     return rows;
   }, [draft]);
 
+  const leafForReorder = useMemo(() => {
+    if (!draft || catFilter === "all") return null;
+    const category = findCategory(draft, catFilter);
+    if (!category || category.children.length > 0) return null;
+    return category;
+  }, [draft, catFilter]);
+
   const filteredProducts = useMemo(() => {
     if (!draft) return [];
     let rows: ProductDto[] = [];
@@ -58,12 +90,13 @@ export function ProductList() {
         rows = rows.concat(child.products);
       }
     }
-    if (catFilter !== "all") {
-      rows = rows.filter((p) => p.categoryId === catFilter);
+    const ids = matchingCategoryIds(draft, catFilter);
+    if (ids) {
+      rows = rows.filter((product) => ids.has(product.categoryId));
     }
     const query = search.trim();
     if (query) {
-      rows = rows.filter((p) => p.name.includes(query));
+      rows = rows.filter((product) => product.name.includes(query));
     }
     return rows.sort((a, b) => a.sortOrder - b.sortOrder);
   }, [draft, catFilter, search]);
@@ -78,6 +111,25 @@ export function ProductList() {
   const openEditor = (product: ProductDto | null) => {
     setEditing(product);
     setIsCreating(product === null);
+  };
+
+  const moveProduct = (productId: string, direction: -1 | 1) => {
+    if (!leafForReorder) return;
+    const ids = filteredProducts.map((product) => product.id);
+    const from = ids.indexOf(productId);
+    const to = from + direction;
+    if (from < 0 || to < 0 || to >= ids.length) return;
+    const previous = ids;
+    const nextIds = moveId(ids, from, to);
+    reorderStore(leafForReorder.id, nextIds);
+    void reorderProductsAction(leafForReorder.id, nextIds).then((result) => {
+      if (result.ok) {
+        clearDirty();
+        return;
+      }
+      reorderStore(leafForReorder.id, previous);
+      toast.error(result.error.fa);
+    });
   };
 
   if (!draft) return null;
@@ -125,15 +177,26 @@ export function ProductList() {
       </div>
 
       <div>
-        {paginated.map((product) => (
-          <ProductRow
-            key={product.id}
-            product={product}
-            onEdit={() => openEditor(product)}
-            onAvailabilityReverted={() => undefined}
-            clearDirty={clearDirty}
-          />
-        ))}
+        {paginated.map((product, pageIndex) => {
+          const index = (currentPage - 1) * LIST_PAGE_SIZE + pageIndex;
+          const canReorder = Boolean(leafForReorder) && search.trim() === "";
+          return (
+            <ProductRow
+              key={product.id}
+              product={product}
+              onEdit={() => openEditor(product)}
+              clearDirty={clearDirty}
+              onMoveUp={
+                canReorder && index > 0 ? () => moveProduct(product.id, -1) : undefined
+              }
+              onMoveDown={
+                canReorder && index < filteredProducts.length - 1
+                  ? () => moveProduct(product.id, 1)
+                  : undefined
+              }
+            />
+          );
+        })}
       </div>
 
       {filteredProducts.length === 0 && (
@@ -167,68 +230,6 @@ export function ProductList() {
           }}
         />
       )}
-    </div>
-  );
-}
-
-type RowProps = {
-  product: ProductDto;
-  onEdit: () => void;
-  onAvailabilityReverted: () => void;
-  clearDirty: () => void;
-};
-
-function ProductRow({ product, onEdit, clearDirty }: RowProps) {
-  const updateAvailability = useMenuDraftStore((s) => s.updateProductAvailability);
-
-  const handleToggle = (checked: boolean) => {
-    updateAvailability(product.id, checked);
-    void updateProductAvailabilityAction(product.id, checked).then((result) => {
-      if (result.ok) {
-        clearDirty();
-        return;
-      }
-      updateAvailability(product.id, !checked);
-      toast.error(result.error.fa);
-    });
-  };
-
-  return (
-    <div
-      data-testid={`admin-product-row-${product.name}`}
-      className="flex items-center gap-4 p-3 border border-border rounded-lg bg-card mb-2"
-    >
-      <div className="flex-1 min-w-0">
-        <p className="font-bold truncate" data-testid="admin-product-name">
-          {product.name}
-        </p>
-        <p className="text-sm text-muted-foreground">{formatPrice(product.price)}</p>
-      </div>
-      <Switch
-        checked={product.isAvailable}
-        onCheckedChange={handleToggle}
-        aria-label={strings.admin.available}
-      />
-      <Button
-        variant="ghost"
-        size="icon"
-        aria-label={strings.admin.editProduct}
-        data-testid="edit-product"
-        onClick={onEdit}
-      >
-        <Edit className="h-4 w-4" />
-      </Button>
-      <DeleteConfirm product={product}>
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label={strings.admin.deleteProduct}
-          data-testid="delete-product"
-          className="text-destructive"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </DeleteConfirm>
     </div>
   );
 }

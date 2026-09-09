@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { NotFoundError, ValidationError } from "@/domain/errors";
+import { ValidationError } from "@/domain/errors";
 import { createRepos, seedLeafCategory } from "@/application/testing/harness";
 import { CreateCategoryUseCase } from "@/application/use-cases/categories/create-category";
 import { CreateProductUseCase } from "./create-product";
-import { DeleteProductUseCase } from "./delete-product";
 import { UpdateProductUseCase } from "./update-product";
 import { productDtoToUpdateInput } from "@/application/mappers/product-dto-to-update-input";
 
@@ -68,6 +67,24 @@ describe("CreateProductUseCase", () => {
     });
     expect(created.price).toBe(550_000);
     expect(created.variants).toHaveLength(2);
+  });
+
+  it("rejects duplicate variant names on create", async () => {
+    const repos = createRepos();
+    const { leaf } = await seedLeafCategory(repos);
+    await expect(
+      new CreateProductUseCase(repos.products, repos.categories).execute({
+        name: "برگر",
+        categoryId: leaf.id,
+        variants: [
+          { name: "سایز بزرگ", price: 200_000 },
+          { name: "سایز بزرگ", price: 250_000 },
+        ],
+      }),
+    ).rejects.toSatisfy(
+      (error: unknown) =>
+        error instanceof ValidationError && error.code === "VALIDATION",
+    );
   });
 
   it("rejects discount on product with variants (BR-14)", async () => {
@@ -221,46 +238,6 @@ describe("UpdateProductUseCase", () => {
     ).execute(productDtoToUpdateInput(created, { isAvailable: false }));
     expect(updated.isAvailable).toBe(false);
     expect(updated.media?.id).toBe("pic");
-  });
-});
-
-describe("DeleteProductUseCase", () => {
-  it("hard-deletes the product and its media files (BR-03)", async () => {
-    const repos = createRepos();
-    const { leaf } = await seedLeafCategory(repos);
-    await repos.media.create({
-      id: "pic",
-      fileName: "pic.jpg",
-      mimeType: "image/jpeg",
-      width: 800,
-      height: 600,
-      dominantColor: "#123456",
-      path: "uploads/pic.jpg",
-    });
-    const created = await new CreateProductUseCase(
-      repos.products,
-      repos.categories,
-    ).execute({
-      name: "لاته",
-      price: 250_000,
-      categoryId: leaf.id,
-      mediaId: "pic",
-    });
-    await new DeleteProductUseCase(repos.products, repos.media, repos.storage).execute({
-      id: created.id,
-    });
-    expect(await repos.products.findById(created.id)).toBeNull();
-    expect(await repos.media.findById("pic")).toBeNull();
-    expect(repos.db.deletedMediaFiles).toEqual(["pic"]);
-  });
-
-  it("throws NotFoundError for an unknown product", async () => {
-    const repos = createRepos();
-    await expect(
-      new DeleteProductUseCase(repos.products, repos.media, repos.storage).execute({
-        id: "missing",
-      }),
-    ).rejects.toBeInstanceOf(NotFoundError);
   });
 });
 

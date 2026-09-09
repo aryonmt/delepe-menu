@@ -14,15 +14,15 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 docker compose stop app
-docker compose exec -T db dropdb -U delepe --if-exists delepe
-docker compose exec -T db createdb -U delepe delepe
-docker compose exec -T db pg_restore -U delepe -d delepe --no-owner <"$DUMP"
+docker compose exec -T db sh -c 'dropdb -U "$POSTGRES_USER" --if-exists "$POSTGRES_DB"'
+docker compose exec -T db sh -c 'createdb -U "$POSTGRES_USER" "$POSTGRES_DB"'
+docker compose exec -T db sh -c 'pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --no-owner' <"$DUMP"
 
 docker run --rm \
   -v delepe_storage:/data \
   -v "$TAR":/backup.tgz:ro \
   alpine:3.20 \
-  sh -c "rm -rf /data/* /data/.[!.]* 2>/dev/null; tar xzf /backup.tgz -C /data"
+  sh -c "rm -rf /data/* /data/.[!.]* 2>/dev/null; tar xzf /backup.tgz -C /data; chown -R 1001:1001 /data"
 
 docker compose start app
 echo "Restore finished. Check /api/health."

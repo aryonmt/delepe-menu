@@ -11,7 +11,7 @@ STAMP="$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$BACKUP_DIR"
 cd "$ROOT"
 
-docker compose exec -T db pg_dump -Fc -U delepe delepe >"$BACKUP_DIR/db-${STAMP}.dump"
+docker compose exec -T db sh -c 'pg_dump -Fc -U "$POSTGRES_USER" "$POSTGRES_DB"' >"$BACKUP_DIR/db-${STAMP}.dump"
 docker run --rm \
   -v delepe_storage:/data:ro \
   -v "$BACKUP_DIR":/backups \

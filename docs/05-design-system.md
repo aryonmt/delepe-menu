@@ -205,7 +205,7 @@ jumps instant. Motion library: `motion/react` (ADR-09).
 lucide-react main package only. Badge icons unchanged: POPULAR `Flame`,
 NEW `Sparkles`, SPICY `FlameKindling`, VEGETARIAN `Leaf`. Added: `X` (peek
 close), `ChevronDown` (variants, mirrored in RTL). **No emoji anywhere in the
-public UI** (seed SVG glyphs no longer use emoji — see ADR-10).
+public UI** (E2E catalog SVG glyphs no longer use emoji — see ADR-10).
 
 ## RTL rules
 
@@ -274,7 +274,7 @@ chapter, no cap, no copy claims). Full-width; image 1:1,
   cards.
 - **Content responsibility:** the POPULAR designation is Admin-managed
   content. The UI never assumes a specific count — not five, not any fixed
-  number. The five POPULAR items in the current seed data are sample data
+  number. The five POPULAR items in the E2E catalog fixture are sample data
   only and carry no design significance.
 - **Gracefulness at scale:** signature cards are self-contained full-width
   blocks in normal document flow, so an unusually large number of POPULAR
@@ -317,9 +317,10 @@ MUTED products may still be peeked (read-only exploration).
 peek): chapter-hue field (hue @ 12% over `card-2`) + oversized Lalezar initial
 (first character of the product name, 56px, hue @ .5) + small ✦.
 
-**Seed placeholder SVG** (ADR-10 default): same deterministic-generator
+**E2E catalog placeholder SVG** (ADR-10): same deterministic-generator
 contract, new art direction — hue gradient field + product initial + category
-name + brand line «دِ‌لِ‌پِ»; **no emoji glyphs**.
+name + brand line «دِ‌لِ‌پِ»; **no emoji glyphs**. Production seed does not
+create product images.
 
 **Skeletons.** Hero skeleton (wordmark block + ticker bar), card skeletons in
 both tier shapes, dock skeleton bar — streamed via the existing Suspense

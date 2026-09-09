@@ -39,9 +39,14 @@ COPY --from=build --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=build --chown=nextjs:nodejs /app/package.json /app/pnpm-lock.yaml /app/tsconfig.json ./
 COPY --from=build --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=build --chown=nextjs:nodejs /app/src ./src
+COPY --from=build --chown=nextjs:nodejs /app/scripts/admin-reset.ts ./scripts/admin-reset.ts
 COPY --chown=nextjs:nodejs scripts/docker-entrypoint.sh /app/docker-entrypoint.sh
 
-RUN mkdir -p /data/storage && chown nextjs:nodejs /data/storage \
+ENV HOME=/home/nextjs
+ENV COREPACK_HOME=/home/nextjs/.cache/node/corepack
+RUN mkdir -p /data/storage /home/nextjs/.cache/node/corepack \
+  && chown nextjs:nodejs /data/storage \
+  && chown -R nextjs:nodejs /home/nextjs \
   && chmod +x /app/docker-entrypoint.sh
 
 USER nextjs

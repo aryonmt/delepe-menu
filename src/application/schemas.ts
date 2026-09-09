@@ -2,6 +2,7 @@
 import { z } from "zod";
 import { BADGE_KINDS, THEME_NAMES, UNAVAILABLE_MODES } from "@/domain/entities";
 import { PRICE_MAX_TOMAN, PRICE_MIN_TOMAN, TICKER_MAX_ITEMS } from "@/lib/constants";
+import { strings } from "@/lib/fa/strings";
 
 const idSchema = z.string().min(1);
 
@@ -35,6 +36,24 @@ const productFields = {
   variants: z.array(variantSchema).optional().default([]),
 };
 
+function uniqueVariantNames(
+  value: { variants: { name: string }[] },
+  ctx: z.RefinementCtx,
+): void {
+  const seen = new Set<string>();
+  for (const [index, variant] of value.variants.entries()) {
+    const name = variant.name.trim();
+    if (seen.has(name)) {
+      ctx.addIssue({
+        code: "custom",
+        message: strings.errors.domain.DUPLICATE_NAME,
+        path: ["variants", index, "name"],
+      });
+    }
+    seen.add(name);
+  }
+}
+
 function requirePriceWhenNoVariants(
   value: { variants: unknown[]; price?: number },
   ctx: z.RefinementCtx,
@@ -48,10 +67,14 @@ function requirePriceWhenNoVariants(
   }
 }
 
-export const createProductSchema = z.object(productFields).superRefine(requirePriceWhenNoVariants);
+export const createProductSchema = z
+  .object(productFields)
+  .superRefine(requirePriceWhenNoVariants)
+  .superRefine(uniqueVariantNames);
 export const updateProductSchema = z
   .object({ id: idSchema, ...productFields })
-  .superRefine(requirePriceWhenNoVariants);
+  .superRefine(requirePriceWhenNoVariants)
+  .superRefine(uniqueVariantNames);
 export const getProductSchema = z.object({ id: idSchema });
 export const deleteProductSchema = z.object({ id: idSchema });
 export const reorderProductsSchema = z.object({

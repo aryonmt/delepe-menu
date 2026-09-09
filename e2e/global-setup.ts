@@ -20,6 +20,7 @@ export default function globalSetup() {
 
   runOrThrow(node, [prismaCli(root), "migrate", "deploy"], testEnv);
   runOrThrow(node, [tsxCli(root), "prisma/seed.ts"], testEnv);
+  runOrThrow(node, [tsxCli(root), "prisma/e2e-seed.ts"], testEnv);
   runOrThrow(
     node,
     [

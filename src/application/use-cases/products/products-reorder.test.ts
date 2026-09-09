@@ -24,6 +24,18 @@ describe("createProductSchema", () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it("rejects duplicate variant names", () => {
+    const result = createProductSchema.safeParse({
+      name: "x",
+      categoryId: "c1",
+      variants: [
+        { name: "بزرگ", price: 10_000 },
+        { name: "بزرگ", price: 12_000 },
+      ],
+    });
+    expect(result.success).toBe(false);
+  });
 });
 
 describe("ReorderProductsUseCase", () => {

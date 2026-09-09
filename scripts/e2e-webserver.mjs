@@ -27,6 +27,7 @@ const execOpts = {
 
 execSync("pnpm db:deploy", execOpts);
 execSync("pnpm db:seed", execOpts);
+execSync("pnpm db:seed:e2e", execOpts);
 execSync("pnpm build", execOpts);
 
 const server = spawn("pnpm", ["start"], {

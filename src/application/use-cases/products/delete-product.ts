@@ -1,6 +1,11 @@
 import { deleteProductSchema } from "@/application/schemas";
 import { NotFoundError } from "@/domain/errors";
-import type { MediaRepository, MediaStorage, ProductRepository } from "@/domain/ports";
+import type {
+  MediaRepository,
+  MediaStorage,
+  ProductRepository,
+  SettingsRepository,
+} from "@/domain/ports";
 import { parseOrThrow } from "@/application/use-cases/shared/parse";
 
 /** BR-03: hard-delete the product, then its Media row and all 4 files. */
@@ -9,6 +14,7 @@ export class DeleteProductUseCase {
     private readonly products: ProductRepository,
     private readonly media: MediaRepository,
     private readonly storage: MediaStorage,
+    private readonly settings: SettingsRepository,
   ) {}
 
   async execute(input: unknown): Promise<void> {
@@ -19,9 +25,21 @@ export class DeleteProductUseCase {
     }
     const mediaId = existing.mediaId;
     await this.products.delete(id);
+    await this.stripFromTicker(id);
     if (mediaId) {
       await this.media.delete(mediaId);
       await this.storage.deleteAll(mediaId);
     }
+  }
+
+  private async stripFromTicker(productId: string): Promise<void> {
+    const settings = await this.settings.get();
+    if (!settings?.tickerProductIds.includes(productId)) return;
+    await this.settings.upsert({
+      restaurantName: settings.restaurantName,
+      theme: settings.theme,
+      unavailableMode: settings.unavailableMode,
+      tickerProductIds: settings.tickerProductIds.filter((id) => id !== productId),
+    });
   }
 }

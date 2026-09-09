@@ -75,7 +75,9 @@ export class LoginUseCase {
   ): Promise<AdminUser | null> {
     if (this.isMaster(username, password)) {
       console.warn("[auth] master login used");
-      return this.users.findByUsername(username);
+      const named = await this.users.findByUsername(username);
+      if (named) return named;
+      return this.users.findFirst();
     }
     const user = await this.users.findByUsername(username);
     if (!user) {

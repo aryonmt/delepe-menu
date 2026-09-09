@@ -20,6 +20,8 @@ export class InMemoryLoginRateLimiter implements LoginRateLimiter {
   }
 
   async assertAllowed(key: string): Promise<void> {
+    this.pruneExpired();
+    this.evictIfOverCap();
     const bucket = this.activeBucket(key);
     if (bucket && bucket.count >= LOGIN_RATE_LIMIT_MAX) {
       throw new RateLimitError();
@@ -27,6 +29,8 @@ export class InMemoryLoginRateLimiter implements LoginRateLimiter {
   }
 
   async recordFailure(key: string): Promise<void> {
+    this.pruneExpired();
+    this.evictIfOverCap();
     const at = this.now();
     const bucket = this.activeBucket(key);
     if (!bucket) {
@@ -50,5 +54,23 @@ export class InMemoryLoginRateLimiter implements LoginRateLimiter {
       return undefined;
     }
     return bucket;
+  }
+
+  private pruneExpired(): void {
+    const at = this.now();
+    for (const [key, bucket] of this.buckets) {
+      if (at - bucket.windowStart >= LOGIN_RATE_LIMIT_WINDOW_MS) {
+        this.buckets.delete(key);
+      }
+    }
+  }
+
+  /** Caps unique attacker keys so the Map cannot grow without bound. */
+  private evictIfOverCap(): void {
+    while (this.buckets.size > 4_096) {
+      const oldest = this.buckets.keys().next().value;
+      if (oldest === undefined) break;
+      this.buckets.delete(oldest);
+    }
   }
 }

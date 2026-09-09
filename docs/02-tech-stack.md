@@ -58,29 +58,25 @@ Exact patch versions are locked in `package.json` / lockfile; this table pins th
 - **ADR-06 Tailwind v3.4 (not v4)**: shadcn tooling + AI familiarity stability.
 - **ADR-07 Fonts (amended Phase 0)**: body IRANSans (owner-provided woff2
   400/500/700, self-hosted) with Vazirmatn fallback; display face **Lalezar**
-  (OFL, single weight 400) via `next/font/google` (downloaded at build,
-  self-hosted at runtime) **replaces Markazi Text**. Two families total keeps the
-  300KB font budget (doc 11). No runtime requests to Google Fonts.
+  (OFL, single weight 400) via `next/font/google` (downloaded at **image
+  build**, self-hosted at runtime) **replaces Markazi Text**. Two families total
+  keeps the 300KB font budget (doc 11). No runtime requests to Google Fonts.
+  A VPS that cannot reach Google during `docker compose build` must build the
+  image on a machine that can, or temporarily allow that outbound access.
 - **ADR-08 No runtime external services** (no CDN, no Cloudinary, no Google Maps):
   guarantees access with/without VPN.
 - **ADR-09 Motion v12 (`motion` package)** instead of `framer-motion` v11:
   the library was renamed; v12 is the maintained line. All imports use
   `motion/react`. Do not install `framer-motion`.
-- **ADR-10 Deterministic seed images (amended Phase 0)**: seed generates branded
-  SVG placeholders («پاتوق»-hued gradient + product initial + category name;
-  **no emoji glyphs**) by default — fully offline, byte-stable, zero network
-  dependency. Optional `SEED_DOWNLOAD_IMAGES=true` downloads **curated food
-  photography** per `imageKeyword` (doc 04) from a fixed keyword→URL map
-  (Unsplash CDN with `w=800&h=800&fit=crop` params and/or FoodiesFeed CC0) —
-  **at seed time only**, through `SharpImageOptimizer` into self-hosted
-  `storage/`, with SVG fallback on any failure. License provenance for every
-  curated URL is recorded in `prisma/seed-assets.md` (created with the seed
-  implementation). These downloads are temporary development stand-ins; the
-  owner's real product photography replaces them per-media later with no layout
-  change. No runtime external image requests (ADR-08). E2E never depends on
-  downloaded photos. Rejected: always-download (non-hermetic seed, breaks
-  offline/E2E); picsum random photos (non-food stand-ins); AI-generated food
-  imagery for gap-filling.
+- **ADR-10 Deterministic seed images (amended Phase 0)**: production
+  `prisma/seed.ts` does **not** create products or images. The E2E catalog
+  seeder (`prisma/e2e-seed.ts`) generates branded SVG placeholders («پاتوق»-hued
+  gradient + product initial + category name; **no emoji glyphs**) — fully
+  offline, byte-stable, zero network dependency — through `SharpImageOptimizer`
+  into self-hosted `storage/`. Owner photography is uploaded in admin. No
+  runtime external image requests (ADR-08). Rejected: always-download
+  (non-hermetic seed, breaks offline/E2E); picsum random photos (non-food
+  stand-ins); AI-generated food imagery for gap-filling.
 - **ADR-11 zustand for the admin draft store**: tiny, no provider boilerplate,
   works outside React render for `beforeunload` guards. Rejected: Redux Toolkit
   (overkill), Context (re-render churn on every keystroke).

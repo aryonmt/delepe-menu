@@ -1,7 +1,7 @@
 "use client";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { ChevronDown, GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
 import type { CategoryDto } from "@/application/dtos";
 import { Button } from "@/components/ui/button";
 import { strings } from "@/lib/fa/strings";
@@ -13,6 +13,7 @@ type Props = {
   onDelete: (category: CategoryDto) => void;
   onAddChild?: (category: CategoryDto) => void;
   onMoveDown?: () => void;
+  onMoveUp?: () => void;
 };
 
 export function CategoryRow({
@@ -22,6 +23,7 @@ export function CategoryRow({
   onDelete,
   onAddChild,
   onMoveDown,
+  onMoveUp,
 }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: category.id,
@@ -49,6 +51,21 @@ export function CategoryRow({
       <span className="flex-1 min-w-0 truncate font-bold" data-testid="admin-category-name">
         {category.name}
       </span>
+      {onMoveUp ? (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label={strings.admin.moveCategoryUp}
+          data-testid={`category-move-up-${category.name}`}
+          onClick={(event) => {
+            event.stopPropagation();
+            onMoveUp();
+          }}
+        >
+          <ChevronUp className="h-4 w-4" />
+        </Button>
+      ) : null}
       {onMoveDown ? (
         <Button
           type="button"
