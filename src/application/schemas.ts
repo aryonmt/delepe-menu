@@ -1,13 +1,20 @@
 // src/application/schemas.ts
 import { z } from "zod";
 import { BADGE_KINDS, THEME_NAMES, UNAVAILABLE_MODES } from "@/domain/entities";
-import { PRICE_MAX_TOMAN, PRICE_MIN_TOMAN, TICKER_MAX_ITEMS } from "@/lib/constants";
+import {
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
+  PRICE_MAX_TOMAN,
+  PRICE_MIN_TOMAN,
+  TICKER_MAX_ITEMS,
+} from "@/lib/constants";
 import { strings } from "@/lib/fa/strings";
 
-const idSchema = z.string().min(1);
+const fa = strings.errors.fields;
+const idSchema = z.string().min(1, fa.required);
 
 export const createCategorySchema = z.object({
-  name: z.string().min(1).max(60),
+  name: z.string().min(1, fa.required).max(60),
   parentId: z.string().min(1).nullable().optional(),
 });
 export const updateCategorySchema = createCategorySchema.extend({ id: idSchema });
@@ -17,24 +24,62 @@ export const reorderCategoriesSchema = z.object({
   parentId: z.string().min(1).nullable(),
 });
 
+const toman = z
+  .number({ error: fa.priceInvalid })
+  .int({ error: fa.priceRange })
+  .min(PRICE_MIN_TOMAN, fa.priceRange)
+  .max(PRICE_MAX_TOMAN, fa.priceRange);
+
 const variantSchema = z.object({
-  name: z.string().min(1).max(40),
-  price: z.number().int().min(PRICE_MIN_TOMAN).max(PRICE_MAX_TOMAN),
+  name: z.string().trim().min(1, fa.required).max(40, fa.variantNameMax),
+  price: toman,
+  discountedPrice: toman.nullable().optional(),
+  discountActive: z.boolean().optional().default(false),
+  isAvailable: z.boolean().optional().default(true),
 });
 
 /** Shared product body — spread into create/update objects. */
 const productFields = {
-  name: z.string().min(1).max(120),
-  description: z.string().max(500).nullable().optional(),
-  price: z.number().int().min(PRICE_MIN_TOMAN).max(PRICE_MAX_TOMAN).optional(),
-  discountedPrice: z.number().int().min(PRICE_MIN_TOMAN).max(PRICE_MAX_TOMAN).nullable().optional(),
+  name: z.string().min(1, fa.required).max(120, fa.nameMax),
+  description: z.string().max(500, fa.descriptionMax).nullable().optional(),
+  price: toman,
+  discountedPrice: toman.nullable().optional(),
   discountActive: z.boolean().optional().default(false),
   isAvailable: z.boolean().optional().default(true),
   badges: z.array(z.enum(BADGE_KINDS)).optional().default([]),
-  categoryId: idSchema,
+  categoryId: z.string().min(1, fa.categoryRequired),
   mediaId: z.string().min(1).nullable().optional(),
   variants: z.array(variantSchema).optional().default([]),
 };
+
+type DiscountUnit = {
+  price: number;
+  discountedPrice?: number | null;
+  discountActive?: boolean;
+};
+
+function refineDiscount(
+  unit: DiscountUnit,
+  ctx: z.RefinementCtx,
+  path: Array<string | number>,
+): void {
+  const discounted = unit.discountedPrice ?? null;
+  if (unit.discountActive && discounted === null) {
+    ctx.addIssue({
+      code: "custom",
+      message: strings.errors.domain.INVALID_DISCOUNT,
+      path: [...path, "discountedPrice"],
+    });
+    return;
+  }
+  if (discounted !== null && discounted >= unit.price) {
+    ctx.addIssue({
+      code: "custom",
+      message: strings.errors.domain.INVALID_DISCOUNT,
+      path: [...path, "discountedPrice"],
+    });
+  }
+}
 
 function uniqueVariantNames(
   value: { variants: { name: string }[] },
@@ -54,27 +99,24 @@ function uniqueVariantNames(
   }
 }
 
-function requirePriceWhenNoVariants(
-  value: { variants: unknown[]; price?: number },
+function productDiscounts(
+  value: DiscountUnit & { variants: DiscountUnit[] },
   ctx: z.RefinementCtx,
 ): void {
-  if (value.variants.length === 0 && value.price === undefined) {
-    ctx.addIssue({
-      code: "custom",
-      message: "price is required when the product has no variants",
-      path: ["price"],
-    });
+  refineDiscount(value, ctx, []);
+  for (const [index, variant] of value.variants.entries()) {
+    refineDiscount(variant, ctx, ["variants", index]);
   }
 }
 
 export const createProductSchema = z
   .object(productFields)
-  .superRefine(requirePriceWhenNoVariants)
-  .superRefine(uniqueVariantNames);
+  .superRefine(uniqueVariantNames)
+  .superRefine(productDiscounts);
 export const updateProductSchema = z
   .object({ id: idSchema, ...productFields })
-  .superRefine(requirePriceWhenNoVariants)
-  .superRefine(uniqueVariantNames);
+  .superRefine(uniqueVariantNames)
+  .superRefine(productDiscounts);
 export const getProductSchema = z.object({ id: idSchema });
 export const deleteProductSchema = z.object({ id: idSchema });
 export const reorderProductsSchema = z.object({
@@ -105,9 +147,9 @@ export const loginSchema = z.object({
 });
 export const changePasswordSchema = z.object({
   adminId: z.string().min(1),
-  current: z.string().min(1).max(128),
-  next: z.string().min(8).max(128),
-  confirm: z.string().min(1).max(128),
+  current: z.string().min(1).max(PASSWORD_MAX_LENGTH),
+  next: z.string().min(PASSWORD_MIN_LENGTH).max(PASSWORD_MAX_LENGTH),
+  confirm: z.string().min(1).max(PASSWORD_MAX_LENGTH),
 });
 export const verifySessionSchema = z.object({ token: z.string().min(1).optional() });
 

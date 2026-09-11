@@ -14,7 +14,7 @@ function sampleProduct(): ProductDto {
     badges: ["NEW"],
     sortOrder: 10,
     categoryId: "leaf",
-    variants: [{ id: "v1", name: "کوچک", price: 200_000, sortOrder: 10 }],
+    variants: [{ id: "v1", name: "کوچک", price: 200_000, discountedPrice: null, discountActive: false, isAvailable: true, sortOrder: 10 }],
     media: { id: "media-1", dominantColor: "#123456", width: 800, height: 800 },
   };
 }
@@ -24,6 +24,14 @@ describe("productDtoToUpdateInput", () => {
     const input = productDtoToUpdateInput(sampleProduct(), { isAvailable: false });
     expect(input.mediaId).toBe("media-1");
     expect(input.isAvailable).toBe(false);
-    expect(input.variants).toEqual([{ name: "کوچک", price: 200_000 }]);
+    expect(input.variants).toEqual([
+      {
+        name: "کوچک",
+        price: 200_000,
+        discountedPrice: null,
+        discountActive: false,
+        isAvailable: true,
+      },
+    ]);
   });
 });

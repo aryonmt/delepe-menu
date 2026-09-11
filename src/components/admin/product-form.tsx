@@ -72,7 +72,13 @@ export function ProductForm({ product, onClose }: Props) {
       isAvailable: product?.isAvailable ?? true,
       badges: product?.badges ?? [],
       categoryId: product?.categoryId ?? "",
-      variants: (product?.variants ?? []).map((v) => ({ name: v.name, price: v.price })),
+      variants: (product?.variants ?? []).map((v) => ({
+        name: v.name,
+        price: v.price,
+        discountedPrice: v.discountedPrice ?? undefined,
+        discountActive: v.discountActive,
+        isAvailable: v.isAvailable !== false,
+      })),
     },
   });
 
@@ -81,22 +87,11 @@ export function ProductForm({ product, onClose }: Props) {
   const watchedDescription = values?.description ?? "";
   const watchedPrice = useWatch({ control, name: "price" });
   const watchedDiscountActive = useWatch({ control, name: "discountActive" });
-  const watchedVariants = useWatch({ control, name: "variants" });
-  const variantValues = useMemo(() => watchedVariants ?? [], [watchedVariants]);
-  const hasVariants = variantValues.some((v) => v?.name && v?.price > 0);
 
   const [categoryId, setCategoryId] = useState(product?.categoryId ?? "");
   useEffect(() => {
     setValue("categoryId", categoryId);
   }, [categoryId, setValue]);
-
-  useEffect(() => {
-    if (!hasVariants) return;
-    const prices = variantValues
-      .map((v) => Number(v?.price) || 0)
-      .filter((p) => p > 0);
-    setValue("price", prices.length > 0 ? Math.min(...prices) : undefined);
-  }, [hasVariants, variantValues, setValue]);
 
   const parentCategory = useMemo(
     () =>
@@ -146,7 +141,7 @@ export function ProductForm({ product, onClose }: Props) {
     formData.append("name", data.name);
     if (data.description) formData.append("description", data.description);
     formData.append("categoryId", data.categoryId);
-    if (data.price !== undefined) formData.append("price", String(data.price));
+    formData.append("price", String(data.price));
     if (data.discountedPrice !== undefined && data.discountedPrice !== null) {
       formData.append("discountedPrice", String(data.discountedPrice));
     }
@@ -228,7 +223,6 @@ export function ProductForm({ product, onClose }: Props) {
               parentCategory={parentCategory}
               selectedParent={selectedParent}
               childValue={childValue}
-              hasVariants={hasVariants}
               watchedDescription={watchedDescription}
               watchedPrice={watchedPrice}
               watchedDiscountActive={watchedDiscountActive}

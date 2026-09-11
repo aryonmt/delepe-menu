@@ -21,7 +21,7 @@ const dbAvailable = await databaseReachable();
 function productWrite(
   categoryId: string,
   name: string,
-  variants: ProductWrite["variants"],
+  variants: Array<{ name: string; price: number }>,
 ): ProductWrite {
   return {
     name,
@@ -33,7 +33,12 @@ function productWrite(
     badges: [],
     categoryId,
     mediaId: null,
-    variants,
+    variants: variants.map((variant) => ({
+      ...variant,
+      discountedPrice: null,
+      discountActive: false,
+      isAvailable: true,
+    })),
   };
 }
 

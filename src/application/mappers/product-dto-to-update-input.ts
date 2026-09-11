@@ -23,6 +23,9 @@ export function productDtoToUpdateInput(
     variants: product.variants.map((variant) => ({
       name: variant.name,
       price: variant.price,
+      discountedPrice: variant.discountedPrice,
+      discountActive: variant.discountActive,
+      isAvailable: variant.isAvailable,
     })),
   };
 }

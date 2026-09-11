@@ -3,11 +3,11 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import type { ProductDto } from "@/application/dtos";
-import { formatPrice } from "@/lib/format/price";
-import { toPersianDigits } from "@/lib/format/digits";
 import { strings } from "@/lib/fa/strings";
 import { Badge } from "./badge";
 import { MenuImage } from "./menu-image";
+import { PricedAmount } from "./priced-amount";
+import { VariantTickets } from "./variant-tickets";
 
 type Props = {
   product: ProductDto | null;
@@ -16,22 +16,6 @@ type Props = {
   container?: HTMLElement | null;
 };
 
-function discountView(product: ProductDto) {
-  if (product.variants.length > 0) return null;
-  const discountedPrice = product.discountedPrice;
-  if (
-    !product.discountActive ||
-    discountedPrice === null ||
-    discountedPrice >= product.price
-  ) {
-    return null;
-  }
-  return {
-    effective: discountedPrice,
-    percent: Math.round((1 - discountedPrice / product.price) * 100),
-  };
-}
-
 /**
  * Dish Peek — exploration/viewer only (docs/06 B-05).
  * No cart, tray, ordering, or checkout semantics.
@@ -39,7 +23,6 @@ function discountView(product: ProductDto) {
 export function DishPeek({ product, onClose, container }: Props) {
   const hasVariants = (product?.variants.length ?? 0) > 0;
   const isMuted = product ? !product.isAvailable : false;
-  const discount = product ? discountView(product) : null;
 
   return (
     <Dialog.Root
@@ -123,44 +106,11 @@ export function DishPeek({ product, onClose, container }: Props) {
 
               {hasVariants ? (
                 <div className="border-t border-line pt-3">
-                  <p className="mb-2 text-secondary text-muted-foreground">
-                    {strings.public.fromPrice}{" "}
-                    <span className="font-display text-primary">{formatPrice(product.price)}</span>
-                  </p>
-                  <ul className="space-y-2">
-                    {product.variants.map((variant) => (
-                      <li key={variant.id} className="flex items-baseline justify-between gap-3">
-                        <span className="text-body text-foreground/85">{variant.name}</span>
-                        <span aria-hidden="true" className="flex-1 border-b border-dotted border-line/70" />
-                        <span className="font-display text-[15px] text-primary">
-                          {formatPrice(variant.price)}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                  <VariantTickets variants={product.variants} />
                 </div>
               ) : (
                 <div className="flex flex-wrap items-baseline gap-2 border-t border-line pt-3">
-                  <span className="font-display text-[19px] text-primary">
-                    {discount ? formatPrice(discount.effective) : formatPrice(product.price)}
-                  </span>
-                  {discount && (
-                    <>
-                      <span className="text-secondary text-muted-2 line-through">
-                        {formatPrice(product.price)}
-                      </span>
-                      <span
-                        className="-rotate-3 rounded-stamp px-1.5 py-0.5 text-[10px] font-extrabold shadow-stamp"
-                        style={{
-                          background: "var(--destructive)",
-                          color: "var(--destructive-foreground)",
-                        }}
-                      >
-                        −{toPersianDigits(discount.percent)}
-                        {strings.public.percentSign}
-                      </span>
-                    </>
-                  )}
+                  <PricedAmount unit={product} size="peek" />
                 </div>
               )}
             </>

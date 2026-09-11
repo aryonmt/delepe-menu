@@ -62,20 +62,21 @@ test.describe("public menu", () => {
     }
   });
 
-  test("row 3 — پیتزا مارگاریتا shows از ۵۵۰ هزار تومان and expands variants", async ({
+  test("row 3 — پیتزا مارگاریتا lists variants without a from-price or toggle", async ({
     page,
   }) => {
     await page.goto("/");
     const card = page.getByTestId("product-پیتزا مارگاریتا");
     await card.scrollIntoViewIfNeeded();
-    await expect(card.getByTestId("price")).toHaveText("از ۵۵۰ هزار تومان");
-    await card.getByTestId("variant-toggle").click();
+    await expect(card.getByTestId("variant-toggle")).toHaveCount(0);
+    await expect(card.getByTestId("price")).toHaveCount(0);
     const list = card.getByTestId("variant-list");
     await expect(list).toBeVisible();
     await expect(list).toContainText("سایز کوچک");
     await expect(list).toContainText("۵۵۰ هزار تومان");
     await expect(list).toContainText("سایز بزرگ");
     await expect(list).toContainText("۷۵۰ هزار تومان");
+    await expect(list).not.toContainText("از");
   });
 
   test("row 4 — کوکی متوسط shows discounted price with −۱۷٪ chip", async ({ page }) => {

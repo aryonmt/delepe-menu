@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { effectivePrice } from "@/domain/pricing";
 import { SORT_ORDER_GAP } from "@/lib/constants";
 import { createProductSchema } from "@/application/schemas";
+import { strings } from "@/lib/fa/strings";
 import { createRepos, seedLeafCategory } from "@/application/testing/harness";
 import { CreateProductUseCase } from "./create-product";
 import { ReorderProductsUseCase } from "./reorder-products";
@@ -25,9 +26,23 @@ describe("createProductSchema", () => {
     expect(result.success).toBe(false);
   });
 
+  it("uses Persian copy for an empty name", () => {
+    const result = createProductSchema.safeParse({
+      name: "",
+      price: 10_000,
+      categoryId: "c1",
+    });
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(result.error.issues.some((issue) => issue.message === strings.errors.fields.required)).toBe(
+      true,
+    );
+  });
+
   it("rejects duplicate variant names", () => {
     const result = createProductSchema.safeParse({
       name: "x",
+      price: 10_000,
       categoryId: "c1",
       variants: [
         { name: "بزرگ", price: 10_000 },
@@ -85,7 +100,6 @@ describe("effective display price on a created product", () => {
         price: created.price,
         discountedPrice: created.discountedPrice,
         discountActive: created.discountActive,
-        variantCount: created.variants.length,
       }),
     ).toBe(95_000);
   });

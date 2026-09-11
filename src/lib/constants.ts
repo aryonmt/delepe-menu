@@ -21,6 +21,9 @@ export const ARGON2_PARALLELISM = 1;
 export const LOGIN_RATE_LIMIT_MAX = 5;
 export const LOGIN_RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
 export const LOGIN_FAILURE_DELAY_MS = 300;
+/** Change-password new value (docs/10); current password is 1..128. */
+export const PASSWORD_MIN_LENGTH = 8;
+export const PASSWORD_MAX_LENGTH = 128;
 export const PUBLIC_MENU_CACHE_TAG = "public-menu";
 export const PUBLIC_HTML_S_MAXAGE = 60;
 export const MEDIA_CACHE_MAX_AGE = 31_536_000;
@@ -51,3 +54,11 @@ export const TICKER_LOOP_SECONDS = 40;
 * It NEVER filters, hides, or alters actual menu content.
 */
 export const TICKER_MAX_ITEMS = 16;
+/** Public menu Suspense loader (docs/05 TwinOrbit). */
+export const TWIN_ORBIT_DURATION_MS = 1000;
+/** Minimum TwinOrbit hold so hero/product photos can start (docs/05). */
+export const MENU_BOOT_MIN_MS = 900;
+/** Fail-open if a boot image never settles. */
+export const MENU_BOOT_MAX_MS = 4500;
+/** Sweep across skeleton boxes (docs/05). */
+export const SHIMMER_DURATION_MS = 1400;

@@ -1,12 +1,14 @@
 "use client";
 
+import { useCallback, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import type { ProductDto } from "@/application/dtos";
-import { formatPrice, formatPriceFrom } from "@/lib/format/price";
 import { toPersianDigits } from "@/lib/format/digits";
 import { strings } from "@/lib/fa/strings";
 import { Badge } from "./badge";
+import { ContentReveal } from "./content-reveal";
 import { MenuImage } from "./menu-image";
+import { PricedAmount } from "./priced-amount";
 import { VariantTickets } from "./variant-tickets";
 
 type Props = {
@@ -22,22 +24,6 @@ type Props = {
  * it even when `reveal` is declared outside JSX (no contextual typing).
  */
 const EASE_BRAND: [number, number, number, number] = [0.22, 0.61, 0.36, 1];
-
-function discountView(product: ProductDto) {
-  if (product.variants.length > 0) return null;
-  const discountedPrice = product.discountedPrice;
-  if (
-    !product.discountActive ||
-    discountedPrice === null ||
-    discountedPrice >= product.price
-  ) {
-    return null;
-  }
-  return {
-    effective: discountedPrice,
-    percent: Math.round((1 - discountedPrice / product.price) * 100),
-  };
-}
 
 function MutedStamp() {
   return (
@@ -64,7 +50,8 @@ export function ProductCard({
   const reduceMotion = useReducedMotion();
   const hasVariants = product.variants.length > 0;
   const isMuted = !product.isAvailable;
-  const discount = discountView(product);
+  const [imageReady, setImageReady] = useState(!product.media);
+  const onImageReady = useCallback(() => setImageReady(true), []);
 
   const openPeek = () => onOpenPeek(product);
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -89,37 +76,10 @@ export function ProductCard({
   );
 
   const priceBlock = hasVariants ? (
-    <VariantTickets
-      variants={product.variants}
-      minPriceLabel={formatPriceFrom(product.price)}
-      disabled={isMuted}
-    />
+    <VariantTickets variants={product.variants} />
   ) : (
     <div className="flex flex-wrap items-baseline gap-2">
-      <span className="font-display text-[17px] text-primary" data-testid="price">
-        {discount ? formatPrice(discount.effective) : formatPrice(product.price)}
-      </span>
-      {discount && (
-        <>
-          <span
-            className="text-secondary text-muted-2 line-through"
-            data-testid="price-original"
-          >
-            {formatPrice(product.price)}
-          </span>
-          <span
-            className="-rotate-3 rounded-stamp px-1.5 py-0.5 text-[10px] font-extrabold shadow-stamp"
-            style={{
-              background: "var(--destructive)",
-              color: "var(--destructive-foreground)",
-            }}
-            data-testid="discount-chip"
-          >
-            −{toPersianDigits(discount.percent)}
-            {strings.public.percentSign}
-          </span>
-        </>
-      )}
+      <PricedAmount unit={product} />
     </div>
   );
 
@@ -146,6 +106,7 @@ export function ProductCard({
 
   if (tier === "signature") {
     return (
+      <ContentReveal ready={imageReady}>
       <motion.article
         {...sharedProps}
         {...reveal}
@@ -161,6 +122,7 @@ export function ProductCard({
             fill
             sizes="(max-width: 768px) 100vw, 640px"
             objectPosition="50% 40%"
+            onReady={onImageReady}
           />
           {isMuted && <MutedStamp />}
         </div>
@@ -177,15 +139,17 @@ export function ProductCard({
           <div className="mt-2">{priceBlock}</div>
         </div>
       </motion.article>
+      </ContentReveal>
     );
   }
 
   return (
+    <ContentReveal ready={imageReady}>
     <motion.article
       {...sharedProps}
       {...reveal}
       whileTap={{ scale: 0.98 }}
-      className="group relative flex cursor-pointer items-center gap-3 rounded-card border border-line bg-gradient-to-b from-card to-card-2 p-3 shadow-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="group relative flex cursor-pointer items-start gap-3 rounded-card border border-line bg-gradient-to-b from-card to-card-2 p-3 shadow-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <div className="flex min-w-0 flex-1 flex-col justify-between self-stretch py-0.5">
         <div>
@@ -201,7 +165,7 @@ export function ProductCard({
         </div>
         <div className="mt-2">{priceBlock}</div>
       </div>
-      <div className="relative w-[42%] shrink-0 self-center">
+      <div className="relative w-[42%] shrink-0 self-start">
         <div className="relative aspect-square w-full overflow-hidden rounded-image">
           <MenuImage
             media={product.media}
@@ -210,10 +174,12 @@ export function ProductCard({
             muted={isMuted}
             fill
             sizes="(max-width: 768px) 160px, 200px"
+            onReady={onImageReady}
           />
         </div>
         {isMuted && <MutedStamp />}
       </div>
-    </motion.article>
+      </motion.article>
+    </ContentReveal>
   );
 }

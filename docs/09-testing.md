@@ -28,8 +28,8 @@ development loop.
   them, empty categories pruned, settings passthrough.
 - Every use-case: happy path + each BR it owns
   (e.g. `DeleteCategoryUseCase` → `CategoryNotEmptyError` with products/children;
-  `CreateProductUseCase` → BR-13 auto-price from variants, BR-14 discount
-  rejection with variants, BR-15 non-leaf rejection).
+  `CreateProductUseCase` → BR-13 owner-entered base price, BR-14 per-unit
+  discount on product and variants, BR-15 non-leaf rejection).
 - Zod schemas: boundary cases (discount ≥ price, name lengths, price limits).
 - Colocation: `src/**/*.test.ts` next to source. Fakes in `src/domain/testing/`.
 
@@ -72,9 +72,9 @@ Critical specs:
 
 | Spec | Covers |
 | --- | --- |
-| `public-menu.spec` | Load, hero, tabs scrollspy, chips filter, variants expand («از …» on مارگاریتا), discount UI (−۱۷٪ کوکی), badges, MUTED grayscale + HIDE absence, empty/error states |
+| `public-menu.spec` | Load, hero, tabs scrollspy, chips filter, always-visible variant tickets (مارگاریتا sizes), discount UI (−۱۷٪ کوکی), badges, MUTED grayscale + HIDE absence, empty/error states |
 | `auth.spec` | Login success/failure (generic Persian error), logout, change password, redirect rules (`/admin` → products; authed `/login` → products), **rate limit: 5 fails → 6th attempt returns `RATE_LIMITED` + «تعداد تلاش‌ها بیش از حد مجاز است؛ ۱۵ دقیقه دیگر تلاش کنید»** |
-| `admin-products.spec` | Create with upload (fixture image), edit, discount validation, availability switch (optimistic + revert on failure), delete confirm, product-row dnd absent (order lives on categories), Persian-digit price input, variant auto-price (BR-13), discount hidden with variants (BR-14) |
+| `admin-products.spec` | Create with upload (fixture image), edit, discount validation, availability switch (optimistic + revert on failure), delete confirm, product-row dnd absent (order lives on categories), Persian-digit price input, base price stays editable with variants (BR-13), discount available on product and variants (BR-14) |
 | `admin-categories.spec` | Create child (depth guard BR-01), child-under-product-owner guard (BR-16), delete guard toast (BR-02), reorder |
 | `settings-preview.spec` | Preview reflects the single «پاتوق» identity for both draft and saved state (no public theme switcher exists; the legacy 4-theme system is retired per ADR-12); settings mutations (restaurant name, unavailable mode) reflected in the phone preview and, after save, on the public menu; draft reset button; drawer cancel leaves preview unchanged |
 | `a11y.spec` | axe-core scan of `/`, `/login`, `/admin/products` — zero critical violations |

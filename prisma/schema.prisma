@@ -64,12 +64,15 @@ model Product {
 }
 
 model ProductVariant {
-  id        String  @id @default(cuid())
-  productId String
-  name      String
-  price     Int
-  sortOrder Int
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id               String  @id @default(cuid())
+  productId        String
+  name             String
+  price            Int
+  discountedPrice  Int?
+  discountActive   Boolean @default(false)
+  isAvailable      Boolean @default(true)
+  sortOrder        Int
+  product          Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   @@unique([productId, name])
   @@index([productId, sortOrder])
 }

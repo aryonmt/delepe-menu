@@ -6,8 +6,8 @@ import type {
 } from "@/application/dtos";
 
 /**
- * Pure BR-08 mapper: HIDE drops unavailable products; MUTED keeps them;
- * categories with zero remaining visible products are pruned.
+ * Pure BR-08 mapper: HIDE drops unavailable products and unavailable variants;
+ * MUTED keeps both; categories with zero remaining visible products are pruned.
  * Never mutates `input`.
  */
 export function toPublicMenu(input: AdminMenuDto): PublicMenuDto {
@@ -41,7 +41,7 @@ function filterCategory(
     name: category.name,
     parentId: category.parentId,
     sortOrder: category.sortOrder,
-    products: visible.map(cloneProduct),
+    products: visible.map((product) => cloneProduct(product, hideUnavailable)),
     children,
   };
 }
@@ -53,11 +53,13 @@ function hasVisibleProducts(category: CategoryDto): boolean {
   );
 }
 
-function cloneProduct(product: ProductDto): ProductDto {
+function cloneProduct(product: ProductDto, hideUnavailable: boolean): ProductDto {
   return {
     ...product,
     badges: [...product.badges],
-    variants: product.variants.map((variant) => ({ ...variant })),
+    variants: product.variants
+      .filter((variant) => !hideUnavailable || variant.isAvailable !== false)
+      .map((variant) => ({ ...variant })),
     media: product.media ? { ...product.media } : null,
   };
 }

@@ -172,35 +172,36 @@ export function CategoryTree() {
                 >
                   <ul className="space-y-2">
                     {category.children.map((child, childIndex) => (
-                      <CategoryRow
-                        key={child.id}
-                        category={child}
-                        depth={1}
-                        onEdit={(c) => setDialog({ mode: "edit", category: c })}
-                        onDelete={(c) => void requestDelete(c)}
-                        onMoveUp={
-                          childIndex > 0
-                            ? () => {
-                                const childIds = category.children.map((item) => item.id);
-                                const overId = childIds[childIndex - 1];
-                                if (overId) {
-                                  applyReorder(category.id, childIds, child.id, overId);
+                      <li key={child.id}>
+                        <CategoryRow
+                          category={child}
+                          depth={1}
+                          onEdit={(c) => setDialog({ mode: "edit", category: c })}
+                          onDelete={(c) => void requestDelete(c)}
+                          onMoveUp={
+                            childIndex > 0
+                              ? () => {
+                                  const childIds = category.children.map((item) => item.id);
+                                  const overId = childIds[childIndex - 1];
+                                  if (overId) {
+                                    applyReorder(category.id, childIds, child.id, overId);
+                                  }
                                 }
-                              }
-                            : undefined
-                        }
-                        onMoveDown={
-                          childIndex < category.children.length - 1
-                            ? () => {
-                                const childIds = category.children.map((item) => item.id);
-                                const overId = childIds[childIndex + 1];
-                                if (overId) {
-                                  applyReorder(category.id, childIds, child.id, overId);
+                              : undefined
+                          }
+                          onMoveDown={
+                            childIndex < category.children.length - 1
+                              ? () => {
+                                  const childIds = category.children.map((item) => item.id);
+                                  const overId = childIds[childIndex + 1];
+                                  if (overId) {
+                                    applyReorder(category.id, childIds, child.id, overId);
+                                  }
                                 }
-                              }
-                            : undefined
-                        }
-                      />
+                              : undefined
+                          }
+                        />
+                      </li>
                     ))}
                   </ul>
                 </SortableContext>

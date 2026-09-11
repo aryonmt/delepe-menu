@@ -1,6 +1,5 @@
 import {
   closestCenter,
-  pointerWithin,
   type CollisionDetection,
   type KeyboardCoordinateGetter,
 } from "@dnd-kit/core";
@@ -10,17 +9,20 @@ function sameLevelIds(topIds: Set<string>, id: string, activeIsTop: boolean): bo
   return topIds.has(id) === activeIsTop;
 }
 
-/** Keep top-level and child rows from stealing each other's drops. */
+/**
+ * Same-level drops only. Ignore the active row: without a DragOverlay it
+ * translates under the pointer, so pointerWithin would always "hit" itself
+ * and reorder would never commit.
+ */
 export function createCategoryCollision(topIds: string[]): CollisionDetection {
   const top = new Set(topIds);
   return (args) => {
-    const pointerHits = pointerWithin(args);
-    const base = pointerHits.length > 0 ? pointerHits : closestCenter(args);
-    const activeIsTop = top.has(String(args.active.id));
-    const filtered = base.filter((hit) =>
-      sameLevelIds(top, String(hit.id), activeIsTop),
-    );
-    return filtered.length > 0 ? filtered : base;
+    const activeId = String(args.active.id);
+    const activeIsTop = top.has(activeId);
+    return closestCenter(args).filter((hit) => {
+      const id = String(hit.id);
+      return id !== activeId && sameLevelIds(top, id, activeIsTop);
+    });
   };
 }
 

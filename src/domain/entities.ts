@@ -25,6 +25,9 @@ export type ProductVariant = {
   productId: string;
   name: string;
   price: number;
+  discountedPrice: number | null;
+  discountActive: boolean;
+  isAvailable: boolean;
   sortOrder: number;
 };
 export type Product = {
@@ -63,7 +66,13 @@ export type Settings = {
   /** Admin-curated hero ticker order; empty = automatic chapter-order fill. */
   tickerProductIds: string[];
 };
-export type VariantWrite = { name: string; price: number };
+export type VariantWrite = {
+  name: string;
+  price: number;
+  discountedPrice: number | null;
+  discountActive: boolean;
+  isAvailable: boolean;
+};
 export type ProductWrite = {
   name: string;
   description: string | null;

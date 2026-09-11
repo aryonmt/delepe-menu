@@ -11,6 +11,9 @@ export type VariantDto = {
   id: string;
   name: string;
   price: number;
+  discountedPrice: number | null;
+  discountActive: boolean;
+  isAvailable: boolean;
   sortOrder: number;
 };
 export type ProductDto = {

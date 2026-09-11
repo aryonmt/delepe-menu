@@ -32,8 +32,25 @@ export async function assertUniqueProductName(
   }
 }
 
+function assertDiscount(
+  price: number,
+  discountedPrice: number | null,
+  discountActive: boolean,
+): void {
+  if (discountedPrice !== null && discountedPrice >= price) {
+    throw new ValidationError("INVALID_DISCOUNT");
+  }
+  if (discountActive && discountedPrice === null) {
+    throw new ValidationError("INVALID_DISCOUNT");
+  }
+  if (discountedPrice !== null && discountedPrice < PRICE_MIN_TOMAN) {
+    throw new ValidationError("INVALID_DISCOUNT");
+  }
+}
+
 /**
- * BR-13 auto min-price, BR-14 no discount with variants, BR-04 discount bounds.
+ * BR-13: owner-entered base price is kept.
+ * BR-14: base and each variant may have their own discount (BR-04 bounds).
  */
 export function resolveProductWrite(
   input: CreateProductInput | UpdateProductInput,
@@ -43,58 +60,32 @@ export function resolveProductWrite(
   if (new Set(names).size !== names.length) {
     throw new ValidationError("DUPLICATE_NAME");
   }
-  if (variants.length > 0) {
-    const hasDiscount =
-      input.discountActive === true || input.discountedPrice != null;
-    if (hasDiscount) {
-      throw new ValidationError("DISCOUNT_WITH_VARIANTS");
-    }
-    const price = Math.min(...variants.map((variant) => variant.price));
-    return toWrite(input, price, null, false);
-  }
-
   const price = input.price;
-  if (price === undefined) {
-    throw new ValidationError("VALIDATION");
-  }
   const discountedPrice = input.discountedPrice ?? null;
-  if (discountedPrice !== null && discountedPrice >= price) {
-    throw new ValidationError("INVALID_DISCOUNT");
+  assertDiscount(price, discountedPrice, input.discountActive);
+  for (const variant of variants) {
+    assertDiscount(
+      variant.price,
+      variant.discountedPrice ?? null,
+      variant.discountActive,
+    );
   }
-  if (input.discountActive && discountedPrice === null) {
-    throw new ValidationError("INVALID_DISCOUNT");
-  }
-  if (discountedPrice !== null && discountedPrice < PRICE_MIN_TOMAN) {
-    throw new ValidationError("INVALID_DISCOUNT");
-  }
-  return toWrite(input, price, discountedPrice, input.discountActive);
-}
-
-function toWrite(
-  input: CreateProductInput | UpdateProductInput,
-  price: number,
-  discountedPrice: number | null,
-  discountActive: boolean,
-): ProductWrite {
   return {
     name: input.name,
     description: input.description ?? null,
     price,
     discountedPrice,
-    discountActive,
+    discountActive: input.discountActive,
     isAvailable: input.isAvailable,
     badges: [...input.badges],
     categoryId: input.categoryId,
     mediaId: input.mediaId ?? null,
-    variants: variantsOf(input),
+    variants: variants.map((variant) => ({
+      name: variant.name,
+      price: variant.price,
+      discountedPrice: variant.discountedPrice ?? null,
+      discountActive: variant.discountActive,
+      isAvailable: variant.isAvailable ?? true,
+    })),
   };
-}
-
-function variantsOf(
-  input: CreateProductInput | UpdateProductInput,
-): ProductWrite["variants"] {
-  return input.variants.map((variant) => ({
-    name: variant.name,
-    price: variant.price,
-  }));
 }

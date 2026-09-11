@@ -197,7 +197,7 @@ Constraints:
 - Every animation transform/opacity only, durations from docs/05 tokens;
   prefers-reduced-motion disables all of them.
 - Enable the previously fixme'd public-menu.spec rows 3–6 and make them pass
-  (مارگاریتا «از ۵۵۰ هزار تومان», کوکی متوسط −۱۷٪ chip, HIDE/MUTED switch).
+  (مارگاریتا size tickets always visible, کوکی متوسط −۱۷٪ chip, HIDE/MUTED switch).
 
 Tests: public-menu.spec full green; a11y.spec (axe) zero critical violations;
 Lighthouse ≥ 90 mobile on /.

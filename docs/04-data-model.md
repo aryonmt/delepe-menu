@@ -29,7 +29,7 @@ model Product {
   id              String            @id @default(cuid())
   name            String
   description     String?
-  price           Int               // integer TOMAN; auto = min(variants) when variants exist (BR-13)
+  price           Int               // integer TOMAN; always owner-entered (BR-13)
   discountedPrice Int?
   discountActive  Boolean           @default(false)
   isAvailable     Boolean           @default(true)
@@ -48,12 +48,15 @@ model Product {
 }
 
 model ProductVariant {
-  id        String  @id @default(cuid())
-  productId String
-  name      String
-  price     Int
-  sortOrder Int
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id               String  @id @default(cuid())
+  productId        String
+  name             String
+  price            Int
+  discountedPrice  Int?
+  discountActive   Boolean @default(false)
+  isAvailable      Boolean @default(true)
+  sortOrder        Int
+  product          Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([productId, name])
   @@index([productId, sortOrder])
@@ -101,17 +104,17 @@ model AdminUser {
 | BR-01 | Category depth ≤ 2. Creating a child under a category that already has a parent → `ValidationError` |
 | BR-02 | Deleting a category with products or children → `CategoryNotEmptyError` (UI: Persian toast, no confirm shown) |
 | BR-03 | Deleting a product is a hard delete after confirm dialog; its Media row + the original (whichever of jpg/png/webp exists) + the three pre-generated WebP variants are deleted after the DB transaction succeeds |
-| BR-04 | `discountedPrice` must be ≥ 1000 and < `price` |
-| BR-05 | Effective price = `discountActive && discountedPrice ? discountedPrice : price` (variants never discounted, BR-14) |
-| BR-06 | When variants exist, the public card shows «از » + `formatPrice(price)` where `price` = min(variant prices) per BR-13, plus an expand chevron |
+| BR-04 | `discountedPrice` must be ≥ 1000 and < the unit’s own `price` (product or variant) |
+| BR-05 | Effective unit price = `discountActive && discountedPrice ? discountedPrice : price` (product and each variant independently) |
+| BR-06 | When variants exist, the public card and Dish Peek list every visible variant (name + own effective price) by default. No «از » summary and no expand control. Base `price` is not shown as a stand-in for variant prices |
 | BR-07 | Reorder commands receive an ordered id array; persistence writes 10/20/30… gaps |
-| BR-08 | Public menu hides categories with zero visible products. `HIDE` removes unavailable products server-side; `MUTED` renders them grayscale + «امروز تموم شد» |
+| BR-08 | Public menu hides categories with zero visible products. `HIDE` removes unavailable products and unavailable variants server-side; `MUTED` keeps them and stamps «امروز تموم شد» on the product and/or the variant row |
 | BR-09 | Product name unique per category; category name unique per parent — **enforced in use-cases** (see schema note) |
 | BR-10 | Settings is a singleton (id = 1), always upserted |
 | BR-11 | Upload: JPG/PNG/WebP by magic bytes, ≤ 5MB, 1:1 ratio enforced (±2% tolerance server-side) |
 | BR-12 | Prices: integer tomans, **1,000 ≤ p ≤ 100,000,000** |
-| BR-13 | Products with ≥ 1 variant: `price` is system-maintained = `min(variant prices)`, recomputed by use-cases on every variant add/update/remove/reorder. The form disables manual price input when variants exist. Products without variants: `price` is manual |
-| BR-14 | Discount (`discountedPrice`/`discountActive`) is allowed only when `variants.length === 0`. Use-cases reject otherwise; the form hides the discount section when variants exist |
+| BR-13 | `price` is always the owner-entered base price (required). Variant prices are independent and may be higher or lower than the base. Use-cases never overwrite `price` from variants |
+| BR-14 | Discount is allowed on the product and on each variant independently (`discountedPrice` / `discountActive` per unit). BR-04 applies to every unit |
 | BR-15 | Products belong to **leaf** categories only. CreateProduct/UpdateProduct reject a `categoryId` whose category has children → `ValidationError` |
 | BR-16 | Creating a child under a category that directly owns products → `ValidationError` («ابتدا محصولات این دسته را منتقل کنید») — prevents invisible products |
 
@@ -121,10 +124,14 @@ All DTOs are plain TS types in `application/dtos.ts`. Prisma types never leak.
 
 ```ts
 type MediaDto = { id: string; dominantColor: string; width: number; height: number };
-type VariantDto = { id: string; name: string; price: number; sortOrder: number };
+type VariantDto = {
+  id: string; name: string; price: number;
+  discountedPrice: number | null; discountActive: boolean;
+  isAvailable: boolean; sortOrder: number;
+};
 type ProductDto = {
   id: string; name: string; description: string | null;
-  price: number;                    // final base price (BR-13 applied)
+  price: number;                    // owner-entered base (BR-13)
   discountedPrice: number | null; discountActive: boolean;
   isAvailable: boolean; badges: BadgeKind[]; sortOrder: number;
   categoryId: string; variants: VariantDto[]; media: MediaDto | null;
@@ -177,13 +184,13 @@ restaurantName, theme, unavailableMode, tickerProductIds? (ordered ids; omitted 
 | UpdateCategory | same + id |
 | DeleteCategory | id; guard BR-02 |
 | ReorderCategories | `{ orderedIds: string[], parentId: string \| null }` |
-| CreateProduct | name 1..120, description ≤ 500 optional, price BR-12 (ignored when variants present, BR-13), discount BR-04 + BR-14, badges array, categoryId (leaf, BR-15), mediaId optional, variants[] (name 1..40, price BR-12) |
+| CreateProduct | name 1..120, description ≤ 500 optional, price BR-12 (always required, BR-13), discount BR-04 + BR-14 (product + each variant), badges array, categoryId (leaf, BR-15), mediaId optional, variants[] (name 1..40, price BR-12, optional per-variant discount) |
 | UpdateProduct | same + id; replacing image deletes old media after success |
 | DeleteProduct | id; BR-03 |
 | ReorderProducts | `{ orderedIds: string[], categoryId }` |
 | UpdateSettings | restaurantName 1..80, theme enum, unavailableMode enum |
 | Login | username 1..40, password 1..128 |
-| ChangePassword | current, next ≥ 8 chars |
+| ChangePassword | current 1..128, next 8..128, matching confirm |
 
 All numeric inputs arrive as strings that may contain Persian digits; the form
 layer normalizes via `lib/format/digits.ts` before Zod parses (doc 03 conventions).
@@ -198,7 +205,7 @@ Algorithm (Persian digits, «تومان»). Precondition: `1_000 ≤ p ≤ 100_0
    `T == 0 ? "{M} میلیون تومان" : "{M} میلیون و {T} هزار تومان"`
 3. Else if `rem == 0` → `"{thousands} هزار تومان"`
 4. Else → `"{thousands}٫{d} هزار تومان"` where `d = trim(rem/1000, max 2 decimals)`
-5. Variant prefix: `"از "` + result.
+   Variant products list each ticket price with this formatter; they do not prefix «از ».
 
 Unit-test exactly these cases (golden table):
 

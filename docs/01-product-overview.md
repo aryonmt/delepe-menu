@@ -32,9 +32,9 @@ Single-tenant digital menu + owner admin panel. **No ordering, no cart, no payme
 
 - Public menu: bottom dock (mobile) / top spine (desktop) + scrollspy, chapters with
   scroll, two-tier product cards (signature + standard), one image per product,
-  variants (e.g. pizza sizes) with «از …» pricing + expandable ticket list,
-  discount (discounted price + active flag, products without variants only),
-  predefined badges, unavailable mode (global: hide OR grayscale + stamp),
+  variants (e.g. pizza sizes) listed on the card by default (no «از …», no expand control),
+  discount (product and/or per-variant),
+  predefined badges, unavailable mode (global: hide OR grayscale + stamp; variants have their own `isAvailable`),
   Dish Peek non-transactional dish viewer, single art-directed «پاتوق» identity
   (doc 05), RTL Persian.
 - Admin: username/password login, change password, categories CRUD (2 levels,
@@ -63,9 +63,9 @@ audit log, trash/restore, multiple admin roles (single role only).
 | Category | Menu section; exactly 2 levels (parent → children). Only **leaf** categories own products (BR-15) |
 | Leaf category | A category with no children. Products are assigned to leaves only |
 | Product | A menu item with name, description (ingredients), price, one image |
-| Variant | A size/option of a product with its own absolute price (e.g. pizza small/large). When variants exist, product price = min(variant prices), auto-maintained (BR-13) |
+| Variant | A size/option of a product with its own absolute price (may be higher or lower than the product’s required base price). Each variant may also carry its own discount (BR-13, BR-14) |
 | Badge | Predefined label: popular / new / spicy / vegetarian |
-| Discount | Optional discounted price + active toggle; allowed only on products **without** variants (BR-14) |
+| Discount | Optional discounted price + active toggle on the **product** and independently on **each variant** (BR-14); each unit must satisfy BR-04 |
 | Visual identity | Single «پاتوق» identity applied via CSS variables (doc 05); the legacy `ThemeName` field persists in the data model but is visually inert (ADR-12) |
 | Unavailable mode | Global setting: `HIDE` or `MUTED` (grayscale + «امروز تموم شد» stamp) |
 | Draft state | Unsaved admin edits held in the client draft store, shown live in the phone-frame preview |

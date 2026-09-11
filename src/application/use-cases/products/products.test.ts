@@ -46,11 +46,11 @@ describe("CreateProductUseCase", () => {
       }),
     ).rejects.toSatisfy(
       (error: unknown) =>
-        error instanceof ValidationError && error.code === "INVALID_DISCOUNT",
+        error instanceof ValidationError && error.code === "VALIDATION",
     );
   });
 
-  it("sets price to min(variant prices) when variants exist (BR-13)", async () => {
+  it("keeps the owner-entered base price when variants exist (BR-13)", async () => {
     const repos = createRepos();
     const { leaf } = await seedLeafCategory(repos, "پیتزا");
     const created = await new CreateProductUseCase(
@@ -58,14 +58,14 @@ describe("CreateProductUseCase", () => {
       repos.categories,
     ).execute({
       name: "مارگاریتا",
-      price: 999_000,
+      price: 600_000,
       categoryId: leaf.id,
       variants: [
         { name: "بزرگ", price: 750_000 },
         { name: "کوچک", price: 550_000 },
       ],
     });
-    expect(created.price).toBe(550_000);
+    expect(created.price).toBe(600_000);
     expect(created.variants).toHaveLength(2);
   });
 
@@ -75,6 +75,7 @@ describe("CreateProductUseCase", () => {
     await expect(
       new CreateProductUseCase(repos.products, repos.categories).execute({
         name: "برگر",
+        price: 200_000,
         categoryId: leaf.id,
         variants: [
           { name: "سایز بزرگ", price: 200_000 },
@@ -87,30 +88,57 @@ describe("CreateProductUseCase", () => {
     );
   });
 
-  it("rejects discount on product with variants (BR-14)", async () => {
+  it("allows product discount together with per-variant discount (BR-14)", async () => {
     const repos = createRepos();
     const { leaf } = await seedLeafCategory(repos);
-    await expect(
-      new CreateProductUseCase(repos.products, repos.categories).execute({
-        name: "پیتزا",
-        categoryId: leaf.id,
-        discountActive: true,
-        discountedPrice: 100_000,
-        variants: [
-          { name: "کوچک", price: 550_000 },
-          { name: "بزرگ", price: 750_000 },
-        ],
-      }),
-    ).rejects.toSatisfy(
-      (error: unknown) =>
-        error instanceof ValidationError &&
-        error.code === "DISCOUNT_WITH_VARIANTS",
-    );
+    const created = await new CreateProductUseCase(
+      repos.products,
+      repos.categories,
+    ).execute({
+      name: "پیتزا",
+      price: 600_000,
+      categoryId: leaf.id,
+      discountActive: true,
+      discountedPrice: 520_000,
+      variants: [
+        {
+          name: "کوچک",
+          price: 550_000,
+          discountActive: true,
+          discountedPrice: 480_000,
+        },
+        { name: "بزرگ", price: 750_000 },
+      ],
+    });
+    expect(created.discountActive).toBe(true);
+    expect(created.discountedPrice).toBe(520_000);
+    expect(created.variants[0]?.discountedPrice).toBe(480_000);
+    expect(created.variants[1]?.discountActive).toBe(false);
+  });
+
+  it("persists per-variant availability independently of the product", async () => {
+    const repos = createRepos();
+    const { leaf } = await seedLeafCategory(repos);
+    const created = await new CreateProductUseCase(
+      repos.products,
+      repos.categories,
+    ).execute({
+      name: "پیتزا",
+      price: 600_000,
+      categoryId: leaf.id,
+      variants: [
+        { name: "کوچک", price: 550_000, isAvailable: true },
+        { name: "بزرگ", price: 750_000, isAvailable: false },
+      ],
+    });
+    expect(created.isAvailable).toBe(true);
+    expect(created.variants[0]?.isAvailable).toBe(true);
+    expect(created.variants[1]?.isAvailable).toBe(false);
   });
 });
 
 describe("UpdateProductUseCase", () => {
-  it("recomputes base price when a variant is removed (BR-13)", async () => {
+  it("does not overwrite base price when a variant is removed (BR-13)", async () => {
     const repos = createRepos();
     const { leaf } = await seedLeafCategory(repos);
     const create = new CreateProductUseCase(repos.products, repos.categories);
@@ -122,6 +150,7 @@ describe("UpdateProductUseCase", () => {
     );
     const created = await create.execute({
       name: "پیتزا",
+      price: 600_000,
       categoryId: leaf.id,
       variants: [
         { name: "کوچک", price: 550_000 },
@@ -131,10 +160,12 @@ describe("UpdateProductUseCase", () => {
     const updated = await update.execute({
       id: created.id,
       name: "پیتزا",
+      price: 600_000,
       categoryId: leaf.id,
       variants: [{ name: "بزرگ", price: 750_000 }],
     });
-    expect(updated.price).toBe(750_000);
+    expect(updated.price).toBe(600_000);
+    expect(updated.variants).toHaveLength(1);
   });
 
   it("deletes the previous media after a successful image replace", async () => {

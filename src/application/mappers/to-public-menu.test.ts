@@ -164,7 +164,7 @@ describe("toPublicMenu", () => {
     expect(toPublicMenu(input).settings).not.toBe(input.settings);
   });
 
-  it("keeps variants so the card can show from-price (BR-06)", () => {
+  it("keeps variants on the public card without a from-price (BR-06)", () => {
     const input = adminMenu("MUTED", [
       {
         id: "pizza",
@@ -178,8 +178,8 @@ describe("toPublicMenu", () => {
             name: "مارگاریتا",
             price: 550_000,
             variants: [
-              { id: "s", name: "کوچک", price: 550_000, sortOrder: 10 },
-              { id: "l", name: "بزرگ", price: 750_000, sortOrder: 20 },
+              { id: "s", name: "کوچک", price: 550_000, discountedPrice: null, discountActive: false, isAvailable: true, sortOrder: 10 },
+              { id: "l", name: "بزرگ", price: 750_000, discountedPrice: null, discountActive: false, isAvailable: true, sortOrder: 20 },
             ],
           }),
         ],
@@ -188,6 +188,48 @@ describe("toPublicMenu", () => {
     const card = toPublicMenu(input).categories[0]?.products[0];
     expect(card?.variants).toHaveLength(2);
     expect(card?.price).toBe(550_000);
+  });
+
+  it("drops unavailable variants when mode is HIDE (BR-08)", () => {
+    const pizza = product({
+      id: "m",
+      name: "مارگاریتا",
+      price: 600_000,
+      variants: [
+        {
+          id: "s",
+          name: "کوچک",
+          price: 550_000,
+          discountedPrice: null,
+          discountActive: false,
+          isAvailable: true,
+          sortOrder: 10,
+        },
+        {
+          id: "l",
+          name: "بزرگ",
+          price: 750_000,
+          discountedPrice: null,
+          discountActive: false,
+          isAvailable: false,
+          sortOrder: 20,
+        },
+      ],
+    });
+    const categories: AdminMenuDto["categories"] = [
+      {
+        id: "pizza",
+        name: "پیتزا",
+        parentId: null,
+        sortOrder: 10,
+        children: [],
+        products: [pizza],
+      },
+    ];
+    const hidden = toPublicMenu(adminMenu("HIDE", categories)).categories[0]?.products[0];
+    expect(hidden?.variants.map((variant) => variant.name)).toEqual(["کوچک"]);
+    const muted = toPublicMenu(adminMenu("MUTED", categories)).categories[0]?.products[0];
+    expect(muted?.variants).toHaveLength(2);
   });
 
   it("does not mutate the admin input", () => {

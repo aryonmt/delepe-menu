@@ -20,13 +20,26 @@ async function requireAdmin(): Promise<void> {
 }
 
 function parseProductForm(formData: FormData) {
-  const variants = formData
-    .getAll("variants")
-    .map((raw) => JSON.parse(String(raw)) as { name: string; price: number });
+  const variants = formData.getAll("variants").map((raw) => {
+    const parsed = JSON.parse(String(raw)) as {
+      name: string;
+      price: number;
+      discountedPrice?: number | null;
+      discountActive?: boolean;
+      isAvailable?: boolean;
+    };
+    return {
+      name: parsed.name,
+      price: parsed.price,
+      discountedPrice: parsed.discountedPrice ?? null,
+      discountActive: Boolean(parsed.discountActive),
+      isAvailable: parsed.isAvailable ?? true,
+    };
+  });
   return {
     name: String(formData.get("name") ?? ""),
     description: String(formData.get("description") ?? "") || null,
-    price: formData.get("price") ? Number(formData.get("price")) : undefined,
+    price: Number(formData.get("price")),
     discountedPrice: formData.get("discountedPrice")
       ? Number(formData.get("discountedPrice"))
       : null,

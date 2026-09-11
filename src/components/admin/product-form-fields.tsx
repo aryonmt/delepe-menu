@@ -1,7 +1,7 @@
 "use client";
 import type { Control, FieldErrors, UseFormRegister, UseFormSetValue } from "react-hook-form";
 import { Controller, useWatch, type UseFieldArrayReturn } from "react-hook-form";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import type { CategoryDto } from "@/application/dtos";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,7 @@ import { formatPrice } from "@/lib/format/price";
 import { strings } from "@/lib/fa/strings";
 import type { FormInput, FormOutput } from "./product-form-draft";
 import { parseDigitInput } from "./product-form-draft";
+import { ProductVariantFields } from "./product-variant-fields";
 
 const BADGES = ["POPULAR", "NEW", "SPICY", "VEGETARIAN"] as const;
 
@@ -35,7 +36,6 @@ type Props = {
   parentCategory: CategoryDto | null;
   selectedParent: CategoryDto | null;
   childValue: string;
-  hasVariants: boolean;
   watchedDescription: string;
   watchedPrice: unknown;
   watchedDiscountActive: boolean | undefined;
@@ -54,12 +54,12 @@ export function ProductFormFields({
   parentCategory,
   selectedParent,
   childValue,
-  hasVariants,
   watchedDescription,
   watchedPrice,
   watchedDiscountActive,
 }: Props) {
   const badges = useWatch({ control, name: "badges" }) ?? [];
+  const variantRows = useWatch({ control, name: "variants" }) ?? [];
 
   const toggleBadge = (badge: (typeof BADGES)[number]) => {
     const next = badges.includes(badge)
@@ -134,19 +134,11 @@ export function ProductFormFields({
         <p className="text-xs text-destructive">{errors.categoryId.message as string}</p>
       )}
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="pf-price">{strings.admin.price}</Label>
-          {hasVariants && (
-            <span className="text-xs text-muted-foreground">
-              {strings.admin.systemMaintainedPrice}
-            </span>
-          )}
-        </div>
+        <Label htmlFor="pf-price">{strings.admin.price}</Label>
         <Input
           id="pf-price"
           type="text"
           inputMode="numeric"
-          disabled={hasVariants}
           {...register("price", { setValueAs: parseDigitInput })}
         />
         {typeof watchedPrice === "number" && watchedPrice > 0 && (
@@ -156,40 +148,38 @@ export function ProductFormFields({
           <p className="text-xs text-destructive">{errors.price.message as string}</p>
         )}
       </div>
-      {!hasVariants && (
-        <div className="space-y-3 rounded-lg border border-border p-3">
-          <div className="flex items-center gap-2">
-            <Controller
-              name="discountActive"
-              control={control}
-              render={({ field }) => (
-                <Switch
-                  id="pf-discount-active"
-                  checked={Boolean(field.value)}
-                  onCheckedChange={field.onChange}
-                />
-              )}
-            />
-            <Label htmlFor="pf-discount-active">{strings.admin.discountActive}</Label>
-          </div>
-          {watchedDiscountActive && (
-            <div className="space-y-2">
-              <Label htmlFor="pf-discounted-price">{strings.admin.discountedPrice}</Label>
-              <Input
-                id="pf-discounted-price"
-                type="text"
-                inputMode="numeric"
-                {...register("discountedPrice", { setValueAs: parseDigitInput })}
+      <div className="space-y-3 rounded-lg border border-border p-3">
+        <div className="flex items-center gap-2">
+          <Controller
+            name="discountActive"
+            control={control}
+            render={({ field }) => (
+              <Switch
+                id="pf-discount-active"
+                checked={Boolean(field.value)}
+                onCheckedChange={field.onChange}
               />
-              {errors.discountedPrice && (
-                <p className="text-xs text-destructive">
-                  {errors.discountedPrice.message as string}
-                </p>
-              )}
-            </div>
-          )}
+            )}
+          />
+          <Label htmlFor="pf-discount-active">{strings.admin.discountActive}</Label>
         </div>
-      )}
+        {watchedDiscountActive && (
+          <div className="space-y-2">
+            <Label htmlFor="pf-discounted-price">{strings.admin.discountedPrice}</Label>
+            <Input
+              id="pf-discounted-price"
+              type="text"
+              inputMode="numeric"
+              {...register("discountedPrice", { setValueAs: parseDigitInput })}
+            />
+            {errors.discountedPrice && (
+              <p className="text-xs text-destructive">
+                {errors.discountedPrice.message as string}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
       <div className="space-y-2">
         <Label>{strings.admin.badges}</Label>
         <div className="flex flex-wrap gap-2">
@@ -221,34 +211,31 @@ export function ProductFormFields({
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => append({ name: "", price: 0 })}
+            onClick={() =>
+              append({
+                name: "",
+                price: 0,
+                discountActive: false,
+                discountedPrice: null,
+                isAvailable: true,
+              })
+            }
           >
             <Plus className="h-3 w-3 me-1" />
             {strings.admin.addVariant}
           </Button>
         </div>
         {fields.map((field, index) => (
-          <div key={field.id} className="flex gap-2">
-            <Input
-              placeholder={strings.admin.variantName}
-              {...register(`variants.${index}.name`)}
-            />
-            <Input
-              placeholder={strings.admin.variantPrice}
-              type="text"
-              inputMode="numeric"
-              {...register(`variants.${index}.price`, { setValueAs: parseDigitInput })}
-            />
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              aria-label={strings.admin.delete}
-              onClick={() => remove(index)}
-            >
-              <Trash2 className="h-4 w-4 text-destructive" />
-            </Button>
-          </div>
+          <ProductVariantFields
+            key={field.id}
+            fieldId={field.id}
+            index={index}
+            register={register}
+            control={control}
+            errors={errors}
+            discountActive={Boolean(variantRows[index]?.discountActive)}
+            onRemove={() => remove(index)}
+          />
         ))}
       </div>
       <div className="flex items-center gap-2">

@@ -149,7 +149,7 @@ describe("ChangePasswordUseCase", () => {
         next: "short",
         confirm: "short",
       }),
-    ).rejects.toBeInstanceOf(ValidationError);
+    ).rejects.toMatchObject({ code: "NEW_PASSWORD_INVALID" });
     await expect(
       change.execute({
         adminId: admin.id,
@@ -157,7 +157,7 @@ describe("ChangePasswordUseCase", () => {
         next: "long-enough",
         confirm: "long-enough",
       }),
-    ).rejects.toMatchObject({ code: "INVALID_CREDENTIALS" });
+    ).rejects.toMatchObject({ code: "CURRENT_PASSWORD_WRONG" });
     await expect(
       change.execute({
         adminId: admin.id,

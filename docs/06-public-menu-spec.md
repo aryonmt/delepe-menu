@@ -60,10 +60,10 @@ strip row), Dish Peek dialog.
 | B-03 Signature tier | Per doc 05 «Signature tier — UI behavior vs content responsibility»: every POPULAR product becomes a signature card; no UI cap; the designation is Admin-owned content; the layout stays graceful for any POPULAR count (self-contained full-width blocks in normal flow). |
 | B-04 Cards | Standard card per doc 05; tap → press scale + open Dish Peek (no navigation, no route). |
 | B-05 Dish Peek | Radix dialog per doc 05; content = image (960), name, badges, full description, price/variants; Esc/backdrop/X close; focus trap + restore; strictly non-transactional. |
-| B-06 Variants | «از …» summary (BR-06) + chevron → spring-height ticket list; local state per card; multiple may be open; disabled when MUTED. |
-| B-07 Discount | BR-14 (no variants) + BR-04/05; ember price + struck original + −٪ stamp; formula `−{round((1−disc/price)·100)}٪`. |
+| B-06 Variants | Always-visible ticket list (BR-06); no chevron. Each row shows that variant’s price/discount. MUTED variants stamped; HIDE drops them in the mapper. |
+| B-07 Discount | BR-14 (product and/or variants) + BR-04/05; ember price + struck original + −٪ stamp; formula `−{round((1−disc/price)·100)}٪`. |
 | B-08 Badges | doc 05 map; max 2 + `+n`. |
-| B-09 Unavailable | `HIDE` → excluded by the mapper. `MUTED` → grayscale + opacity .7 + «امروز تموم شد» stamp. Copy maps to the single `isAvailable` boolean; if richer availability semantics are ever added to the model, copy mapping must be extended in this doc first. |
+| B-09 Unavailable | Product `isAvailable` and each variant’s `isAvailable`. `HIDE` → excluded by the mapper. `MUTED` → grayscale + opacity .7 + «امروز تموم شد» stamp on the product card and/or the variant row. |
 | B-10 Ticker | Items = `resolveTickerItems(publicMenu)`: curated `settings.tickerProductIds` filtered to available products, capped at `TICKER_MAX_ITEMS = 16`; empty curation falls back to flattened available products in chapter order. Unavailable items never appear. CSS marquee 40s; paused on hover for fine pointers; static under reduced motion. Tap → instant jump + 600ms ember flash. |
 | B-11 Hero | Wordmark ignition once (900ms); `h1` semantics; `data-testid="hero"`. **Binding:** doc 05 «Hero — high-priority visual experimentation area» applies — structural spec plus Phase 1 evaluation/iteration mandate. |
 | B-12 Images | `MenuImage` + media loader (doc 03); tiered `sizes`: standard `(max-width:768px) 160px, 200px` · signature `(max-width:768px) 100vw, 640px` · peek `960px` fixed. First 4 images `priority`, rest lazy. `dominantColor` placeholder + shimmer; error → placeholder art. **No `<img>` may precede menu product images in DOM order** (`media.spec` extracts the first `img[alt]`). |
@@ -88,7 +88,7 @@ strip row), Dish Peek dialog.
 | A-03 | Chapter arrival | Ghost number + title settle (250ms); cards stagger reveal (y16→0, 35ms, once) |
 | A-04 | Tab change | Indicator spring; instant jump; chapter settle |
 | A-05 | Chip change | popLayout relayout + fade |
-| A-06 | Variants | height+opacity spring; chevron rotate |
+| A-06 | Variants | none — list is always in layout; no height collapse |
 | A-07 | Press | stamps: translate+shadow collapse; cards: scale .97/.98 (120ms) |
 | A-08 | Peek | sheet slide-up / panel scale-fade (Radix data-state), transform/opacity |
 | A-09 | Deep-link flash | target card ember ring flash 600ms |
@@ -97,7 +97,7 @@ Reduced motion: all disabled (Motion hook + CSS media query); ticker static.
 
 ## States
 
-- **Loading**: Suspense skeletons per doc 05 (no splash gate).
+- **Loading**: TwinOrbit until menu DTO + boot images (doc 05); shimmer boxes on hero / cards / ticker thumbs until each is ready.
 - **Error**: `error.tsx` identity restyle + «تلاش دوباره».
 - **404**: identity restyle + home link.
 - **No image**: placeholder art (doc 05).
@@ -115,8 +115,8 @@ doc-11 budgets apply (≤220KB first-load JS, Lighthouse ≥90 mid-range Android
    grayscale, `data-available="false"`, stamp «امروز تموم شد», opacity `0.7`.
 2. Tap «غذای اصلی» (dock) → instant jump; tab `data-active`; scrollspy keeps it
    active while scrolling toward the پیتزا group.
-3. پیتزا مارگاریتا: «از ۵۵۰ هزار تومان»; expand → tickets «سایز کوچک ۵۵۰…» /
-   «سایز بزرگ ۷۵۰…».
+3. پیتزا مارگاریتا: `variant-list` visible without a toggle; tickets «سایز کوچک ۵۵۰…» /
+   «سایز بزرگ ۷۵۰…»; no «از …» summary.
 4. کوکی متوسط: ۹۵ هزار تومان primary, ۱۱۵ هزار struck, −۱۷٪ stamp.
 5. MUTED → HIDE switch removes آب کرفس.
 6. Leaf-category product renders (اسپرسو).
@@ -130,8 +130,8 @@ doc-11 budgets apply (≤220KB first-load JS, Lighthouse ≥90 mid-range Android
 
 `hero` · `category-tabs` · `tab-{name}` · `data-active` · `section-{name}` ·
 `product-{name}` · `data-available` · `unavailable-chip` · `price` ·
-`price-original` · `discount-chip` · `variant-toggle` · `variant-list` ·
-`subcategory-chips` · `product-grid` · new: `dish-peek`, `peek-close`,
+`price-original` · `discount-chip` · `variant-list` ·
+`subcategory-chips` · `product-grid` · `menu-loading` · new: `dish-peek`, `peek-close`,
 `hero-ticker`. Any rename requires updating the E2E specs in the same commit.
 
 ## Required string changes (`lib/fa/strings.ts`)

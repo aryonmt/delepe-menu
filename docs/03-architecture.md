@@ -46,8 +46,8 @@ src/
 │   ├── menu/                     # PURE presentational: hero-wordmark, dish-ticker, dock,
 │   │                             #   context-strip, chapter-header, product-card (signature
 │   │                             #   + standard tiers), variant-tickets, dish-peek, badge,
-│   │                             #   section, empty-state, skeletons, menu-image
-│   │                             #   (next/image + media loader)
+│   │                             #   section, empty-state, menu-loading, menu-boot-gate,
+│   │                             #   shimmer-block, content-reveal, menu-image
 │   ├── admin/                    # product-form, category-form, upload-editor,
 │   │                             #   dnd-list, confirm-dialog, preview-phone
 │   └── phone-frame.tsx

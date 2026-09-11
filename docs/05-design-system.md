@@ -185,7 +185,9 @@ are a brand-spelling exception owned by the string constant, not prose.
 
 | token | value |
 | --- | --- |
-| duration-fast / base / slow | 150 / 260 / 450ms |
+| twin-orbit | 1000ms ease infinite (half-period delay on the second disc) |
+| menu-boot min / max | 900ms hold / 4500ms fail-open |
+| shimmer sweep | 1400ms ease-in-out infinite |
 | ease-brand | cubic-bezier(.22,.61,.36,1) |
 | spring | stiffness 380 · damping 32 |
 | stagger | 35ms |
@@ -284,14 +286,16 @@ chapter, no cap, no copy claims). Full-width; image 1:1,
 - A presentation cap may only ever be introduced as a documented product
   decision — never silently as a layout workaround.
 
-**Standard card.** Horizontal; image 42% width, 1:1, rounded-image; title 16/800
+**Standard card.** Horizontal; image 42% width, 1:1, rounded-image, **top-aligned**
+(`items-start` / `self-start`) so a tall variant list does not recenter the photo;
+title 16/800
 clamp-1, description clamp-2, price row. `md+`: 2-column grid. Tap → Dish Peek.
 Press: scale .98. Both tiers: `data-testid="product-{name}"`,
 `data-available`, `price`, `price-original`, `discount-chip` preserved.
 
-**Variant tickets.** Chevron expands a spring-height list of ticket rows:
-variant name + dotted leader + price (Lalezar). «از …» summary line per BR-06.
-Disabled for MUTED products.
+**Variant tickets.** Always visible list of ticket rows (no chevron, no collapse):
+variant name + dotted leader + that variant’s price (Lalezar). MUTED variants get
+the «امروز تموم شد» stamp on the row. Base price is not shown as «از …».
 
 **Discount.** Ember effective price + struck muted original + rotated (−3°)
 spark stamp chip `−{percent}٪` with `--shadow-stamp`. Formula unchanged.
@@ -322,9 +326,20 @@ contract, new art direction — hue gradient field + product initial + category
 name + brand line «دِ‌لِ‌پِ»; **no emoji glyphs**. Production seed does not
 create product images.
 
-**Skeletons.** Hero skeleton (wordmark block + ticker bar), card skeletons in
-both tier shapes, dock skeleton bar — streamed via the existing Suspense
-boundary. **No artificial loading gate** (the pizza splash is retired).
+**Loading (TwinOrbit + skeletons).** Public menu Suspense fallback and the
+boot overlay (`data-testid="menu-loading"`) are a centered TwinOrbit loader:
+two `currentColor` discs (`size-4`, `text-primary`) orbiting at `translate(155%)`
+for `TWIN_ORBIT_DURATION_MS` (1000ms) ease infinite, second disc delayed by half
+the duration. Keyframes live in `globals.css`. After RSC data arrives, TwinOrbit
+**stays up** until `MENU_BOOT_MIN_MS` (900) **and** hero-orbit + first four
+product photos have preloaded (`MENU_BOOT_MAX_MS` 4500 fail-open). Reduced
+motion skips the minimum hold but still waits for preloads (or max).
+
+**Skeletons (shimmer boxes).** While a surface is not ready, a faded `bg-card-2`
+box with the 1400ms shimmer sweep covers it; the real node stays mounted at
+opacity 0 then fades in (`DURATION_BASE_MS`, ease-brand). Used on: hero (orbit
+photos), product cards (until `MenuImage` ready), ticker thumbs, and in-image
+placeholders. `prefers-reduced-motion` stops the sweep.
 
 **Empty / error / 404 / footer.** Existing copy via strings; restyled with
 identity tokens, three-spark dividers, stamp-styled primary button.
@@ -353,7 +368,8 @@ identity target:
 
 ## Loading behavior
 
-RSC streaming + skeletons only. No timed splash, no fake delays.
+RSC streaming + TwinOrbit until boot images settle (min 900ms / max 4500ms).
+Per-surface shimmer boxes until that surface’s media is ready. No fake menu data.
 
 ## Retired values
 

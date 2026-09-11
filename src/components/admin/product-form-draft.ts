@@ -1,7 +1,7 @@
-import type { z } from "zod";
 import type { MediaDto, ProductDto } from "@/application/dtos";
 import { createProductSchema } from "@/application/schemas";
 import { toAsciiDigits } from "@/lib/format/digits";
+import type { z } from "zod";
 
 export type FormInput = z.input<typeof createProductSchema>;
 export type FormOutput = z.output<typeof createProductSchema>;
@@ -23,8 +23,36 @@ export type DraftFormValues = {
   isAvailable?: boolean;
   badges?: ProductDto["badges"];
   categoryId?: string;
-  variants?: Array<{ name?: string; price?: number } | undefined>;
+  variants?: Array<
+    | {
+        name?: string;
+        price?: number;
+        discountedPrice?: number | null;
+        discountActive?: boolean;
+        isAvailable?: boolean;
+      }
+    | undefined
+  >;
 };
+
+function draftVariants(tempId: string, values: DraftFormValues): ProductDto["variants"] {
+  return (values.variants ?? [])
+    .filter(
+      (variant): variant is NonNullable<DraftFormValues["variants"]>[number] & {
+        name: string;
+        price: number;
+      } => Boolean(variant?.name) && (variant?.price ?? 0) > 0,
+    )
+    .map((variant, index) => ({
+      id: `${tempId}-v${index}`,
+      name: variant.name,
+      price: variant.price,
+      discountedPrice: variant.discountedPrice ?? null,
+      discountActive: Boolean(variant.discountActive),
+      isAvailable: variant.isAvailable ?? true,
+      sortOrder: (index + 1) * 10,
+    }));
+}
 
 /** Provisional DTO so the phone preview updates BEFORE save (docs/07 AC-2). */
 export function provisionalProduct(
@@ -33,32 +61,18 @@ export function provisionalProduct(
   values: DraftFormValues,
   media: MediaDto | null,
 ): ProductDto {
-  const variants = (values.variants ?? [])
-    .filter((v): v is { name: string; price: number } =>
-      Boolean(v?.name) && (v?.price ?? 0) > 0,
-    )
-    .map((v, index) => ({
-      id: `${tempId}-v${index}`,
-      name: v.name,
-      price: v.price,
-      sortOrder: (index + 1) * 10,
-    }));
-  const price =
-    variants.length > 0
-      ? Math.min(...variants.map((v) => v.price))
-      : (values.price ?? 0);
   return {
     id: base?.id ?? tempId,
     name: values.name || "…",
     description: values.description ?? null,
-    price,
-    discountedPrice: variants.length > 0 ? null : (values.discountedPrice ?? null),
-    discountActive: variants.length > 0 ? false : Boolean(values.discountActive),
+    price: values.price ?? 0,
+    discountedPrice: values.discountedPrice ?? null,
+    discountActive: Boolean(values.discountActive),
     isAvailable: values.isAvailable ?? true,
     badges: values.badges ?? [],
     sortOrder: base?.sortOrder ?? 0,
     categoryId: values.categoryId || "",
-    variants,
+    variants: draftVariants(tempId, values),
     media,
   };
 }

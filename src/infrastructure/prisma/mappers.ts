@@ -36,6 +36,9 @@ export function toVariant(row: PrismaVariant): ProductVariant {
     productId: row.productId,
     name: row.name,
     price: row.price,
+    discountedPrice: row.discountedPrice,
+    discountActive: row.discountActive,
+    isAvailable: row.isAvailable !== false,
     sortOrder: row.sortOrder,
   };
 }

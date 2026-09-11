@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { MediaDto } from "@/application/dtos";
 import { mediaUrl } from "@/lib/media-url";
+import { ShimmerBlock } from "./shimmer-block";
 
 type Props = {
   media: MediaDto | null;
@@ -14,6 +15,7 @@ type Props = {
   fill?: boolean;
   sizes?: string;
   objectPosition?: string;
+  onReady?: () => void;
 };
 
 function loaderFor(width: number): number {
@@ -38,11 +40,17 @@ export function MenuImage({
   fill = false,
   sizes = "(max-width: 768px) 160px, 200px",
   objectPosition = "center",
+  onReady,
 }: Props) {
   const [hasError, setHasError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const showPlaceholder = !media || hasError;
 
-  if (!media || hasError) {
+  useEffect(() => {
+    if (showPlaceholder || isLoaded) onReady?.();
+  }, [showPlaceholder, isLoaded, onReady]);
+
+  if (showPlaceholder) {
     return (
       <div
         className="flex h-full w-full items-center justify-center rounded-image border border-line bg-card-2"
@@ -62,18 +70,7 @@ export function MenuImage({
       className="relative h-full w-full overflow-hidden rounded-image"
       style={{ backgroundColor: media.dominantColor }}
     >
-      {!isLoaded && (
-        <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
-          <div
-            className="absolute inset-y-0 start-0 w-2/3"
-            style={{
-              background:
-                "linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)",
-              animation: "shimmer 1.4s ease-in-out infinite",
-            }}
-          />
-        </div>
-      )}
+      {!isLoaded ? <ShimmerBlock className="absolute inset-0" /> : null}
       {fill ? (
         <Image
           loader={imageLoader}
@@ -101,7 +98,6 @@ export function MenuImage({
           className={`h-full w-full ${imageClassName}`}
         />
       )}
-      {/* Warm unifying grade: melts any photo into the brand's warm world */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"

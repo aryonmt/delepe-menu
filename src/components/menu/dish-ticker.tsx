@@ -1,10 +1,12 @@
 // src/components/menu/dish-ticker.tsx
 "use client";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ProductDto } from "@/application/dtos";
 import { mediaUrl } from "@/lib/media-url";
 import { formatPrice } from "@/lib/format/price";
+import { preloadImage } from "@/lib/menu-boot";
 import { strings } from "@/lib/fa/strings";
+import { ShimmerBlock } from "./shimmer-block";
 
 type Props = {
   /** Curated-or-fallback available products (docs/06 B-10). */
@@ -19,6 +21,14 @@ const CHIP_CLASS =
 
 /** Decorative 36px thumb: background-image keeps `img[alt]` contracts intact (B-12). */
 function Thumb({ product }: { product: ProductDto }) {
+  const [ready, setReady] = useState(!product.media);
+  useEffect(() => {
+    if (!product.media) {
+      setReady(true);
+      return;
+    }
+    void preloadImage(mediaUrl(product.media.id, 320)).then(() => setReady(true));
+  }, [product.media]);
   if (!product.media) {
     return (
       <span
@@ -30,14 +40,17 @@ function Thumb({ product }: { product: ProductDto }) {
     );
   }
   return (
-    <span
-      aria-hidden="true"
-      className="h-9 w-9 shrink-0 rounded-full border border-line bg-center bg-cover"
-      style={{
-        backgroundImage: `url(${mediaUrl(product.media.id, 320)})`,
-        backgroundColor: product.media.dominantColor,
-      }}
-    />
+    <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-line">
+      <span
+        aria-hidden="true"
+        className={`absolute inset-0 bg-center bg-cover ${ready ? "opacity-100" : "opacity-0"}`}
+        style={{
+          backgroundImage: `url(${mediaUrl(product.media.id, 320)})`,
+          backgroundColor: product.media.dominantColor,
+        }}
+      />
+      {!ready ? <ShimmerBlock className="absolute inset-0 rounded-full" /> : null}
+    </span>
   );
 }
 

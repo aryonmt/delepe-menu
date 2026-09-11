@@ -71,6 +71,9 @@ export class PrismaProductRepository implements ProductRepository {
           create: input.variants.map((variant, index) => ({
             name: variant.name,
             price: variant.price,
+            discountedPrice: variant.discountedPrice,
+            discountActive: variant.discountActive,
+            isAvailable: variant.isAvailable,
             sortOrder: (index + 1) * SORT_ORDER_GAP,
           })),
         },
@@ -91,6 +94,9 @@ export class PrismaProductRepository implements ProductRepository {
             create: input.variants.map((variant, index) => ({
               name: variant.name,
               price: variant.price,
+              discountedPrice: variant.discountedPrice,
+              discountActive: variant.discountActive,
+              isAvailable: variant.isAvailable,
               sortOrder: (index + 1) * SORT_ORDER_GAP,
             })),
           },

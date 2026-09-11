@@ -44,7 +44,7 @@ export function CategoryRow({
         {...listeners}
         aria-label={strings.admin.reorderAria}
         data-testid="category-reorder-handle"
-        className="cursor-grab text-muted-foreground"
+        className="cursor-grab touch-none text-muted-foreground"
       >
         <GripVertical className="h-5 w-5" />
       </button>

@@ -90,20 +90,19 @@ test.describe("admin products", () => {
     await expect(row(page, "محصول تست")).toBeVisible({ timeout: 15_000 });
   });
 
-  test("variants auto-price disables manual price and hides discount (BR-13/14)", async ({ page }) => {
+  test("base price and discounts stay available when variants exist (BR-13/14)", async ({ page }) => {
     await loginAsAdmin(page);
     await page.getByRole("button", { name: strings.admin.newProduct }).click();
     const form = page.getByRole("dialog");
+    await form.getByLabel(strings.admin.price).fill("۶۰۰۰۰۰");
     await form.getByRole("button", { name: strings.admin.addVariant }).click();
-    await form.getByRole("button", { name: strings.admin.addVariant }).click();
-    await form.getByPlaceholder(strings.admin.variantName).nth(0).fill("بزرگ");
-    await form.getByPlaceholder(strings.admin.variantName).nth(1).fill("کوچک");
-    await form.getByPlaceholder(strings.admin.variantPrice).nth(0).fill("۷۵۰۰۰۰");
-    await form.getByPlaceholder(strings.admin.variantPrice).nth(1).fill("۵۵۰۰۰۰");
+    await form.getByPlaceholder(strings.admin.variantName).fill("بزرگ");
+    await form.getByPlaceholder(strings.admin.variantPrice).fill("۷۵۰۰۰۰");
     const priceInput = form.getByLabel(strings.admin.price);
-    await expect(priceInput).toBeDisabled();
-    await expect(priceInput).toHaveValue("550000");
-    await expect(page.getByLabel(strings.admin.discountActive)).toHaveCount(0);
+    await expect(priceInput).toBeEnabled();
+    await expect(priceInput).toHaveValue("۶۰۰۰۰۰");
+    await expect(form.getByLabel(strings.admin.discountActive)).toBeVisible();
+    await expect(form.getByLabel(strings.admin.variantDiscountActive)).toBeVisible();
   });
 
   test("upload fixture image shows progress and success toast", async ({ page }) => {
@@ -118,6 +117,15 @@ test.describe("admin products", () => {
       .getByRole("dialog")
       .filter({ hasText: strings.admin.cropImage });
     await expect(cropDialog).toBeVisible();
+    const cropIsTopmost = await cropDialog.evaluate((node) => {
+      const rect = node.getBoundingClientRect();
+      const el = document.elementFromPoint(
+        rect.left + rect.width / 2,
+        rect.top + rect.height / 2,
+      );
+      return Boolean(el && node.contains(el));
+    });
+    expect(cropIsTopmost).toBe(true);
     await cropDialog.getByRole("button", { name: strings.admin.save }).click();
     await expect(page.getByText(strings.admin.imageUploaded)).toBeVisible();
   });

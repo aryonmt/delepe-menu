@@ -110,6 +110,9 @@ export class InMemoryProductRepository implements ProductRepository {
         productId: id,
         name: variant.name,
         price: variant.price,
+        discountedPrice: variant.discountedPrice,
+        discountActive: variant.discountActive,
+        isAvailable: variant.isAvailable,
         sortOrder: (index + 1) * 10,
       })),
     };

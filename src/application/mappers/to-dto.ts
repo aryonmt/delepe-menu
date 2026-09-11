@@ -24,6 +24,9 @@ export function toProductDto(product: ProductWithRelations): ProductDto {
     id: variant.id,
     name: variant.name,
     price: variant.price,
+    discountedPrice: variant.discountedPrice,
+    discountActive: variant.discountActive,
+    isAvailable: variant.isAvailable,
     sortOrder: variant.sortOrder,
   }));
   return {

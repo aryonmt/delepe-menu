@@ -38,9 +38,13 @@ Successful login redirects to `/admin/products`.
 - Mobile: top bar + bottom navigation (3 items) — thumb-reachable.
 - Top bar: «پیش‌نمایش» button (opens preview drawer), user menu
   (trigger label «حساب کاربری»; تغییر رمز عبور dialog, خروج).
-- Change password: current + new + repeat new; «ذخیره رمز» opens an in-dialog
-  confirmation («تأیید تغییر رمز») before the mutation. Mismatch →
-  `PASSWORD_MISMATCH`.
+- Change password: current + new + repeat new. The new-password field shows
+  live rules (8–128 characters, docs/10) and whether the value currently
+  meets them; repeat-new flags a mismatch as the owner types. «ذخیره رمز» is
+  enabled only when current is non-empty, the new password is valid, and
+  repeat matches, then opens in-dialog confirmation («تأیید تغییر رمز»).
+  Server errors are distinct: `CURRENT_PASSWORD_WRONG`, `NEW_PASSWORD_INVALID`,
+  `PASSWORD_MISMATCH` (Persian copy in `strings.ts`).
 - Unsaved-changes: `isDirty` → `beforeunload` + confirm dialog
   («تغییرات ذخیره‌نشده دارید») on internal navigation.
 
@@ -97,18 +101,23 @@ Rules (deterministic):
 Fields (Persian labels, English code):
 name · category (two selects: parent → child; the child select is shown only when
 the chosen parent has children — BR-15 means the effective category is always a
-leaf) · description (≤500, counter) · price (integer toman, accepts FA/EN digits —
-normalized in the form layer; live Persian-formatted hint below input; **disabled
-and auto-filled with min(variant prices) when variants exist**, BR-13) ·
-discount (Switch + discountedPrice, inline error if ≥ price, BR-04; **the whole
-section is hidden when variants exist**, BR-14) · badges (multi chip toggle,
-doc 05) · available Switch · image (upload editor) · variants (dynamic rows:
-name + price, add/remove, min 0 rows).
+leaf) · description (≤500, counter) · **base price** (integer toman, required
+always, BR-12/13; accepts FA/EN digits — normalized in the form layer; live
+Persian-formatted hint below input) · discount (Switch + discountedPrice on the
+base price, inline error if ≥ price, BR-04; **stays visible when variants exist**,
+BR-14) · badges (multi chip toggle, doc 05) · available Switch · image (upload
+editor) · variants (dynamic rows: name + price + optional per-variant discount +
+availability switch, add/remove, min 0 rows; variant prices may be higher or lower
+than the base).
 
 Submit → server action → success toast + close drawer; errors → inline Persian
 messages + error toast.
 
 ### Upload editor (modal)
+
+The crop dialog portals to `document.body`. It must stack **above** the product
+drawer (`z-70`), live preview (`z-60`/`z-61`), and admin header (`z-80`):
+overlay `z-90`, content `z-91`. A `z-50` crop dialog is covered by the drawer.
 
 1. Pick/drag file (JPG/PNG/WebP ≤5MB, client pre-check).
 2. `react-easy-crop`: fixed 1:1 aspect, rotate slider, zoom.
@@ -166,4 +175,5 @@ messages + error toast.
 6. Dirty form + sidebar navigation → confirm dialog appears.
 7. Cancelling the product drawer after edits leaves list and preview unchanged.
 8. Typing Persian digits («۱۲۵۰۰۰») in the price field validates and saves as 125000.
-9. A product with variants shows no discount section and an auto-filled, disabled price equal to the cheapest variant.
+9. A product with variants keeps an editable required base price; each variant has
+   its own price, optional discount, and availability switch.

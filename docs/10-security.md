@@ -15,10 +15,14 @@
 - Middleware (edge, jose only) guards `/admin/**` + `/api/admin/**` as
   defense-in-depth; **every** server action & route handler re-verifies the
   session via `VerifySessionUseCase`.
-- Password change requires the current password, a new password (≥8), a matching
-  confirmation field, and an explicit UI confirm step before the mutation.
-  Password change does **not** invalidate other sessions (stateless JWT, single
-  admin — accepted for v1; revisit if roles are ever added).
+- Password change requires the current password, a new password (8–128 chars),
+  a matching confirmation field, and an explicit UI confirm step before the
+  mutation. The dialog validates the new password live (rules listed under the
+  field). Failed mutation messages are specific: wrong current password,
+  invalid new password, or confirmation mismatch — not the login generic
+  `INVALID_CREDENTIALS` string. Password change does **not** invalidate other
+  sessions (stateless JWT, single admin — accepted for v1; revisit if roles
+  are ever added).
 
 ## Login hardening
 
