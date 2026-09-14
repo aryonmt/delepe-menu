@@ -1,5 +1,5 @@
 "use client";
-import { startTransition, useActionState, useEffect, useState } from "react";
+import { startTransition, useActionState, useState } from "react";
 import type { ActionResult } from "@/application/dtos";
 import { changePasswordAction } from "@/app/admin/_actions";
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,16 @@ export function ChangePasswordForm() {
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [seenState, setSeenState] = useState(state);
+  if (state !== seenState) {
+    setSeenState(state);
+    setConfirming(false);
+    if (state?.ok) {
+      setCurrent("");
+      setNext("");
+      setConfirm("");
+    }
+  }
 
   const fields = fieldsOf(current, next, confirm);
   const clientBlock = changePasswordClientBlock(fields);
@@ -45,19 +55,6 @@ export function ChangePasswordForm() {
   const nextStarted = next.length > 0;
   const confirmMismatch = confirm.length > 0 && changePasswordMismatch(fields);
   const nextValid = isNewPasswordValid(next);
-
-  useEffect(() => {
-    if (state?.ok) {
-      setConfirming(false);
-      setCurrent("");
-      setNext("");
-      setConfirm("");
-      return;
-    }
-    if (state && !state.ok) {
-      setConfirming(false);
-    }
-  }, [state]);
 
   const askConfirm = () => {
     if (clientBlock) return;

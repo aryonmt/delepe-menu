@@ -21,15 +21,20 @@ const CHIP_CLASS =
 
 /** Decorative 36px thumb: background-image keeps `img[alt]` contracts intact (B-12). */
 function Thumb({ product }: { product: ProductDto }) {
-  const [ready, setReady] = useState(!product.media);
+  const media = product.media;
+  const mediaId = media?.id ?? null;
+  const [readyFor, setReadyFor] = useState<string | null>(null);
   useEffect(() => {
-    if (!product.media) {
-      setReady(true);
-      return;
-    }
-    void preloadImage(mediaUrl(product.media.id, 320)).then(() => setReady(true));
-  }, [product.media]);
-  if (!product.media) {
+    if (!mediaId) return;
+    let cancelled = false;
+    void preloadImage(mediaUrl(mediaId, 320)).then(() => {
+      if (!cancelled) setReadyFor(mediaId);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [mediaId]);
+  if (!media) {
     return (
       <span
         aria-hidden="true"
@@ -43,13 +48,15 @@ function Thumb({ product }: { product: ProductDto }) {
     <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-line">
       <span
         aria-hidden="true"
-        className={`absolute inset-0 bg-center bg-cover ${ready ? "opacity-100" : "opacity-0"}`}
+        className={`absolute inset-0 bg-center bg-cover ${readyFor === media.id ? "opacity-100" : "opacity-0"}`}
         style={{
-          backgroundImage: `url(${mediaUrl(product.media.id, 320)})`,
-          backgroundColor: product.media.dominantColor,
+          backgroundImage: `url(${mediaUrl(media.id, 320)})`,
+          backgroundColor: media.dominantColor,
         }}
       />
-      {!ready ? <ShimmerBlock className="absolute inset-0 rounded-full" /> : null}
+      {readyFor === media.id ? null : (
+        <ShimmerBlock className="absolute inset-0 rounded-full" />
+      )}
     </span>
   );
 }
