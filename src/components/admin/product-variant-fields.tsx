@@ -1,5 +1,11 @@
 "use client";
-import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
+import { useCallback } from "react";
+import type {
+  Control,
+  FieldErrors,
+  UseFormRegister,
+  UseFormSetValue,
+} from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { strings } from "@/lib/fa/strings";
+import { DiscountPercentFields } from "./discount-percent-fields";
 import type { FormInput, FormOutput } from "./product-form-draft";
 import { parseDigitInput } from "./product-form-draft";
 
@@ -16,7 +23,10 @@ type Props = {
   register: UseFormRegister<FormInput>;
   control: Control<FormInput, unknown, FormOutput>;
   errors: FieldErrors<FormInput>;
+  setValue: UseFormSetValue<FormInput>;
   discountActive: boolean;
+  price: unknown;
+  discountedPrice: number | null | undefined;
   onRemove: () => void;
 };
 
@@ -26,10 +36,22 @@ export function ProductVariantFields({
   register,
   control,
   errors,
+  setValue,
   discountActive,
+  price,
+  discountedPrice,
   onRemove,
 }: Props) {
   const variantErrors = errors.variants?.[index];
+  const handleDiscountedPrice = useCallback(
+    (value: number | null) => {
+      setValue(`variants.${index}.discountedPrice`, value, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    },
+    [index, setValue],
+  );
   return (
     <div
       key={fieldId}
@@ -81,24 +103,15 @@ export function ProductVariantFields({
         <Label htmlFor={`pf-v-disc-${index}`}>{strings.admin.variantDiscountActive}</Label>
       </div>
       {discountActive ? (
-        <div className="space-y-1">
-          <Label htmlFor={`pf-v-disc-price-${index}`}>
-            {strings.admin.variantDiscountedPrice}
-          </Label>
-          <Input
-            id={`pf-v-disc-price-${index}`}
-            type="text"
-            inputMode="numeric"
-            {...register(`variants.${index}.discountedPrice`, {
-              setValueAs: parseDigitInput,
-            })}
-          />
-          {variantErrors?.discountedPrice && (
-            <p className="text-xs text-destructive">
-              {variantErrors.discountedPrice.message}
-            </p>
-          )}
-        </div>
+        <DiscountPercentFields
+          id={`pf-v-disc-percent-${index}`}
+          percentLabel={strings.admin.variantDiscountPercent}
+          priceHintLabel={strings.admin.variantDiscountedPrice}
+          price={price}
+          discountedPrice={discountedPrice}
+          error={variantErrors?.discountedPrice?.message}
+          onDiscountedPriceChange={handleDiscountedPrice}
+        />
       ) : null}
       <div className="flex items-center gap-2">
         <Controller

@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { discountPercent, effectivePrice, startingPrice } from "./pricing";
+import {
+  discountPercent,
+  discountedPriceFromPercent,
+  effectivePrice,
+  startingPrice,
+} from "./pricing";
 
 describe("effectivePrice", () => {
   it("uses discountedPrice when discount is active (BR-05)", () => {
@@ -52,5 +57,30 @@ describe("startingPrice", () => {
 describe("discountPercent", () => {
   it("rounds the percent off for the −٪ stamp (docs/06 B-07)", () => {
     expect(discountPercent(115_000, 95_000)).toBe(17);
+  });
+});
+
+describe("discountedPriceFromPercent", () => {
+  it("derives the stored toman amount from a percent off", () => {
+    expect(discountedPriceFromPercent(100_000, 20)).toBe(80_000);
+    expect(discountedPriceFromPercent(10_000, 50)).toBe(5_000);
+  });
+
+  it("rounds to the nearest toman", () => {
+    expect(discountedPriceFromPercent(115_000, 17)).toBe(95_450);
+  });
+
+  it("returns null when the percent cannot produce a lower price", () => {
+    expect(discountedPriceFromPercent(100_000, 0)).toBeNull();
+    expect(discountedPriceFromPercent(100_000, 100)).toBeNull();
+    expect(discountedPriceFromPercent(100_000, 17.5)).toBeNull();
+    expect(discountedPriceFromPercent(100_000, -10)).toBeNull();
+  });
+
+  it("round-trips integer percents through discountPercent", () => {
+    const price = 100_000;
+    const discounted = discountedPriceFromPercent(price, 25);
+    expect(discounted).not.toBeNull();
+    expect(discountPercent(price, discounted ?? 0)).toBe(25);
   });
 });

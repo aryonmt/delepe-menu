@@ -103,12 +103,16 @@ name · category (two selects: parent → child; the child select is shown only 
 the chosen parent has children — BR-15 means the effective category is always a
 leaf) · description (≤500, counter) · **base price** (integer toman, required
 always, BR-12/13; accepts FA/EN digits — normalized in the form layer; live
-Persian-formatted hint below input) · discount (Switch + discountedPrice on the
-base price, inline error if ≥ price, BR-04; **stays visible when variants exist**,
-BR-14) · badges (multi chip toggle, doc 05) · available Switch · image (upload
-editor) · variants (dynamic rows: name + price + optional per-variant discount +
-availability switch, add/remove, min 0 rows; variant prices may be higher or lower
-than the base).
+Persian-formatted hint below input) · discount (Switch + whole-number **percent**
+1–99 on the base price; the form derives `discountedPrice` as
+`round(price × (1 − percent/100))` and shows that amount as a Persian-formatted
+hint; the stored field remains `discountedPrice`. Inline error if the derived
+amount violates BR-04; **stays visible when variants exist**, BR-14). Existing
+saved amounts are kept until the owner edits the percent or the unit price. ·
+badges (multi chip toggle, doc 05) · available Switch · image (upload
+editor) · variants (dynamic rows: name + price + optional per-variant percent
+discount using the same derivation + availability switch, add/remove, min 0 rows;
+variant prices may be higher or lower than the base).
 
 Submit → server action → success toast + close drawer; errors → inline Persian
 messages + error toast.

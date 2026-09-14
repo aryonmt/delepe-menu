@@ -30,3 +30,20 @@ export function startingPrice(product: PricedUnit & { variants: PricedUnit[] }):
 export function discountPercent(price: number, discountedPrice: number): number {
   return Math.round((1 - discountedPrice / price) * 100);
 }
+
+/**
+ * Admin input helper: store BR-04's discountedPrice from a whole-number percent off.
+ * Returns null when the percent cannot produce a strictly lower toman amount.
+ */
+export function discountedPriceFromPercent(
+  price: number,
+  percent: number,
+): number | null {
+  if (!Number.isInteger(percent) || percent <= 0 || percent >= 100) {
+    return null;
+  }
+  if (!Number.isFinite(price) || price <= 0) {
+    return null;
+  }
+  return Math.round(price * (1 - percent / 100));
+}

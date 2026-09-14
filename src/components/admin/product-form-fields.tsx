@@ -1,4 +1,5 @@
 "use client";
+import { useCallback } from "react";
 import type { Control, FieldErrors, UseFormRegister, UseFormSetValue } from "react-hook-form";
 import { Controller, useWatch, type UseFieldArrayReturn } from "react-hook-form";
 import { Plus } from "lucide-react";
@@ -19,6 +20,7 @@ import { formatPrice } from "@/lib/format/price";
 import { strings } from "@/lib/fa/strings";
 import type { FormInput, FormOutput } from "./product-form-draft";
 import { parseDigitInput } from "./product-form-draft";
+import { DiscountPercentFields } from "./discount-percent-fields";
 import { ProductVariantFields } from "./product-variant-fields";
 
 const BADGES = ["POPULAR", "NEW", "SPICY", "VEGETARIAN"] as const;
@@ -60,6 +62,7 @@ export function ProductFormFields({
 }: Props) {
   const badges = useWatch({ control, name: "badges" }) ?? [];
   const variantRows = useWatch({ control, name: "variants" }) ?? [];
+  const watchedDiscountedPrice = useWatch({ control, name: "discountedPrice" });
 
   const toggleBadge = (badge: (typeof BADGES)[number]) => {
     const next = badges.includes(badge)
@@ -67,6 +70,15 @@ export function ProductFormFields({
       : [...badges, badge];
     setValue("badges", next, { shouldDirty: true, shouldValidate: true });
   };
+  const handleDiscountedPrice = useCallback(
+    (value: number | null) => {
+      setValue("discountedPrice", value, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    },
+    [setValue],
+  );
 
   return (
     <>
@@ -164,20 +176,19 @@ export function ProductFormFields({
           <Label htmlFor="pf-discount-active">{strings.admin.discountActive}</Label>
         </div>
         {watchedDiscountActive && (
-          <div className="space-y-2">
-            <Label htmlFor="pf-discounted-price">{strings.admin.discountedPrice}</Label>
-            <Input
-              id="pf-discounted-price"
-              type="text"
-              inputMode="numeric"
-              {...register("discountedPrice", { setValueAs: parseDigitInput })}
-            />
-            {errors.discountedPrice && (
-              <p className="text-xs text-destructive">
-                {errors.discountedPrice.message as string}
-              </p>
-            )}
-          </div>
+          <DiscountPercentFields
+            id="pf-discount-percent"
+            percentLabel={strings.admin.discountPercent}
+            priceHintLabel={strings.admin.discountedPrice}
+            price={watchedPrice}
+            discountedPrice={watchedDiscountedPrice}
+            error={
+              typeof errors.discountedPrice?.message === "string"
+                ? errors.discountedPrice.message
+                : undefined
+            }
+            onDiscountedPriceChange={handleDiscountedPrice}
+          />
         )}
       </div>
       <div className="space-y-2">
@@ -233,7 +244,10 @@ export function ProductFormFields({
             register={register}
             control={control}
             errors={errors}
+            setValue={setValue}
             discountActive={Boolean(variantRows[index]?.discountActive)}
+            price={variantRows[index]?.price}
+            discountedPrice={variantRows[index]?.discountedPrice}
             onRemove={() => remove(index)}
           />
         ))}
