@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from "motion/react";
 import { strings } from "@/lib/fa/strings";
+import { MenuFooter } from "./menu-footer";
 
 export function EmptyState() {
   const reduceMotion = useReducedMotion();
@@ -28,7 +29,9 @@ export function EmptyState() {
         </h1>
         <p className="mt-2.5 text-body text-muted-foreground">{strings.public.emptyHint}</p>
       </motion.div>
-      <p className="mt-8 text-xs text-muted-foreground/70">{strings.public.footer}</p>
+      <div className="mt-6 w-full">
+        <MenuFooter />
+      </div>
     </main>
   );
 }

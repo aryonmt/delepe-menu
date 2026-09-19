@@ -44,7 +44,11 @@ components remain **pure/presentational** (reused by the admin live preview).
    chapter header (ghost number + title + hue tick) and products; child groups
    render with sub-headers when the active chip is «همه»; leftover products on
    a parent render under the «سایر» sub-header (existing rule).
-3. **Footer mini** — three-spark divider + `strings.public.footer`.
+3. **Footer mini** — three-spark divider; Instagram `@cafe_delepe`
+   (`https://www.instagram.com/cafe_delepe/`); phone `0936 288 8142`
+   (`tel:+989362888142`); `strings.public.footer`; maker credit `aryo`
+   (latin, extra-small, muted). Contact values live in `src/lib/venue-contact.ts`
+   (not the database). Same footer on the empty state.
 
 Overlays (not in flow): **menu nav header** (sticky top: tabs row + context
 strip row), Dish Peek dialog.

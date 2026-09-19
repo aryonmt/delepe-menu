@@ -89,7 +89,7 @@ export function HeroWordmark({ restaurantName, children }: Props) {
           aria-label={strings.hero.solarAria}
           centerLogoAlt={restaurantName}
           centerLogo={
-            <span aria-hidden="true">
+            <span dir="rtl" aria-hidden="true">
               <BrandWordmark className="text-gold-gradient text-[20px] md:text-[26px]" />
             </span>
           }

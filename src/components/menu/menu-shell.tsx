@@ -3,13 +3,13 @@
 import { useCallback, useMemo, useState } from "react";
 import type { CategoryDto, ProductDto } from "@/application/dtos";
 import { NAV_OFFSET_DESKTOP_PX, NAV_OFFSET_MOBILE_PX } from "@/lib/constants";
-import { strings } from "@/lib/fa/strings";
 import { CategorySection } from "./category-section";
 import { ALL_SUBCATEGORY_CHIP, ContextStrip, type ChipId } from "./context-strip";
 import { DishPeek } from "./dish-peek";
 import { DishTicker } from "./dish-ticker";
 import { Dock } from "./dock";
 import { HeroWordmark } from "./hero-wordmark";
+import { MenuFooter } from "./menu-footer";
 import {
   findSection,
   relativeTopOf,
@@ -132,18 +132,7 @@ export function MenuShell({ categories, restaurantName, tickerItems, scrollRoot 
         ))}
       </main>
 
-      <footer className="relative z-10 flex flex-col items-center gap-3 border-t border-line py-10 text-center">
-        <div className="flex items-center gap-2" aria-hidden="true">
-          <span className="h-px w-10 bg-gradient-to-r from-transparent to-primary/60" />
-          <span className="flex gap-1">
-            {[0, 1, 2].map((index) => (
-              <span key={index} className="h-2 w-0.5 rotate-[18deg] rounded-full bg-primary/80" />
-            ))}
-          </span>
-          <span className="h-px w-10 bg-gradient-to-l from-transparent to-primary/60" />
-        </div>
-        <span className="font-display text-xs text-muted-foreground">{strings.public.footer}</span>
-      </footer>
+      <MenuFooter />
 
       <DishPeek
         product={peekProduct}

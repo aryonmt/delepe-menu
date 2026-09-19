@@ -13,7 +13,11 @@ type Props = {
 export function BrandWordmark({ className }: Props) {
   const clusters = wordmarkClusters();
   return (
-    <span className="inline-flex items-baseline font-display" aria-label={strings.brand.wordmark}>
+    <span
+      dir="rtl"
+      className="inline-flex items-baseline font-display"
+      aria-label={strings.brand.wordmark}
+    >
       {clusters.map((cluster, index) => (
         <span
           key={`${cluster}-${index}`}
