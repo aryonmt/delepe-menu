@@ -45,10 +45,13 @@ components remain **pure/presentational** (reused by the admin live preview).
    render with sub-headers when the active chip is «همه»; leftover products on
    a parent render under the «سایر» sub-header (existing rule).
 3. **Footer mini** — three-spark divider; Instagram `@cafe_delepe`
-   (`https://www.instagram.com/cafe_delepe/`); phone `0936 288 8142`
-   (`tel:+989362888142`); `strings.public.footer`; maker credit `aryo`
+   (`https://www.instagram.com/cafe_delepe/`); landline phones
+   `011_44510495` (`tel:+981144510495`) and `011_44525365`
+   (`tel:+981144525365`); `strings.public.footer` (locked wordmark
+   `دِ‌لِ‌پِ` + subtitle); maker credit `aryo`
    (latin, extra-small, muted). Contact values live in `src/lib/venue-contact.ts`
-   (not the database). Same footer on the empty state.
+   (not the database). Same footer on the empty state. Contact links use the
+   Footer contact type scale in doc 05 (larger than secondary body).
 
 Overlays (not in flow): **menu nav header** (sticky top: tabs row + context
 strip row), Dish Peek dialog.

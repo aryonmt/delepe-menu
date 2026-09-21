@@ -159,6 +159,7 @@ Ambient layers: `--ambient-glow-1/-2` warm radial gradients on the canvas
 | Secondary | 12.5px / lh 1.7 | body |
 | Badge / stamp | 11px / 800 | body |
 | Dock label | 12.5px / 700 | body |
+| Footer contact | 16px / 800, `--foreground` (hover `--primary`), icons 16px `--primary` | body |
 
 Persian rules (unchanged): ZWNJ everywhere, no letter-spacing on Persian text,
 Persian digits, momayyez `U+066B`, Persian punctuation. The wordmark's kasras

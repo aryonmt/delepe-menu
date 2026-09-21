@@ -3,8 +3,7 @@ import { toPersianDigits } from "@/lib/format/digits";
 import {
   VENUE_INSTAGRAM_HANDLE,
   VENUE_INSTAGRAM_URL,
-  VENUE_PHONE_DISPLAY_ASCII,
-  VENUE_PHONE_E164,
+  VENUE_PHONES,
   venueInstagramHref,
   venuePhoneHref,
   venuePhoneLabel,
@@ -17,10 +16,19 @@ describe("venue contact (docs/06 footer)", () => {
     expect(venueInstagramHref()).toContain(VENUE_INSTAGRAM_HANDLE);
   });
 
-  it("exposes an E.164 tel link and a Persian-digit local display", () => {
-    expect(VENUE_PHONE_E164).toBe("+989362888142");
-    expect(venuePhoneHref()).toBe("tel:+989362888142");
-    expect(VENUE_PHONE_DISPLAY_ASCII).toBe("0936 288 8142");
-    expect(venuePhoneLabel()).toBe(toPersianDigits("0936 288 8142"));
+  it("exposes two landline E.164 tel links and Persian-digit displays", () => {
+    expect(VENUE_PHONES).toHaveLength(2);
+    expect(VENUE_PHONES[0]).toEqual({
+      e164: "+981144510495",
+      displayAscii: "011_44510495",
+    });
+    expect(VENUE_PHONES[1]).toEqual({
+      e164: "+981144525365",
+      displayAscii: "011_44525365",
+    });
+    expect(venuePhoneHref(VENUE_PHONES[0])).toBe("tel:+981144510495");
+    expect(venuePhoneHref(VENUE_PHONES[1])).toBe("tel:+981144525365");
+    expect(venuePhoneLabel(VENUE_PHONES[0])).toBe(toPersianDigits("011_44510495"));
+    expect(venuePhoneLabel(VENUE_PHONES[1])).toBe(toPersianDigits("011_44525365"));
   });
 });

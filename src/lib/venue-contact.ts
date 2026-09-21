@@ -4,18 +4,25 @@ import { toPersianDigits } from "@/lib/format/digits";
 export const VENUE_INSTAGRAM_HANDLE = "cafe_delepe";
 export const VENUE_INSTAGRAM_URL = "https://www.instagram.com/cafe_delepe/";
 
-/** E.164 for tel: links. Display uses the local 0-prefix grouping. */
-export const VENUE_PHONE_E164 = "+989362888142";
-export const VENUE_PHONE_DISPLAY_ASCII = "0936 288 8142";
+/** Landline listed on the public footer (docs/06). Display keeps the `_` grouping. */
+export type VenuePhone = {
+  e164: string;
+  displayAscii: string;
+};
+
+export const VENUE_PHONES: readonly VenuePhone[] = [
+  { e164: "+981144510495", displayAscii: "011_44510495" },
+  { e164: "+981144525365", displayAscii: "011_44525365" },
+];
 
 export function venueInstagramHref(): string {
   return VENUE_INSTAGRAM_URL;
 }
 
-export function venuePhoneHref(): string {
-  return `tel:${VENUE_PHONE_E164}`;
+export function venuePhoneHref(phone: VenuePhone): string {
+  return `tel:${phone.e164}`;
 }
 
-export function venuePhoneLabel(): string {
-  return toPersianDigits(VENUE_PHONE_DISPLAY_ASCII);
+export function venuePhoneLabel(phone: VenuePhone): string {
+  return toPersianDigits(phone.displayAscii);
 }

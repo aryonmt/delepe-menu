@@ -13,4 +13,8 @@ describe("locked brand wordmark (docs/05)", () => {
   it("splits into three ZWNJ clusters", () => {
     expect(wordmarkClusters()).toEqual(["دِ", "لِ", "پِ"]);
   });
+
+  it("starts the public footer line with the locked wordmark", () => {
+    expect(strings.public.footer.startsWith(strings.brand.wordmark)).toBe(true);
+  });
 });

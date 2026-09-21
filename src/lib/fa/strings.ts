@@ -15,7 +15,7 @@ export const strings = {
   public: {
     emptyTitle: "منو به‌زودی تکمیل می‌شود",
     emptyHint: "به‌زودی فهرست غذاها و نوشیدنی‌ها اینجا می‌آید.",
-    footer: "دلِپ · منوی دیجیتال",
+    footer: "دِ‌لِ‌پِ · منوی دیجیتال",
     contactNav: "ارتباط",
     instagram: "اینستاگرام",
     phone: "تماس",

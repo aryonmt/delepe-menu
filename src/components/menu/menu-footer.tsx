@@ -2,13 +2,14 @@ import { Instagram, Phone } from "lucide-react";
 import { strings } from "@/lib/fa/strings";
 import {
   VENUE_INSTAGRAM_HANDLE,
+  VENUE_PHONES,
   venueInstagramHref,
   venuePhoneHref,
   venuePhoneLabel,
 } from "@/lib/venue-contact";
 
 const linkClass =
-  "inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors duration-fast hover:text-primary";
+  "inline-flex items-center gap-2 text-card-title text-foreground transition-colors duration-fast hover:text-primary";
 
 export function MenuFooter() {
   return (
@@ -22,7 +23,7 @@ export function MenuFooter() {
         </span>
         <span className="h-px w-10 bg-gradient-to-l from-transparent to-primary/60" />
       </div>
-      <nav className="flex flex-col items-center gap-2" aria-label={strings.public.contactNav}>
+      <nav className="flex flex-col items-center gap-3" aria-label={strings.public.contactNav}>
         <a
           className={linkClass}
           href={venueInstagramHref()}
@@ -30,13 +31,20 @@ export function MenuFooter() {
           rel="noopener noreferrer"
           aria-label={strings.public.instagram}
         >
-          <Instagram className="h-3.5 w-3.5" aria-hidden="true" />
+          <Instagram className="h-4 w-4 text-primary" aria-hidden="true" />
           <span dir="ltr">@{VENUE_INSTAGRAM_HANDLE}</span>
         </a>
-        <a className={linkClass} href={venuePhoneHref()} aria-label={strings.public.phone}>
-          <Phone className="h-3.5 w-3.5" aria-hidden="true" />
-          <span dir="ltr">{venuePhoneLabel()}</span>
-        </a>
+        {VENUE_PHONES.map((phone) => (
+          <a
+            key={phone.e164}
+            className={linkClass}
+            href={venuePhoneHref(phone)}
+            aria-label={`${strings.public.phone} ${venuePhoneLabel(phone)}`}
+          >
+            <Phone className="h-4 w-4 text-primary" aria-hidden="true" />
+            <span dir="ltr">{venuePhoneLabel(phone)}</span>
+          </a>
+        ))}
       </nav>
       <span className="font-display text-xs text-muted-foreground">{strings.public.footer}</span>
       <span
