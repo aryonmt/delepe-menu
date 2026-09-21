@@ -49,6 +49,7 @@ services:
       STORAGE_ROOT: /data/storage
       PORT: "3000"
       HOSTNAME: "0.0.0.0"
+      NODE_OPTIONS: --max-old-space-size=384
       HOME: /home/nextjs
       COREPACK_HOME: /home/nextjs/.cache/node/corepack
     volumes:

@@ -399,14 +399,24 @@ docker compose exec app ./node_modules/.bin/tsx scripts/admin-reset.ts --usernam
 
 ## ۱۳) به‌روزرسانی بعدی
 
+روی VPS یک‌گیگ، **همان‌طور که اپ زنده است `docker compose up -d --build` نزنید**
+(بیلد و منوی در حال سرو با هم رم را تمام می‌کنند). اسکریپت زیر Postgres را
+خاموش نمی‌کند و ولوم دیتابیس را حذف نمی‌کند:
+
 ```bash
 cd /opt/delepe-menu
 git pull origin main
-docker compose up -d --build
-docker compose exec app ./node_modules/.bin/prisma db seed
+bash scripts/vps-update.sh
 ```
 
-سید دوباره رمز ادمین و تنظیمات ذخیره‌شده را عوض نمی‌کند.
+منو فقط تا پایان بیلد ایمیج قطع است. دیتای رستوران روی ولوم `delepe_pgdata`
+می‌ماند. سید در به‌روزرسانی لازم نیست (منوی مالک از قبل در دیتابیس است).
+اگر زمانی کاتالوگ خالی بود، سید امن و idempotent است و رمز/تنظیمات ذخیره‌شده
+را عوض نمی‌کند:
+
+```bash
+docker compose exec app ./node_modules/.bin/prisma db seed
+```
 
 لاگ‌ها:
 

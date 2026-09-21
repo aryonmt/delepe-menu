@@ -51,16 +51,19 @@ default; never expose the app behind a proxy that forwards client-supplied XFF
 unchecked (login rate limiting keys on it, doc 10).
 
 Dockerfile (multi-stage, node:22-bookworm-slim, corepack pnpm):
-`deps → build (output: standalone) → runner` (non-root user, copies
-`.next/standalone`, `public`, `prisma`, `src` for seed, storage entrypoint).
+`deps → build (output: standalone) → cli → runner`. The **runner does not copy
+the full app `node_modules`** (that layer was multi-hundreds of MB and made
+1GB VPS deploys swap-thrash). Runtime is Next standalone + a tiny npm install
+of `prisma` + `tsx` at `/opt/cli` (symlinked to `./node_modules/.bin` so
+existing seed/admin-reset commands stay valid). `src/` and `prisma/` stay in
+the image for those operator CLIs. Build-stage
+`NODE_OPTIONS=--max-old-space-size=512`.
 The **build** stage uses a placeholder `DATABASE_URL` (no live DB). Public `/`
 is dynamic RSC plus tagged menu cache, so image build does not require
 `Settings`. Runtime Compose supplies the real `DATABASE_URL`; entrypoint
 migrates and starts standalone with `HOSTNAME=0.0.0.0`. Catalog is empty until
 the owner adds items (or an operator runs `prisma db seed` for settings/admin
-only). The runner image sets `HOME` and
-`COREPACK_HOME` under `/home/nextjs` so `pnpm` via Corepack can write cache;
-prefer `./node_modules/.bin/prisma db seed` so Corepack is not required.
+only). Prefer `./node_modules/.bin/prisma db seed` inside the container.
 `.dockerignore` omits `e2e/` and Playwright/Vitest configs; `tsconfig.json`
 excludes them so `next build` inside the image does not typecheck test files.
 
@@ -130,6 +133,21 @@ and images (or the empty state on a fresh database).
 
 ## Updates
 
-`git pull && docker compose up -d --build` (downtime < 10s; acceptable for v1).
+On a 1GB VPS, **do not** run `docker compose up -d --build` while the live
+`app` is still running — the Next compiler and the serving process fight for
+RAM and the host swap-thrashes. Use `scripts/vps-update.sh`:
+
+```bash
+cd /opt/delepe-menu
+git pull origin main
+bash scripts/vps-update.sh
+```
+
+The script starts/keeps **Postgres only** (named volume `delepe_pgdata` is
+never removed), stops `app` + `caddy` (menu downtime = image build time),
+builds `app`, brings `app` + `caddy` back, waits for `/api/health`, then
+`docker image prune -f` (dangling images only; **no volume prune**).
+Do not add `down -v`, `volume rm`, or `migrate reset` to this path.
+
 Healthcheck + `restart: always` for self-healing. Logs: `docker compose logs`
 (JSON stdout; rotation via compose `json-file` log-opts).

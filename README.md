@@ -52,11 +52,14 @@ See [`docs/12-deployment.md`](docs/12-deployment.md) for the full runbook.
 
 ```bash
 cp .env.example .env          # set SESSION_SECRET and ADMIN_* 
-docker compose up -d --build
+docker compose up -d --build  # first install only
 docker compose exec app ./node_modules/.bin/prisma db seed
 curl -sf http://127.0.0.1/api/health
 # {"ok":true,"db":true}
 ```
+
+Later updates on a small VPS: `git pull && bash scripts/vps-update.sh`
+(keeps the Postgres volume; see docs/12).
 
 Daily backups: `scripts/backup.sh`. Restore: `scripts/restore.sh <dump> <storage.tgz>`.
 
